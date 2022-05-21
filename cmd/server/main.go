@@ -12,8 +12,7 @@ var metrics = make(map[string]int)
 
 func PostGauge(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		fmt.Println("got a post")
-		b, err := ioutil.ReadAll(r.Body)
+		_, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 			return
@@ -24,7 +23,8 @@ func PostGauge(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		name := args[3]
-		metric, err := strconv.Atoi(string(b))
+		metric, err := strconv.Atoi(args[4])
+		fmt.Println(metric)
 		if err != nil {
 			http.Error(w, err.Error(), 400)
 			return
