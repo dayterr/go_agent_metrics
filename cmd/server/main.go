@@ -7,35 +7,43 @@ import (
 	"strconv"
 	"strings"
 )
-// HelloWorld — обработчик запроса.
-var metrics = make(map[string][]int)
+
+var metrics = make(map[string]int)
+
 func PostGauge(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		_, err := ioutil.ReadAll(r.Body)
-		// обрабатываем ошибку
+
+		b, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
 		args := strings.Split(r.URL.Path, "/")
 		name := args[3]
-		metric, err := strconv.Atoi(args[4])
+		metric, err := strconv.Atoi(string(b))
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
-		metrics[name] = append(metrics[name], metric)
+		metrics[name] = metric
+		w.WriteHeader(http.StatusCreated)
 	} else {
 		fmt.Println("method GET", r.URL.Path)
 		args := strings.Split(r.URL.Path, "/")
 		name := args[3]
-		l := len(metrics[name]) - 1
-		m := strconv.Itoa(metrics[name][l])
+		m := strconv.Itoa(metrics[name])
 		w.Write([]byte(m))
 	}
 }
 
+func GetUpdate(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
 func main() {
-	http.HandleFunc("/update/gauge/", PostGauge)
+	http.HandleFunc("/update/gauge", PostGauge)
+	http.HandleFunc("/update", GetUpdate)
 	http.ListenAndServe(":8080", nil)
 }
