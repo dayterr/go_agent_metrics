@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime"
+	"strconv"
 	"time"
 )
 
@@ -12,11 +13,10 @@ type gauge int64
 type counter int64
 
 func postGauge (v gauge, name string) {
-	fmt.Println("sending", name)
+	fmt.Println("Sending", v)
 	url := fmt.Sprintf("http://localhost:8080/update/gauge/%v/%v/", name, v)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(string(v))))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(strconv.Itoa(int(v)))))
 	req.Header.Set("Content-Type", "text/plain")
-
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -32,8 +32,6 @@ func main() {
 		runtime.ReadMemStats(m)
 		Alloc := gauge(m.Alloc)
 		BuckHashSys := gauge(m.BuckHashSys)
-		fmt.Println("getting alloc")
-		fmt.Println("getting bhs")
 		go func() {
 			<-ticker.C
 			postGauge(Alloc, "alloc")
