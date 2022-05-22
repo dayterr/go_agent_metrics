@@ -16,6 +16,9 @@ func postGauge (v gauge, name string) {
 	fmt.Println("Sending", v)
 	url := fmt.Sprintf("http://localhost:8080/update/gauge/%v/%v/", name, v)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(strconv.Itoa(int(v)))))
+	if err != nil {
+		panic(err)
+	}
 	req.Header.Set("Content-Type", "text/plain")
 	client := &http.Client{}
 	resp, err := client.Do(req)
