@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-var metrics = make(map[string]float)
+var metrics = make(map[string]float64)
 var counters = make(map[string]int)
 
 func PostGauge(w http.ResponseWriter, r *http.Request) {
@@ -23,17 +23,21 @@ func PostGauge(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	val, err := strconv.Atoi(v)
-		if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
 	switch mt {
 	case "gauge":
-		fmt.Println(val)
+		val, err := strconv.ParseFloat(v, 64)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 		metrics[mn] = val
 		w.WriteHeader(http.StatusOK)
 	case "counter":
+		val, err := strconv.Atoi(v)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 		counters[mn] += val
 		w.WriteHeader(http.StatusOK)
 	default:
