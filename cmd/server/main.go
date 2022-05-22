@@ -19,6 +19,10 @@ func PostGauge(w http.ResponseWriter, r *http.Request) {
 		}
 
 		args := strings.Split(r.URL.Path, "/")
+		if len(args) == 4 {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
 		if len(args) < 4 {
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -26,7 +30,7 @@ func PostGauge(w http.ResponseWriter, r *http.Request) {
 		name := args[3]
 		metric, err := strconv.Atoi(args[4])
 		if err != nil {
-			w.WriteHeader(http.StatusNotFound)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 		metrics[name] = metric
