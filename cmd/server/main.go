@@ -27,6 +27,11 @@ func PostGauge(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		tm := args[2]
+		if tm != "counter" && tm != "gauge" {
+			w.WriteHeader(http.StatusNotImplemented)
+			return
+		}
 		name := args[3]
 		metric, err := strconv.Atoi(args[4])
 		if err != nil {
