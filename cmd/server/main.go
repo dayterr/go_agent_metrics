@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-var metrics = make(map[string]int)
+var metrics = make(map[string]float)
 var counters = make(map[string]int)
 
 func PostGauge(w http.ResponseWriter, r *http.Request) {
