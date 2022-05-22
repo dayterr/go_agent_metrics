@@ -34,7 +34,7 @@ func PostGauge(w http.ResponseWriter, r *http.Request) {
 		metrics[mn] = val
 		w.WriteHeader(http.StatusOK)
 	case "counter":
-		counters[mn] = val
+		counters[mn] += val
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
@@ -56,9 +56,14 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(v))
 	case "counter":
-		c := strconv.Itoa(counters[mn])
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(c))
+		if _, ok := counters[mn]; ok {
+			c := strconv.Itoa(counters[mn])
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(c))
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
 	default:
 		w.WriteHeader(http.StatusNotFound)
 		return
