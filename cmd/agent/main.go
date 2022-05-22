@@ -12,7 +12,7 @@ import (
 type gauge int64
 type counter int64
 
-func postGauge (v gauge, name string) {
+func PostGauge (v gauge, name string) {
 	fmt.Println("Sending", v)
 	url := fmt.Sprintf("http://localhost:8080/update/gauge/%v/%v/", name, v)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(strconv.Itoa(int(v)))))
@@ -37,8 +37,8 @@ func main() {
 		BuckHashSys := gauge(m.BuckHashSys)
 		go func() {
 			<-ticker.C
-			postGauge(Alloc, "alloc")
-			postGauge(BuckHashSys, "buckhashsys")
+			PostGauge(Alloc, "alloc")
+			PostGauge(BuckHashSys, "buckhashsys")
 		}()
 		time.Sleep(2 * time.Second)
 	}
