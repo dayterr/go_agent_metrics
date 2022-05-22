@@ -54,9 +54,14 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 	}
 	switch mt {
 	case "gauge":
-		v := strconv.FormatFloat(metrics[mn], 'f', -1, 64)
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(v))
+		if _, ok := metrics[mn]; ok {
+			v := strconv.FormatFloat(metrics[mn], 'f', -1, 64)
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(v))
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
 	case "counter":
 		if _, ok := counters[mn]; ok {
 			c := strconv.Itoa(counters[mn])
