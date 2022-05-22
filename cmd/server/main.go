@@ -8,7 +8,7 @@ import (
 )
 
 var metrics = make(map[string]int)
-var counter int
+var counters = make(map[string]int)
 
 func PostGauge(w http.ResponseWriter, r *http.Request) {
 	mt := chi.URLParam(r, "mt")
@@ -34,7 +34,7 @@ func PostGauge(w http.ResponseWriter, r *http.Request) {
 		metrics[mn] = val
 		w.WriteHeader(http.StatusOK)
 	case "counter":
-		counter = val
+		counters[mn] = val
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
@@ -56,7 +56,7 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(v))
 	case "counter":
-		c := strconv.Itoa(counter)
+		c := strconv.Itoa(counters[mn])
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(c))
 	default:
