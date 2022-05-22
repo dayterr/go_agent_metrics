@@ -9,7 +9,7 @@ import (
 	"github.com/levigross/grequests"
 )
 
-type gauge int64
+type gauge float64
 type counter int64
 
 var metrics = make(map[string]gauge)
