@@ -2,61 +2,65 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"github.com/go-chi/chi/v5"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 var metrics = make(map[string]int)
+var counter int
 
 func PostGauge(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		_, err := ioutil.ReadAll(r.Body)
+	fmt.Println("workig")
+	mt := chi.URLParam(r, "mt")
+	mn := chi.URLParam(r,"mn")
+	if mn == "" {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	v := chi.URLParam(r,"v")
+	if v == "" {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	val, err := strconv.Atoi(v)
 		if err != nil {
-			http.Error(w, err.Error(), 500)
-			return
-		}
-
-		args := strings.Split(r.URL.Path, "/")
-		if len(args) == 4 {
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
-		if len(args) < 4 {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		tm := args[2]
-		if tm != "counter" && tm != "gauge" {
-			w.WriteHeader(http.StatusNotImplemented)
-			return
-		}
-		name := args[3]
-		metric, err := strconv.Atoi(args[4])
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		metrics[name] = metric
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	switch mt {
+	case "gauge":
+		metrics[mn] = val
 		w.WriteHeader(http.StatusOK)
-	} else {
+	case "counter":
+		counter = val
+		w.WriteHeader(http.StatusOK)
+	default:
+		w.WriteHeader(http.StatusNotImplemented)
+	}
+	/*else {
 		fmt.Println("method GET", r.URL.Path)
 		args := strings.Split(r.URL.Path, "/")
 		name := args[3]
 		m := strconv.Itoa(metrics[name])
 		w.Write([]byte(m))
-	}
+	}*/
 }
 
-func GetUpdate(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		w.WriteHeader(http.StatusOK)
-	}
+func GetMetric(w http.ResponseWriter, r *http.Request) {
+	mn := chi.URLParam(r, "mn")
+	fmt.Println("cho works", mn)
+	w.Write([]byte(mn))
 }
 
 func main() {
-	http.HandleFunc("/update/", PostGauge)
-	http.HandleFunc("/update", GetUpdate)
-	http.ListenAndServe(":8080", nil)
+	r := chi.NewRouter()
+	r.Route("/update", func(r chi.Router) {
+		r.Post("/{mt}/{mn}/{v}", PostGauge)
+	})
+	r.Get("/value/gauge/{mn}", GetMetric)
+
+	//http.HandleFunc("/update/", PostGauge)
+	//http.HandleFunc("/update", GetUpdate)
+	http.ListenAndServe(":8080", r)
 }
