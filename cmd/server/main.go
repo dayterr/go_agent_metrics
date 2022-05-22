@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 	"strconv"
@@ -11,7 +10,6 @@ var metrics = make(map[string]int)
 var counter int
 
 func PostGauge(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("workig")
 	mt := chi.URLParam(r, "mt")
 	mn := chi.URLParam(r,"mn")
 	if mn == "" {
@@ -38,19 +36,28 @@ func PostGauge(w http.ResponseWriter, r *http.Request) {
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
 	}
-	/*else {
-		fmt.Println("method GET", r.URL.Path)
-		args := strings.Split(r.URL.Path, "/")
-		name := args[3]
-		m := strconv.Itoa(metrics[name])
-		w.Write([]byte(m))
-	}*/
 }
 
 func GetMetric(w http.ResponseWriter, r *http.Request) {
+	mt := chi.URLParam(r, "mt")
 	mn := chi.URLParam(r, "mn")
-	fmt.Println("cho works", mn)
-	w.Write([]byte(mn))
+	if mn == "" {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	switch mt {
+	case "gauge":
+		v := strconv.Itoa(metrics[mt])
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(v))
+	case "counter":
+		c := strconv.Itoa(counter)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(c))
+	default:
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 }
 
 func main() {
@@ -58,9 +65,6 @@ func main() {
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/{mt}/{mn}/{v}", PostGauge)
 	})
-	r.Get("/value/gauge/{mn}", GetMetric)
-
-	//http.HandleFunc("/update/", PostGauge)
-	//http.HandleFunc("/update", GetUpdate)
+	r.Get("/value/{mt}/{mn}", GetMetric)
 	http.ListenAndServe(":8080", r)
 }
