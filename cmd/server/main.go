@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 	"strconv"
@@ -17,6 +18,7 @@ func PostGauge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	v := chi.URLParam(r,"v")
+	fmt.Println("v", v)
 	if v == "" {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -28,6 +30,7 @@ func PostGauge(w http.ResponseWriter, r *http.Request) {
 	}
 	switch mt {
 	case "gauge":
+		fmt.Println(val)
 		metrics[mn] = val
 		w.WriteHeader(http.StatusOK)
 	case "counter":
@@ -47,7 +50,9 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 	}
 	switch mt {
 	case "gauge":
-		v := strconv.Itoa(metrics[mt])
+		fmt.Println(metrics[mn])
+		v := strconv.Itoa(metrics[mn])
+		fmt.Println(v)
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(v))
 	case "counter":
