@@ -80,6 +80,7 @@ func main() {
 		metrics["Sys"] = Gauge(m.Sys)
 		metrics["TotalAlloc"] = Gauge(m.TotalAlloc)
 		metrics["RandomValue"] = Gauge(rand.Float64())
+		counters["Counter"] += 1
 		go func() {
 			<-ticker.C
 			for k, v := range metrics {
@@ -89,7 +90,6 @@ func main() {
 				PostCounter(v, k, "counter")
 			}
 		}()
-		counters["Counter"] += 1
 		time.Sleep(2 * time.Second)
 	}
 }
