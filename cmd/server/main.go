@@ -1,16 +1,18 @@
 package main
 
 import (
-	"fmt"
-	"github.com/go-chi/chi/v5"
+	"html/template"
+	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
 )
 
 var metrics = make(map[string]float64)
 var counters = make(map[string]int)
 
-func PostGauge(w http.ResponseWriter, r *http.Request) {
+func PostMetric(w http.ResponseWriter, r *http.Request) {
 	mt := chi.URLParam(r, "mt")
 	mn := chi.URLParam(r,"mn")
 	if mn == "" {
@@ -18,7 +20,6 @@ func PostGauge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	v := chi.URLParam(r,"v")
-	fmt.Println("v", v)
 	if v == "" {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -77,11 +78,24 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func GetIndex(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("cmd/server/index.html")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = t.ExecuteTemplate(w, "index.html", metrics)
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
 func main() {
 	r := chi.NewRouter()
 	r.Route("/update", func(r chi.Router) {
-		r.Post("/{mt}/{mn}/{v}", PostGauge)
+		r.Post("/{mt}/{mn}/{v}", PostMetric)
 	})
 	r.Get("/value/{mt}/{mn}", GetMetric)
+	r.Get("/", GetIndex)
 	http.ListenAndServe(":8080", r)
 }
