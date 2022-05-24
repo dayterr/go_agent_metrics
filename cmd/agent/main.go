@@ -94,6 +94,7 @@ func main() {
 			}
 		}
 	}()
+	
 	exitCode := <-exitChan
 	os.Exit(exitCode)
 }
