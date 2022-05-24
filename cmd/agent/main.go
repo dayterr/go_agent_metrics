@@ -3,12 +3,8 @@ package main
 import (
 	"fmt"
 	"math/rand"
-	"os"
-	"os/signal"
-	"context"
 	"runtime"
 	"strconv"
-	"syscall"
 	"time"
 
 	"github.com/levigross/grequests"
@@ -41,13 +37,6 @@ func PostCounter (v Counter, name string, mt string) error {
 }
 
 func main() {
-	cancelChan := make(chan os.Signal, 1)
-	signal.Notify(cancelChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
-	_, cancel := context.WithCancel(context.Background())
-	go func() {
-		<-cancelChan
-		cancel()
-	}()
 	m := &runtime.MemStats{}
 	ticker := time.NewTicker(10 * time.Second)
 	for {
