@@ -35,6 +35,7 @@ func TestPostCounter(t *testing.T) {
 		want  error
 	}{
 		{name: "no error for counter metric", v: Counter(63), nm: "Some_Counter", tm: "counter", want: nil},
+		{name: "no error for counter metric", v: Counter(0), nm: "Some_Counter", tm: "counter", want: nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
