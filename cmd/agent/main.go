@@ -15,10 +15,10 @@ import (
 )
 
 type Gauge float64
-type counter int64
+type Counter int64
 
 var metrics = make(map[string]Gauge)
-var counters = make(map[string]counter)
+var counters = make(map[string]Counter)
 
 func PostMetric (v Gauge, name string, mt string) error {
 	url := fmt.Sprintf("http://localhost:8080/update/%v/%v/%v", mt, name, v)
@@ -30,7 +30,7 @@ func PostMetric (v Gauge, name string, mt string) error {
 	return nil
 }
 
-func PostCounter (v counter, name string, mt string) error {
+func PostCounter (v Counter, name string, mt string) error {
 	url := fmt.Sprintf("http://localhost:8080/update/%v/%v/%v", mt, name, v)
 	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string {name: strconv.Itoa(int(v))},
 		Headers: map[string]string{"ContentType": "text/plain"}})
