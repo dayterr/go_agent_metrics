@@ -20,7 +20,7 @@ func TestPostMetric(t *testing.T) {
 	}{
 		{
 			url: "/update/gauge/test_metric/303",
-			name: "positive test #1",
+			name: "test usual metric",
 			want: want{
 				code:        200,
 			},
