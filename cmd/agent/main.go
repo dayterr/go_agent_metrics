@@ -42,7 +42,7 @@ func PostCounter (v Counter, name string, mt string) error {
 func main() {
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
-	exitChan := make(chan int)
+	exit_chan := make(chan int)
 	m := &runtime.MemStats{}
 	ticker := time.NewTicker(10 * time.Second)
 	go func() {
@@ -90,10 +90,10 @@ func main() {
 			s := <- signalChan
 			switch s {
 			case syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT:
-				exitChan <- 0
+				exit_chan <- 0
 			}
 		}
 	}()
-	exitCode := <-exitChan
+	exitCode := <-exit_chan
 	os.Exit(exitCode)
 }
