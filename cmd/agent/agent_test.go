@@ -6,8 +6,6 @@ import (
 
 )
 
-type gauge float64
-
 func TestPostGauge(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -25,6 +23,7 @@ func TestPostGauge(t *testing.T) {
 			assert.Nil(t, v)
 		})
 	}
+
 }
 
 func TestPostCounter(t *testing.T) {
