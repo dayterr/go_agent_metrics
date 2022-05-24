@@ -12,6 +12,16 @@ import (
 var metrics = make(map[string]float64)
 var counters = make(map[string]int)
 
+func CreateRouter() chi.Router {
+	r := chi.NewRouter()
+	r.Route("/update", func(r chi.Router) {
+		r.Post("/{mt}/{mn}/{v}", PostMetric)
+	})
+	r.Get("/value/{mt}/{mn}", GetMetric)
+	r.Get("/", GetIndex)
+	return r
+}
+
 func PostMetric(w http.ResponseWriter, r *http.Request) {
 	mt := chi.URLParam(r, "mt")
 	mn := chi.URLParam(r,"mn")
@@ -91,11 +101,6 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	r := chi.NewRouter()
-	r.Route("/update", func(r chi.Router) {
-		r.Post("/{mt}/{mn}/{v}", PostMetric)
-	})
-	r.Get("/value/{mt}/{mn}", GetMetric)
-	r.Get("/", GetIndex)
+	r := CreateRouter()
 	http.ListenAndServe(":8080", r)
 }
