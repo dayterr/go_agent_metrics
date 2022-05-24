@@ -3,8 +3,11 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
+	"os/signal"
 	"runtime"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/levigross/grequests"
@@ -37,9 +40,17 @@ func PostCounter (v Counter, name string, mt string) error {
 }
 
 func main() {
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	exit_chan := make(chan int)
 	m := &runtime.MemStats{}
 	ticker := time.NewTicker(10 * time.Second)
 	for {
+		s := <- signalChan
+		switch s {
+		case syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT:
+			exit_chan <- 0
+		}
 		runtime.ReadMemStats(m)
 		metrics["Alloc"] = Gauge(m.Alloc)
 		metrics["BuckHashSys"] = Gauge(m.BuckHashSys)
@@ -81,4 +92,6 @@ func main() {
 		}()
 		time.Sleep(2 * time.Second)
 	}
+	exitCode := <-exit_chan
+	os.Exit(exitCode)
 }
