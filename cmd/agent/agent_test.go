@@ -15,8 +15,8 @@ func TestPostGauge(t *testing.T) {
 		tm string
 		want  error
 	}{
-		{name: "no error", v: Gauge(63.3), nm: "Some Metric", tm: "gauge", want: nil},
-		{name: "no error without decimal part", v: Gauge(63), nm: "Some Metric", tm: "gauge", want: nil},
+		{name: "no error for gauge metric", v: Gauge(63.3), nm: "Some_Metric", tm: "gauge", want: nil},
+		{name: "no error for gauge metric without decimal part", v: Gauge(63), nm: "Some_Metric", tm: "gauge", want: nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
