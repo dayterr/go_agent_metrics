@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"testing"
 
+	"github.com/dayterr/go_agent_metrics/cmd/server"
 )
 
 func TestPostGauge(t *testing.T) {
