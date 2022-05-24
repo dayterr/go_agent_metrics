@@ -46,11 +46,6 @@ func main() {
 	m := &runtime.MemStats{}
 	ticker := time.NewTicker(10 * time.Second)
 	for {
-		s := <- signalChan
-		switch s {
-		case syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT:
-			exit_chan <- 0
-		}
 		runtime.ReadMemStats(m)
 		metrics["Alloc"] = Gauge(m.Alloc)
 		metrics["BuckHashSys"] = Gauge(m.BuckHashSys)
@@ -91,6 +86,11 @@ func main() {
 			}
 		}()
 		time.Sleep(2 * time.Second)
+		s := <- signalChan
+		switch s {
+		case syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT:
+			exit_chan <- 0
+		}
 	}
 	exitCode := <-exit_chan
 	os.Exit(exitCode)
