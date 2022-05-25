@@ -59,6 +59,5 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 		return nil, ""
 	}
 	defer resp.Body.Close()
-
 	return resp, string(respBody)
 }

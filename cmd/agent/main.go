@@ -26,6 +26,7 @@ func PostMetric (v Gauge, name string, mt string) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
