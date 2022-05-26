@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -23,7 +24,7 @@ func TestPostMetric(t *testing.T) {
 			url: "/update/gauge/test_metric/303",
 			name: "test usual gauge metric",
 			want: want{
-				code:        200,
+				code:        http.StatusOK,
 			},
 		},
 	}
@@ -33,9 +34,7 @@ func TestPostMetric(t *testing.T) {
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 			req, _ := testRequest(t, ts, http.MethodPost, tt.url, nil)
-			if req.StatusCode != tt.want.code {
-				t.Errorf("Expected status code %d, got %d", tt.want.code, req.StatusCode)
-			}
+			assert.Equal(t, tt.want.code, req.StatusCode, "Возвращаемый код не равен ожидаемому")
 		})
 	}
 }
@@ -44,19 +43,16 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 	req, err := http.NewRequest(method, ts.URL+path, body)
 	if err != nil {
 		t.Fatal(err)
-		return nil, ""
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatal(err)
-		return nil, ""
 	}
 
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatal(err)
-		return nil, ""
 	}
 	defer resp.Body.Close()
 	return resp, string(respBody)
