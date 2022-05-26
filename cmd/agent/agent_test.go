@@ -1,13 +1,15 @@
 package main
-/*
+
 import (
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
 	"github.com/stretchr/testify/assert"
+	"net"
 	"net/http/httptest"
 	"testing"
 )
 
 func TestPostGauge(t *testing.T) {
+
 	tests := []struct {
 		name  string
 		v Gauge
@@ -21,7 +23,11 @@ func TestPostGauge(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := handlers.CreateRouter()
-			ts := httptest.NewServer(r)
+			ts := httptest.NewUnstartedServer(r)
+			url := "127.0.0.1:8080"
+			l, _ := net.Listen("tcp", url)
+			ts.Listener = l
+			ts.Start()
 			defer ts.Close()
 			v := PostMetric(tt.v, tt.nm, tt.tm)
 			assert.Nil(t, v)
@@ -43,8 +49,15 @@ func TestPostCounter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			r := handlers.CreateRouter()
+			ts := httptest.NewUnstartedServer(r)
+			url := "127.0.0.1:8080"
+			l, _ := net.Listen("tcp", url)
+			ts.Listener = l
+			ts.Start()
+			defer ts.Close()
 			v := PostCounter(tt.v, tt.nm, tt.tm)
 			assert.Nil(t, v)
 		})
 	}
-}*/
+}

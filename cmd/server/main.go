@@ -5,7 +5,9 @@ import (
 	"net/http"
 )
 
+var port = ":8080"
+
 func main() {
 	r := handlers.CreateRouter()
-	http.ListenAndServe(":8080", r)
+	http.ListenAndServe(port, r)
 }

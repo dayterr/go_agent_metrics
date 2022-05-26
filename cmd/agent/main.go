@@ -19,9 +19,9 @@ type Counter int64
 var metrics = make(map[string]Gauge)
 var counters = make(map[string]Counter)
 
-func PostMetric (v Gauge, name string, mt string) error {
-	url := fmt.Sprintf("http://localhost:8080/update/%v/%v/%v", mt, name, v)
-	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string {name: strconv.Itoa(int(v))},
+func PostMetric (value Gauge, metricName string, metricType string) error {
+	url := fmt.Sprintf("http://localhost:8080/update/%v/%v/%v", metricType, metricName, value)
+	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string {metricName: strconv.Itoa(int(value))},
 		Headers: map[string]string{"ContentType": "text/plain"}})
 	if err != nil {
 		return err
@@ -30,9 +30,9 @@ func PostMetric (v Gauge, name string, mt string) error {
 	return nil
 }
 
-func PostCounter (v Counter, name string, mt string) error {
-	url := fmt.Sprintf("http://localhost:8080/update/%v/%v/%v", mt, name, v)
-	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string {name: strconv.Itoa(int(v))},
+func PostCounter (value Counter, metricName string, metricType string) error {
+	url := fmt.Sprintf("http://localhost:8080/update/%v/%v/%v", metricType, metricName, value)
+	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string {metricName: strconv.Itoa(int(value))},
 		Headers: map[string]string{"ContentType": "text/plain"}})
 	if err != nil {
 		return err

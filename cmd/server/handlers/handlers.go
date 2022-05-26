@@ -19,7 +19,7 @@ func PostMetric(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	value:= chi.URLParam(r,"v")
+	value:= chi.URLParam(r,"value")
 	if value== "" {
 		w.WriteHeader(http.StatusNotFound)
 		return
