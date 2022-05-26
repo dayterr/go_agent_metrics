@@ -3,42 +3,43 @@ package handlers
 import (
 	"github.com/go-chi/chi/v5"
 	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 )
 
 var metrics = make(map[string]float64)
 var counters = make(map[string]int)
+var gauge = "gauge"
+var counter = "counter"
 
 func PostMetric(w http.ResponseWriter, r *http.Request) {
-	mt := chi.URLParam(r, "mt")
-	mn := chi.URLParam(r,"mn")
-	if mn == "" {
+	metricType := chi.URLParam(r, "metricType")
+	metricName := chi.URLParam(r,"metricName")
+	if metricName == "" {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	v := chi.URLParam(r,"v")
-	if v == "" {
+	value:= chi.URLParam(r,"v")
+	if value== "" {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	switch mt {
-	case "gauge":
-		val, err := strconv.ParseFloat(v, 64)
+	switch metricType {
+	case gauge:
+		valFloat, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		metrics[mn] = val
+		metrics[metricName] = valFloat
 		w.WriteHeader(http.StatusOK)
-	case "counter":
-		val, err := strconv.Atoi(v)
+	case counter:
+		valInt, err := strconv.Atoi(value)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		counters[mn] += val
+		counters[metricName] += valInt
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
@@ -46,25 +47,25 @@ func PostMetric(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetMetric(w http.ResponseWriter, r *http.Request) {
-	mt := chi.URLParam(r, "mt")
-	mn := chi.URLParam(r, "mn")
-	if mn == "" {
+	metricType := chi.URLParam(r, "metricType")
+	metricName := chi.URLParam(r, "metricName")
+	if metricName == "" {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	switch mt {
-	case "gauge":
-		if _, ok := metrics[mn]; ok {
-			v := strconv.FormatFloat(metrics[mn], 'f', -1, 64)
+	switch metricType {
+	case gauge:
+		if _, ok := metrics[metricName]; ok {
+			value := strconv.FormatFloat(metrics[metricName], 'f', -1, 64)
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(v))
+			w.Write([]byte(value))
 		} else {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-	case "counter":
-		if _, ok := counters[mn]; ok {
-			c := strconv.Itoa(counters[mn])
+	case counter:
+		if _, ok := counters[metricName]; ok {
+			c := strconv.Itoa(counters[metricName])
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(c))
 		} else {
@@ -80,21 +81,21 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 func GetIndex(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("cmd/server/index.html")
 	if err != nil {
-		log.Fatalln(err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	err = t.ExecuteTemplate(w, "index.html", metrics)
 	if err != nil {
-		log.Fatalln(err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
 func CreateRouter() chi.Router {
 	r := chi.NewRouter()
 	r.Route("/update", func(r chi.Router) {
-		r.Post("/{mt}/{mn}/{v}", PostMetric)
+		r.Post("/{metricType}/{metricName}/{value}", PostMetric)
 	})
-	r.Get("/value/{mt}/{mn}", GetMetric)
+	r.Get("/value/{metricType}/{metricName}", GetMetric)
 	r.Get("/", GetIndex)
 
 	return r
