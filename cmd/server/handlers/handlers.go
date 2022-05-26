@@ -97,6 +97,5 @@ func CreateRouter() chi.Router {
 	})
 	r.Get("/value/{metricType}/{metricName}", GetMetric)
 	r.Get("/", GetIndex)
-
 	return r
 }
