@@ -175,6 +175,6 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	resp.Body.Close()
 	return resp, string(respBody)
 }
