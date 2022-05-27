@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
@@ -77,6 +76,7 @@ func TestPostMetric(t *testing.T) {
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 			req, _ := testRequest(t, ts, http.MethodPost, tt.url, nil)
+			defer req.Body.Close()
 			assert.Equal(t, tt.want.code, req.StatusCode, "Возвращаемый код не равен ожидаемому")
 		})
 	}
@@ -149,10 +149,13 @@ func TestGetMetric(t *testing.T) {
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 			url := "/update/gauge/test_metric/303"
-			testRequest(t, ts, http.MethodPost, url, nil)
+			tr1, _ := testRequest(t, ts, http.MethodPost, url, nil)
+			defer tr1.Body.Close()
 			url = "/update/counter/test_counter/3"
-			testRequest(t, ts, http.MethodPost, url, nil)
+			tr2, _ := testRequest(t, ts, http.MethodPost, url, nil)
+			defer tr2.Body.Close()
 			req, _ := testRequest(t, ts, http.MethodGet, tt.url, nil)
+			defer req.Body.Close()
 			assert.Equal(t, tt.want.code, req.StatusCode, "Возвращаемый код не равен ожидаемому")
 		})
 	}
@@ -160,7 +163,6 @@ func TestGetMetric(t *testing.T) {
 
 func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io.Reader) (*http.Response, string) {
 	req, err := http.NewRequest(method, ts.URL+path, body)
-	fmt.Println(req.URL.Path)
 
 	if err != nil {
 		t.Fatal(err)
