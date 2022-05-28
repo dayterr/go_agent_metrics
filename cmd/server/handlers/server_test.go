@@ -16,7 +16,7 @@ func TestPostMetric(t *testing.T) {
 		contentType string
 	}
 	tests := []struct {
-		url string
+		url  string
 		name string
 		want want
 	}{
@@ -27,14 +27,14 @@ func TestPostMetric(t *testing.T) {
 				code: http.StatusOK,
 			},
 		},
-			{
-				url:  "/update/counter/test_counter/3",
-				name: "test usual counter metric",
-				want: want{
-					code: http.StatusOK,
-				},
+		{
+			url:  "/update/counter/test_counter/3",
+			name: "test usual counter metric",
+			want: want{
+				code: http.StatusOK,
 			},
-			{
+		},
+		{
 			url:  "/update/gauge/test_metric",
 			name: "test gauge without a value",
 			want: want{
@@ -89,55 +89,71 @@ func TestGetMetric(t *testing.T) {
 		contentType string
 	}
 	tests := []struct {
-		url string
-		name string
-		want want
+		url            string
+		urlPostMetric  string
+		urlPostCounter string
+		name           string
+		want           want
 	}{
 		{
-			url:  "/value/gauge/test_metric",
-			name: "test usual gauge metric",
+			url:            "/value/gauge/test_metric",
+			urlPostMetric:  "/update/gauge/test_metric/303",
+			urlPostCounter: "/update/counter/test_counter/3",
+			name:           "test usual gauge metric",
 			want: want{
 				code: http.StatusOK,
 			},
 		},
 		{
-			url:  "/value/counter/test_counter",
-			name: "test usual counter metric",
+			url:            "/value/counter/test_counter",
+			urlPostMetric:  "/update/gauge/test_metric/303",
+			urlPostCounter: "/update/counter/test_counter/3",
+			name:           "test usual counter metric",
 			want: want{
 				code: http.StatusOK,
 			},
 		},
 		{
-			url:  "/value/gauge/test_metric3",
-			name: "test gauge with a non-existent value",
+			url:            "/value/gauge/test_metric3",
+			urlPostMetric:  "/update/gauge/test_metric/303",
+			urlPostCounter: "/update/counter/test_counter/3",
+			name:           "test gauge with a non-existent value",
 			want: want{
 				code: http.StatusNotFound,
 			},
 		},
 		{
-			url:  "/value/counter/test_counter3",
-			name: "test counter with a non-existent value",
+			url:            "/value/counter/test_counter3",
+			urlPostMetric:  "/update/gauge/test_metric/303",
+			urlPostCounter: "/update/counter/test_counter/3",
+			name:           "test counter with a non-existent value",
 			want: want{
 				code: http.StatusNotFound,
 			},
 		},
 		{
-			url:  "/value/rand/test_counter",
-			name: "test case with an incorrect metric type",
+			url:            "/value/rand/test_counter",
+			urlPostMetric:  "/update/gauge/test_metric/303",
+			urlPostCounter: "/update/counter/test_counter/3",
+			name:           "test case with an incorrect metric type",
 			want: want{
 				code: http.StatusNotFound,
 			},
 		},
 		{
-			url:  "/value/gauge",
-			name: "test gauge without a metric name",
+			url:            "/value/gauge",
+			urlPostMetric:  "/update/gauge/test_metric/303",
+			urlPostCounter: "/update/counter/test_counter/3",
+			name:           "test gauge without a metric name",
 			want: want{
 				code: http.StatusNotFound,
 			},
 		},
 		{
-			url:  "/value/counter",
-			name: "test counter without a metric name",
+			url:            "/value/counter",
+			urlPostMetric:  "/update/gauge/test_metric/303",
+			urlPostCounter: "/update/counter/test_counter/3",
+			name:           "test counter without a metric name",
 			want: want{
 				code: http.StatusNotFound,
 			},
@@ -148,11 +164,9 @@ func TestGetMetric(t *testing.T) {
 			r := CreateRouter()
 			ts := httptest.NewServer(r)
 			defer ts.Close()
-			url := "/update/gauge/test_metric/303"
-			tr1, _ := testRequest(t, ts, http.MethodPost, url, nil)
+			tr1, _ := testRequest(t, ts, http.MethodPost, tt.urlPostMetric, nil)
 			defer tr1.Body.Close()
-			url = "/update/counter/test_counter/3"
-			tr2, _ := testRequest(t, ts, http.MethodPost, url, nil)
+			tr2, _ := testRequest(t, ts, http.MethodPost, tt.urlPostCounter, nil)
 			defer tr2.Body.Close()
 			req, _ := testRequest(t, ts, http.MethodGet, tt.url, nil)
 			defer req.Body.Close()
