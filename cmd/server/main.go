@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
 	"net/http"
+
+	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
 )
 
 var port = ":8080"

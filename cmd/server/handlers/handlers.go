@@ -1,26 +1,28 @@
 package handlers
 
 import (
-	"github.com/go-chi/chi/v5"
 	"html/template"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
 )
 
 var metrics = make(map[string]float64)
 var counters = make(map[string]int)
-var gauge = "gauge"
-var counter = "counter"
+
+const gauge = "gauge"
+const counter = "counter"
 
 func PostMetric(w http.ResponseWriter, r *http.Request) {
 	metricType := chi.URLParam(r, "metricType")
-	metricName := chi.URLParam(r,"metricName")
+	metricName := chi.URLParam(r, "metricName")
 	if metricName == "" {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	value:= chi.URLParam(r,"value")
-	if value== "" {
+	value := chi.URLParam(r, "value")
+	if value == "" {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -82,11 +84,13 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("cmd/server/index.html")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	err = t.ExecuteTemplate(w, "index.html", metrics)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 }
 
