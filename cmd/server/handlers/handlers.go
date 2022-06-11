@@ -49,6 +49,9 @@ func PostJSON(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
+	if m.MType == agent.CounterType {
+		fmt.Println(m)
+	}
 	switch m.MType{
 	case agent.GaugeType:
 		metrics[m.ID] = m.Value
