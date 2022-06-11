@@ -3,7 +3,10 @@ package agent
 import (
 	"encoding/json"
 	"errors"
-//	"fmt"
+	"fmt"
+	"strconv"
+
+	//	"fmt"
 	"math/rand"
 	"runtime"
 //	"strconv"
@@ -49,7 +52,7 @@ func (m *Metrics) MarshallJSON() ([]byte, error) {
 		}
 		return json.Marshal(aliasValue)
 	default:
-		return nil, errors.New("No such metric type")
+		return nil, errors.New("no such metric type")
 	}
 }
 
@@ -91,14 +94,13 @@ func ReadMetrics() {
 }
 
 func PostCounter(value Counter, metricName string, metricType string) error {
-	/*url := fmt.Sprintf("http://localhost:8080/update/%v/%v/%v", metricType, metricName, value)
+	url := fmt.Sprintf("http://localhost:8080/update/%v/%v/%v", metricType, metricName, value)
 	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string{metricName: strconv.Itoa(int(value))},
 		Headers: map[string]string{"ContentType": "text/plain"}})
 	if err != nil {
 		return err
 	}
-	return nil*/
-	url := "http://localhost:8080/update"
+	url = "http://localhost:8080/update"
 	metric := Metrics{ID: metricName, MType: metricType, Delta: int64(value)}
 	mJSON, err := metric.MarshallJSON()
 	if err != nil {
@@ -113,13 +115,13 @@ func PostCounter(value Counter, metricName string, metricType string) error {
 }
 
 func PostMetric(value Gauge, metricName string, metricType string) error {
-	/*url := fmt.Sprintf("http://localhost:8080/update/%v/%v/%v", metricType, metricName, value)
+	url := fmt.Sprintf("http://localhost:8080/update/%v/%v/%v", metricType, metricName, value)
 	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string{metricName: strconv.Itoa(int(value))},
 		Headers: map[string]string{"ContentType": "text/plain"}})
 	if err != nil {
 		return err
-	}*/
-	url := "http://localhost:8080/update"
+	}
+	url = "http://localhost:8080/update"
 	metric := Metrics{ID: metricName, MType: metricType, Value: float64(value)}
 	mJSON, err := metric.MarshallJSON()
 	if err != nil {
