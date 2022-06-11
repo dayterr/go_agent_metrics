@@ -49,8 +49,8 @@ func PostJSON(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
-	if m.MType == agent.CounterType {
-		fmt.Println(m)
+	if m.MType == agent.GaugeType {
+		fmt.Println(r.Header)
 	}
 	switch m.MType{
 	case agent.GaugeType:
@@ -146,9 +146,9 @@ func CreateRouter() chi.Router {
 	r := chi.NewRouter()
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/{metricType}/{metricName}/{value}", PostMetric)
-		r.Post("/", PostJSON)
+		r.Post("", PostJSON)
 	})
-	r.Post("/value/", GetValue)
+	r.Post("/value", GetValue)
 	r.Get("/value/{metricType}/{metricName}", GetMetric)
 	r.Get("/", GetIndex)
 	return r
