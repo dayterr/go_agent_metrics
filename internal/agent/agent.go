@@ -3,10 +3,10 @@ package agent
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
+//	"fmt"
 	"math/rand"
 	"runtime"
-	"strconv"
+//	"strconv"
 
 	"github.com/levigross/grequests"
 )
@@ -91,9 +91,21 @@ func ReadMetrics() {
 }
 
 func PostCounter(value Counter, metricName string, metricType string) error {
-	url := fmt.Sprintf("http://localhost:8080/update/%v/%v/%v", metricType, metricName, value)
+	/*url := fmt.Sprintf("http://localhost:8080/update/%v/%v/%v", metricType, metricName, value)
 	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string{metricName: strconv.Itoa(int(value))},
 		Headers: map[string]string{"ContentType": "text/plain"}})
+	if err != nil {
+		return err
+	}
+	return nil*/
+	url := "http://localhost:8080/update"
+	metric := Metrics{ID: metricName, MType: metricType, Delta: int64(value)}
+	mJSON, err := metric.MarshallJSON()
+	if err != nil {
+		return err
+	}
+	_, err = grequests.Post(url, &grequests.RequestOptions{JSON: mJSON,
+		Headers: map[string]string{"ContentType": "application/json"}})
 	if err != nil {
 		return err
 	}
