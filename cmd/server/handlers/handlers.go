@@ -40,8 +40,8 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 	default:
 		w.WriteHeader(http.StatusBadRequest)
 	}
-	}
 }
+
 
 func PostJSON(w http.ResponseWriter, r *http.Request) {
 	var m agent.Metrics
