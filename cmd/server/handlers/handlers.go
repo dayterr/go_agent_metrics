@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -28,6 +27,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 		}
+		w.Header().Set("content-type", "application/json")
 		w.Write(mJSON)
 	case agent.CounterType:
 		m.Delta = counters[m.ID]
@@ -35,6 +35,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 		}
+		w.Header().Set("content-type", "application/json")
 		w.Write(mJSON)
 	default:
 		w.WriteHeader(http.StatusBadRequest)
@@ -48,7 +49,6 @@ func PostJSON(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
-	fmt.Println(m.MType)
 	switch m.MType{
 	case agent.GaugeType:
 		metrics[m.ID] = m.Value
@@ -145,8 +145,8 @@ func CreateRouter() chi.Router {
 	r := chi.NewRouter()
 	//r.Post("/update/", PostJSON)
 	r.Route("/update", func(r chi.Router) {
-		r.Post("/{metricType}/{metricName}/{value}", PostMetric)
 		r.Post("/", PostJSON)
+		r.Post("/{metricType}/{metricName}/{value}", PostMetric)
 	})
 	r.Post("/value/", GetValue)
 	r.Get("/value/{metricType}/{metricName}", GetMetric)
