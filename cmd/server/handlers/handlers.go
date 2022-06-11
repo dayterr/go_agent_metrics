@@ -54,6 +54,8 @@ func PostJSON(w http.ResponseWriter, r *http.Request) {
 	case agent.CounterType:
 		counters[m.ID] = m.Delta
 		w.WriteHeader(http.StatusOK)
+	default:
+		w.WriteHeader(http.StatusNotFound)
 	}
 }
 
