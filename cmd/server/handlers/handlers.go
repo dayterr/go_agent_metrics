@@ -2,13 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
-	"github.com/dayterr/go_agent_metrics/internal/agent"
 	"html/template"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+
+	"github.com/dayterr/go_agent_metrics/internal/agent"
 )
 
 var metrics = make(map[string]float64)
