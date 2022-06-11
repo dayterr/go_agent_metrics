@@ -24,7 +24,6 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 	case agent.GaugeType:
 		m.Value = metrics[m.ID]
 		mJSON, err := m.MarshallJSON()
-		fmt.Println(mJSON)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 		}
@@ -32,7 +31,6 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 	case agent.CounterType:
 		m.Delta = counters[m.ID]
 		mJSON, err := m.MarshallJSON()
-		fmt.Println(mJSON)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 		}
@@ -48,9 +46,6 @@ func PostJSON(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-	}
-	if m.MType == agent.GaugeType {
-		fmt.Println(r.Header)
 	}
 	switch m.MType{
 	case agent.GaugeType:
