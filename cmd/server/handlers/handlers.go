@@ -143,9 +143,9 @@ func CreateRouter() chi.Router {
 	r := chi.NewRouter()
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/{metricType}/{metricName}/{value}", PostMetric)
-		r.Post("", PostJSON)
+		r.Post("/", PostJSON)
 	})
-	r.Post("/value", GetValue)
+	r.Post("/value/", GetValue)
 	r.Get("/value/{metricType}/{metricName}", GetMetric)
 	r.Get("/", GetIndex)
 	return r
