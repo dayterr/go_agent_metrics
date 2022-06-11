@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -47,6 +48,7 @@ func PostJSON(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
+	fmt.Println(m.MType)
 	switch m.MType{
 	case agent.GaugeType:
 		metrics[m.ID] = m.Value
@@ -141,9 +143,10 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 
 func CreateRouter() chi.Router {
 	r := chi.NewRouter()
-	r.Post("/update/", PostJSON)
+	//r.Post("/update/", PostJSON)
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/{metricType}/{metricName}/{value}", PostMetric)
+		r.Post("/", PostJSON)
 	})
 	r.Post("/value/", GetValue)
 	r.Get("/value/{metricType}/{metricName}", GetMetric)
