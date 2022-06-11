@@ -141,9 +141,9 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 
 func CreateRouter() chi.Router {
 	r := chi.NewRouter()
+	r.Post("/update/", PostJSON)
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/{metricType}/{metricName}/{value}", PostMetric)
-		r.Post("/", PostJSON)
 	})
 	r.Post("/value", GetValue)
 	r.Get("/value/{metricType}/{metricName}", GetMetric)
