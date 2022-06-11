@@ -1,6 +1,8 @@
 package agent
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"runtime"
@@ -9,22 +11,50 @@ import (
 	"github.com/levigross/grequests"
 )
 
+const GaugeType = "gauge"
+const CounterType = "counter"
+
 type Gauge float64
 type Counter int64
 
+type Metrics struct {
+	ID    string   `json:"id"`
+	MType string   `json:"type"`
+	Delta int64   `json:"delta,omitempty"`
+	Value float64 `json:"value,omitempty"`
+}
+
+func (m *Metrics) MarshallJSON() ([]byte, error) {
+	switch m.MType {
+	case GaugeType:
+		aliasValue := &struct {
+			ID    string `json:"id"`
+			MType string `json:"type"`
+			Value float64 `json:"value"`
+		}{
+		ID: m.ID,
+		MType: m.MType,
+		Value: m.Value,
+		}
+		return json.Marshal(aliasValue)
+	case CounterType:
+		aliasValue := &struct {
+			ID    string `json:"id"`
+			MType string `json:"type"`
+			Delta int64 `json:"delta"`
+		}{
+			ID: m.ID,
+			MType: m.MType,
+			Delta: m.Delta,
+		}
+		return json.Marshal(aliasValue)
+	default:
+		return nil, errors.New("No such metric type")
+	}
+}
+
 var metrics = make(map[string]Gauge)
 var counters = make(map[string]Counter)
-
-func PostMetric(value Gauge, metricName string, metricType string) error {
-	url := fmt.Sprintf("http://localhost:8080/update/%v/%v/%v", metricType, metricName, value)
-	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string{metricName: strconv.Itoa(int(value))},
-		Headers: map[string]string{"ContentType": "text/plain"}})
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
 
 func ReadMetrics() {
 	m := &runtime.MemStats{}
@@ -69,6 +99,28 @@ func PostCounter(value Counter, metricName string, metricType string) error {
 	}
 	return nil
 }
+
+func PostMetric(value Gauge, metricName string, metricType string) error {
+	/*url := fmt.Sprintf("http://localhost:8080/update/%v/%v/%v", metricType, metricName, value)
+	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string{metricName: strconv.Itoa(int(value))},
+		Headers: map[string]string{"ContentType": "text/plain"}})
+	if err != nil {
+		return err
+	}*/
+	url := "http://localhost:8080/update"
+	metric := Metrics{ID: metricName, MType: metricType, Value: float64(value)}
+	mJSON, err := metric.MarshallJSON()
+	if err != nil {
+		return err
+	}
+   	_, err = grequests.Post(url, &grequests.RequestOptions{JSON: mJSON,
+   		Headers: map[string]string{"ContentType": "application/json"}})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 
 func PostAll() {
 	for k, v := range metrics {
