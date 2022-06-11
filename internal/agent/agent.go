@@ -90,7 +90,7 @@ func ReadMetrics() {
 	metrics["Sys"] = Gauge(m.Sys)
 	metrics["TotalAlloc"] = Gauge(m.TotalAlloc)
 	metrics["RandomValue"] = Gauge(rand.Float64())
-	counters["PollCounter"] += 1
+	counters["PollCount"] += 1
 }
 
 func PostCounter(value Counter, metricName string, metricType string) error {
