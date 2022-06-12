@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -11,8 +10,8 @@ import (
 
 type Config struct {
 	Address string `env:"ADDRESS" envDefault:"localhost:8080"`
-	ReportInterval time.Duration `env:"REPORT_INTERVAL" envDefault:"10"`
-	PollInterval time.Duration `env:"POLL_INTERVAL" envDefault:"2"`
+	ReportInterval time.Duration `env:"REPORT_INTERVAL" envDefault:"10s"`
+	PollInterval time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
 }
 
 func GetEnv() Config {
@@ -21,7 +20,6 @@ func GetEnv() Config {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(cfg)
 	return cfg
 }
 
