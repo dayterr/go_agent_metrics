@@ -3,6 +3,7 @@ module github.com/dayterr/go_agent_metrics
 go 1.15
 
 require (
+	github.com/caarlos0/env/v6 v6.9.3
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/levigross/grequests v0.0.0-20190908174114-253788527a1a

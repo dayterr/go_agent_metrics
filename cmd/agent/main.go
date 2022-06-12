@@ -7,14 +7,16 @@ import (
 	"time"
 
 	"github.com/dayterr/go_agent_metrics/internal/agent"
+	"github.com/dayterr/go_agent_metrics/internal/config"
 )
 
 func main() {
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	exitChan := make(chan int)
-	ticker := time.NewTicker(10 * time.Second)
-	tickerMetrics := time.NewTicker(2 * time.Second)
+	conf := config.GetEnv()
+	ticker := time.NewTicker(conf.ReportInterval * time.Second)
+	tickerMetrics := time.NewTicker(conf.PollInterval * time.Second)
 	go func() {
 		for {
 			select {
