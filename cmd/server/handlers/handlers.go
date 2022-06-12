@@ -14,6 +14,22 @@ import (
 var metrics = make(map[string]float64)
 var counters = make(map[string]int64)
 
+func MarshallMetrics() ([]byte, error){
+	jsn, err := json.Marshal(metrics)
+	if err != nil {
+		return nil, err
+	}
+	return jsn, nil
+}
+
+func MarshallCounters() ([]byte, error){
+	jsn, err := json.Marshal(counters)
+	if err != nil {
+		return nil, err
+	}
+	return jsn, nil
+}
+
 func GetValue(w http.ResponseWriter, r *http.Request) {
 	var m agent.Metrics
 	err := json.NewDecoder(r.Body).Decode(&m)
@@ -143,7 +159,6 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 
 func CreateRouter() chi.Router {
 	r := chi.NewRouter()
-	//r.Post("/update/", PostJSON)
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/", PostJSON)
 		r.Post("/{metricType}/{metricName}/{value}", PostMetric)

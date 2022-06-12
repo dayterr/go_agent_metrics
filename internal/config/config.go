@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -15,19 +14,32 @@ type Config struct {
 	PollInterval time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
 }
 
+type ConfigLogger struct {
+	StoreInterval time.Duration `env:"STORE_INTERVAL" envDefault:"10s"`
+	StoreFile string `env:"STORE_FILE" envDefault:"/tmp/devops-metrics-db.json"`
+	Restore bool `env:"RESTORE" envDefault:"true"`
+}
+
 func GetEnv() Config {
 	var cfg Config
 	err := env.Parse(&cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(cfg)
+	return cfg
+}
+
+func GetEnvLogger() ConfigLogger {
+	var cfg ConfigLogger
+	err := env.Parse(&cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return cfg
 }
 
 func GetPort() string {
 	cfg := GetEnv()
 	port := ":" + strings.Split(cfg.Address, ":")[1]
-	fmt.Println(port)
 	return port
 }
