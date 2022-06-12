@@ -25,6 +25,6 @@ func GetEnv() Config {
 
 func GetPort() string {
 	cfg := GetEnv()
-	port := strings.Split(cfg.Address, ":")[1]
+	port := ":" + strings.Split(cfg.Address, ":")[1]
 	return port
 }
