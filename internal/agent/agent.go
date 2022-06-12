@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/dayterr/go_agent_metrics/internal/config"
 	"strconv"
 
 	//	"fmt"
@@ -94,13 +95,14 @@ func ReadMetrics() {
 }
 
 func PostCounter(value Counter, metricName string, metricType string) error {
-	url := fmt.Sprintf("http://localhost:8080/update/%v/%v/%v", metricType, metricName, value)
+	cfg := config.GetEnv()
+	url := fmt.Sprintf("http://%v/update/%v/%v/%v", cfg.Address, metricType, metricName, value)
 	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string{metricName: strconv.Itoa(int(value))},
 		Headers: map[string]string{"ContentType": "text/plain"}})
 	if err != nil {
 		return err
 	}
-	url = "http://localhost:8080/update"
+	url = fmt.Sprintf("http://%v/update", cfg.Address)
 	metric := Metrics{ID: metricName, MType: metricType, Delta: int64(value)}
 	mJSON, err := metric.MarshallJSON()
 	if err != nil {
@@ -115,13 +117,14 @@ func PostCounter(value Counter, metricName string, metricType string) error {
 }
 
 func PostMetric(value Gauge, metricName string, metricType string) error {
-	url := fmt.Sprintf("http://localhost:8080/update/%v/%v/%v", metricType, metricName, value)
+	cfg := config.GetEnv()
+	url := fmt.Sprintf("http://%v/update/%v/%v/%v", cfg.Address, metricType, metricName, value)
 	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string{metricName: strconv.Itoa(int(value))},
 		Headers: map[string]string{"ContentType": "text/plain"}})
 	if err != nil {
 		return err
 	}
-	url = "http://localhost:8080/update"
+	url = fmt.Sprintf("http://%v/update", cfg.Address)
 	metric := Metrics{ID: metricName, MType: metricType, Value: float64(value)}
 	mJSON, err := metric.MarshallJSON()
 	if err != nil {
