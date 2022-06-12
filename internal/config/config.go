@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -20,11 +21,13 @@ func GetEnv() Config {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println(cfg)
 	return cfg
 }
 
 func GetPort() string {
 	cfg := GetEnv()
 	port := ":" + strings.Split(cfg.Address, ":")[1]
+	fmt.Println(port)
 	return port
 }
