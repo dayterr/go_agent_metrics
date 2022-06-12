@@ -15,8 +15,8 @@ func main() {
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	exitChan := make(chan int)
 	conf := config.GetEnv()
-	ticker := time.NewTicker(conf.ReportInterval * time.Second)
-	tickerMetrics := time.NewTicker(conf.PollInterval * time.Second)
+	ticker := time.NewTicker(conf.ReportInterval)
+	tickerMetrics := time.NewTicker(conf.PollInterval)
 	go func() {
 		for {
 			select {
