@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"html/template"
 	"net/http"
+	"reflect"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
@@ -13,6 +14,8 @@ import (
 
 var metrics = make(map[string]float64)
 var counters = make(map[string]int64)
+
+var metricJSON agent.MetricsJSON
 
 func MarshallMetrics() ([]byte, error){
 	jsn, err := json.Marshal(metrics)
@@ -30,15 +33,24 @@ func MarshallCounters() ([]byte, error){
 	return jsn, nil
 }
 
+func UnmarshallMetrics() ([]byte, error){
+	jsn, err := json.Marshal(metrics)
+	if err != nil {
+		return nil, err
+	}
+	return jsn, nil
+}
+
 func GetValue(w http.ResponseWriter, r *http.Request) {
 	var m agent.Metrics
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
+	v := reflect.ValueOf(&metricJSON).Elem()
 	switch m.MType {
 	case agent.GaugeType:
-		m.Value = metrics[m.ID]
+		m.Value = v.Elem().FieldByName(m.ID).Float()
 		mJSON, err := m.MarshallJSON()
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -46,7 +58,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("content-type", "application/json")
 		w.Write(mJSON)
 	case agent.CounterType:
-		m.Delta = counters[m.ID]
+		m.Delta = v.Elem().FieldByName(m.ID).Int()
 		mJSON, err := m.MarshallJSON()
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -65,12 +77,14 @@ func PostJSON(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
+	v := reflect.ValueOf(&metricJSON)
 	switch m.MType{
 	case agent.GaugeType:
-		metrics[m.ID] = m.Value
+		v.Elem().FieldByName(m.ID).SetFloat(m.Value)
 		w.WriteHeader(http.StatusOK)
 	case agent.CounterType:
-		counters[m.ID] += m.Delta
+		uptValue := v.Elem().FieldByName(m.ID).Int() + m.Delta
+		v.Elem().FieldByName(m.ID).SetInt(uptValue)
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotFound)
@@ -89,6 +103,7 @@ func PostMetric(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+	v := reflect.ValueOf(&metricJSON)
 	switch metricType {
 	case agent.GaugeType:
 		valFloat, err := strconv.ParseFloat(value, 64)
@@ -96,7 +111,7 @@ func PostMetric(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		metrics[metricName] = valFloat
+		v.Elem().FieldByName(metricName).SetFloat(valFloat)
 		w.WriteHeader(http.StatusOK)
 	case agent.CounterType:
 		valInt, err := strconv.Atoi(value)
@@ -104,7 +119,8 @@ func PostMetric(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		counters[metricName] += int64(valInt)
+		uptValue := v.Elem().FieldByName(metricName).Int() + int64(valInt)
+		v.Elem().FieldByName(metricName).SetInt(uptValue)
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
@@ -144,6 +160,9 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetIndex(w http.ResponseWriter, r *http.Request) {
+	var metrics map[string]interface{}
+	data, _ := json.Marshal(metricJSON)
+	json.Unmarshal(data, &metrics)
 	t, err := template.ParseFiles("cmd/server/index.html")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
