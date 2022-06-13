@@ -101,10 +101,7 @@ func ReadMetrics() {
 	allMetrics.GaugeField["Sys"] = Gauge(m.Sys)
 	allMetrics.GaugeField["TotalAlloc"] = Gauge(m.TotalAlloc)
 	allMetrics.GaugeField["RandomValue"] = Gauge(rand.Float64())
-	if _, ok := allMetrics.CounterField["PollCounter"]; ok {
-		allMetrics.CounterField["PollCounter"] = 0
-	}
-	allMetrics.CounterField["PollCounter"] += 1
+	allMetrics.CounterField["PollCount"] += 1
 }
 
 func PostCounter(value Counter, metricName string, metricType string) error {
