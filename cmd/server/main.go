@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 	"io/ioutil"
 	"log"
@@ -32,7 +33,7 @@ var port = config.GetPort()
 func main() {
 	cfg := config.GetEnvLogger()
 	ticker := time.NewTicker(cfg.StoreInterval)
-	if cfg.Restore == true {
+	if cfg.Restore {
 		file, err := ioutil.ReadFile(cfg.StoreFile)
 		if err != nil {
 			log.Fatal(err)
@@ -51,6 +52,7 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
+			fmt.Println(cfg.StoreFile)
 			defer file.Close()
 			jsn, err := handlers.MarshallMetrics()
 			if err != nil {
