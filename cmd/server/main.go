@@ -1,20 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 	"io/ioutil"
 
-	//"bufio"
 	"github.com/dayterr/go_agent_metrics/internal/config"
 	"log"
-	"os"
-	"time"
-
-	/*"log"
-	"os"
-	"time"*/
 	"net/http"
 
 
@@ -25,10 +17,10 @@ var port = config.GetPort()
 
 func main() {
 	cfg := config.GetEnvLogger()
-	ticker := time.NewTicker(cfg.StoreInterval)
+	//ticker := time.NewTicker(cfg.StoreInterval)
 	if cfg.Restore == true {
 		var mj agent.MetricsJSON
-		file, err := ioutil.ReadFile("test.json")
+		file, err := ioutil.ReadFile(cfg.StoreFile)
 		if err != nil {
 			log.Fatal(err)
 		}
