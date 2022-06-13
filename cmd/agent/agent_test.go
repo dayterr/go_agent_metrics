@@ -15,13 +15,13 @@ func TestPostGauge(t *testing.T) {
 
 	tests := []struct {
 		name       string
-		value      agent.Gauge
+		value      Gauge
 		metricName string
 		metricType string
 		want       error
 	}{
-		{name: "no error for gauge metric", value: agent.Gauge(63.3), metricName: "Some_Metric", metricType: "gauge", want: nil},
-		{name: "no error for gauge metric without decimal part", value: agent.Gauge(63), metricName: "Some_Metric", metricType: "gauge", want: nil},
+		{name: "no error for gauge metric", value: Gauge(63.3), metricName: "Some_Metric", metricType: "gauge", want: nil},
+		{name: "no error for gauge metric without decimal part", value: Gauge(63), metricName: "Some_Metric", metricType: "gauge", want: nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -33,7 +33,7 @@ func TestPostGauge(t *testing.T) {
 			ts.Listener = l
 			ts.Start()
 			defer ts.Close()
-			v := agent.PostMetric(tt.value, tt.metricName, tt.metricType)
+			v := PostMetric(tt.value, tt.metricName, tt.metricType)
 			assert.Nil(t, v)
 		})
 	}
@@ -43,13 +43,13 @@ func TestPostGauge(t *testing.T) {
 func TestPostCounter(t *testing.T) {
 	tests := []struct {
 		name       string
-		value      agent.Counter
+		value      Counter
 		metricName string
 		metricType string
 		want       error
 	}{
-		{name: "no error for counter metric", value: agent.Counter(63), metricName: "Some_Counter", metricType: "counter", want: nil},
-		{name: "no error for counter metric zero", value: agent.Counter(0), metricName: "Some_Counter", metricType: "counter", want: nil},
+		{name: "no error for counter metric", value: Counter(63), metricName: "Some_Counter", metricType: "counter", want: nil},
+		{name: "no error for counter metric zero", value: Counter(0), metricName: "Some_Counter", metricType: "counter", want: nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -61,7 +61,7 @@ func TestPostCounter(t *testing.T) {
 			ts.Listener = l
 			ts.Start()
 			defer ts.Close()
-			v := agent.PostCounter(tt.value, tt.metricName, tt.metricType)
+			v := PostCounter(tt.value, tt.metricName, tt.metricType)
 			assert.Nil(t, v)
 		})
 	}

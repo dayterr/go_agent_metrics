@@ -2,10 +2,19 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
+	"github.com/dayterr/go_agent_metrics/internal/agent"
+	"io/ioutil"
+
+	//"bufio"
 	"github.com/dayterr/go_agent_metrics/internal/config"
 	"log"
 	"os"
 	"time"
+
+	/*"log"
+	"os"
+	"time"*/
 	"net/http"
 
 
@@ -17,7 +26,20 @@ var port = config.GetPort()
 func main() {
 	cfg := config.GetEnvLogger()
 	ticker := time.NewTicker(cfg.StoreInterval)
-	go func() {
+	if cfg.Restore == true {
+		var mj agent.MetricsJSON
+		file, err := ioutil.ReadFile("test.json")
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = json.Unmarshal(file, &mj)
+		if err != nil {
+			log.Fatal(err)
+		}
+		agent.PostAll(mj)
+
+	}
+	/*go func() {
 		for {
 			<- ticker.C
 			file, err := os.OpenFile(cfg.StoreFile, os.O_RDWR | os.O_CREATE | os.O_APPEND | os.O_SYNC, 0777)
@@ -37,7 +59,7 @@ func main() {
 			w := bufio.NewWriter(file)
 			w.Write(jsn)
 		}
-	}()
+	}()*/
 	r := handlers.CreateRouter()
 	http.ListenAndServe(port, r)
 }

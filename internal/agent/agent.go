@@ -5,12 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/config"
+	"reflect"
 	"strconv"
+	"strings"
 
 	//	"fmt"
 	"math/rand"
 	"runtime"
-//	"strconv"
+	//	"strconv"
 
 	"github.com/levigross/grequests"
 )
@@ -20,6 +22,39 @@ const CounterType = "counter"
 
 type Gauge float64
 type Counter int64
+
+type MetricsJSON struct {
+	Alloc Gauge
+	BuckHashSys Gauge
+	Frees Gauge
+	GCCPUFraction Gauge
+	GCSys Gauge
+	HeapAlloc Gauge
+	HeapIdle Gauge
+	HeapInuse Gauge
+	HeapObjects Gauge
+	HeapReleased Gauge
+	HeapSys Gauge
+	LastGC Gauge
+	Lookups Gauge
+	MCacheInuse Gauge
+	MCacheSys Gauge
+	MSpanInuse Gauge
+	MSpanSys Gauge
+	Mallocs Gauge
+	NextGC Gauge
+	NumForcedGC Gauge
+	NumGC Gauge
+	OtherSys Gauge
+	PauseTotalNs Gauge
+	StackInuse Gauge
+	StackSys Gauge
+	Sys Gauge
+	TotalAlloc Gauge
+	RandomValue Gauge
+	PollCount Counter
+}
+
 
 type Metrics struct {
 	ID    string   `json:"id"`
@@ -60,38 +95,40 @@ func (m *Metrics) MarshallJSON() ([]byte, error) {
 var metrics = make(map[string]Gauge)
 var counters = make(map[string]Counter)
 
-func ReadMetrics() {
+func ReadMetrics() MetricsJSON {
 	m := &runtime.MemStats{}
+	mj := MetricsJSON{}
 	runtime.ReadMemStats(m)
-	metrics["Alloc"] = Gauge(m.Alloc)
-	metrics["BuckHashSys"] = Gauge(m.BuckHashSys)
-	metrics["Frees"] = Gauge(m.Frees)
-	metrics["GCCPUFraction"] = Gauge(m.GCCPUFraction)
-	metrics["GCSys"] = Gauge(m.GCSys)
-	metrics["HeapAlloc"] = Gauge(m.HeapAlloc)
-	metrics["HeapIdle"] = Gauge(m.HeapIdle)
-	metrics["HeapInuse"] = Gauge(m.HeapInuse)
-	metrics["HeapObjects"] = Gauge(m.HeapObjects)
-	metrics["HeapReleased"] = Gauge(m.HeapReleased)
-	metrics["HeapSys"] = Gauge(m.HeapSys)
-	metrics["LastGC"] = Gauge(m.HeapAlloc)
-	metrics["Lookups"] = Gauge(m.Lookups)
-	metrics["MCacheInuse"] = Gauge(m.MCacheInuse)
-	metrics["MCacheSys"] = Gauge(m.MCacheSys)
-	metrics["MSpanInuse"] = Gauge(m.MSpanInuse)
-	metrics["MSpanSys"] = Gauge(m.MSpanSys)
-	metrics["Mallocs"] = Gauge(m.Mallocs)
-	metrics["NextGC"] = Gauge(m.NextGC)
-	metrics["NumForcedGC"] = Gauge(m.NumForcedGC)
-	metrics["NumGC"] = Gauge(m.NumGC)
-	metrics["OtherSys"] = Gauge(m.OtherSys)
-	metrics["PauseTotalNs"] = Gauge(m.PauseTotalNs)
-	metrics["StackInuse"] = Gauge(m.StackInuse)
-	metrics["StackSys"] = Gauge(m.StackSys)
-	metrics["Sys"] = Gauge(m.Sys)
-	metrics["TotalAlloc"] = Gauge(m.TotalAlloc)
-	metrics["RandomValue"] = Gauge(rand.Float64())
-	counters["PollCount"] += 1
+	mj.Alloc = Gauge(m.Alloc)
+	mj.BuckHashSys = Gauge(m.BuckHashSys)
+	mj.Frees = Gauge(m.Frees)
+	mj.GCCPUFraction = Gauge(m.GCCPUFraction)
+	mj.GCSys = Gauge(m.GCSys)
+	mj.HeapAlloc = Gauge(m.HeapAlloc)
+	mj.HeapIdle = Gauge(m.HeapIdle)
+	mj.HeapInuse = Gauge(m.HeapInuse)
+	mj.HeapObjects = Gauge(m.HeapObjects)
+	mj.HeapReleased = Gauge(m.HeapReleased)
+	mj.HeapSys = Gauge(m.HeapSys)
+	mj.LastGC = Gauge(m.HeapAlloc)
+	mj.Lookups = Gauge(m.Lookups)
+	mj.MCacheInuse = Gauge(m.MCacheInuse)
+	mj.MCacheSys = Gauge(m.MCacheSys)
+	mj.MSpanInuse = Gauge(m.MSpanInuse)
+	mj.MSpanSys = Gauge(m.MSpanSys)
+	mj.Mallocs = Gauge(m.Mallocs)
+	mj.NextGC = Gauge(m.NextGC)
+	mj.NumForcedGC = Gauge(m.NumForcedGC)
+	mj.NumGC = Gauge(m.NumGC)
+	mj.OtherSys = Gauge(m.OtherSys)
+	mj.PauseTotalNs = Gauge(m.PauseTotalNs)
+	mj.StackInuse = Gauge(m.StackInuse)
+	mj.StackSys = Gauge(m.StackSys)
+	mj.Sys = Gauge(m.Sys)
+	mj.TotalAlloc = Gauge(m.TotalAlloc)
+	mj.RandomValue = Gauge(rand.Float64())
+	mj.PollCount += 1
+	return mj
 }
 
 func PostCounter(value Counter, metricName string, metricType string) error {
@@ -139,11 +176,19 @@ func PostMetric(value Gauge, metricName string, metricType string) error {
 }
 
 
-func PostAll() {
-	for k, v := range metrics {
-		PostMetric(v, k, "gauge")
-	}
-	for k, v := range counters {
-		PostCounter(v, k, "counter")
+func PostAll(mj MetricsJSON) {
+	v := reflect.ValueOf(&mj).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		metricName := v.Type().Field(i).Name
+		metricType := strings.ToLower(v.Type().Field(i).Type.Name())
+		switch metricType {
+		case GaugeType:
+			metricGauge := v.Field(i).Float()
+			PostMetric(Gauge(metricGauge), metricName, metricType)
+		case CounterType:
+			metricCounter := v.Field(i).Int()
+			PostCounter(Counter(metricCounter), metricName, metricType)
+		}
+
 	}
 }

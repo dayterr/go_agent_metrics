@@ -17,13 +17,14 @@ func main() {
 	conf := config.GetEnv()
 	ticker := time.NewTicker(conf.ReportInterval)
 	tickerMetrics := time.NewTicker(conf.PollInterval)
+	var mj agent.MetricsJSON
 	go func() {
 		for {
 			select {
 			case <-tickerMetrics.C:
-				agent.ReadMetrics()
+				mj = agent.ReadMetrics()
 			case <-ticker.C:
-				agent.PostAll()
+				agent.PostAll(mj)
 			case s := <-signalChan:
 				switch s {
 				case syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT:
