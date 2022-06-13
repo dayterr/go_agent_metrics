@@ -123,7 +123,7 @@ func PostMetric(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		allMetrics.Counter[metricName] = int64(valInt)
+		allMetrics.Counter[metricName] += int64(valInt)
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
