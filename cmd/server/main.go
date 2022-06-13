@@ -1,40 +1,53 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 	"io/ioutil"
-
-	"github.com/dayterr/go_agent_metrics/internal/config"
 	"log"
 	"net/http"
-
+	"os"
+	"time"
 
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
+	"github.com/dayterr/go_agent_metrics/internal/config"
 )
+
+var metrics = make(map[string]agent.Gauge)
+var counters = make(map[string]agent.Counter)
+
+type AllMetrics struct {
+	GaugeField map[string]agent.Gauge
+	CounterField map[string]agent.Counter
+}
+
+var allMetrics AllMetrics = AllMetrics{
+	metrics,
+	counters,
+}
 
 var port = config.GetPort()
 
 func main() {
 	cfg := config.GetEnvLogger()
-	//ticker := time.NewTicker(cfg.StoreInterval)
+	ticker := time.NewTicker(cfg.StoreInterval)
 	if cfg.Restore == true {
-		var mj agent.MetricsJSON
 		file, err := ioutil.ReadFile(cfg.StoreFile)
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = json.Unmarshal(file, &mj)
+		err = json.Unmarshal(file, &allMetrics)
 		if err != nil {
 			log.Fatal(err)
 		}
-		agent.PostAll(mj)
+		agent.PostAll()
 
 	}
-	/*go func() {
+	go func() {
 		for {
 			<- ticker.C
-			file, err := os.OpenFile(cfg.StoreFile, os.O_RDWR | os.O_CREATE | os.O_APPEND | os.O_SYNC, 0777)
+			file, err := os.OpenFile(cfg.StoreFile, os.O_CREATE | os.O_APPEND | os.O_RDWR | os.O_SYNC, 0777)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -51,7 +64,7 @@ func main() {
 			w := bufio.NewWriter(file)
 			w.Write(jsn)
 		}
-	}()*/
+	}()
 	r := handlers.CreateRouter()
 	http.ListenAndServe(port, r)
 }
