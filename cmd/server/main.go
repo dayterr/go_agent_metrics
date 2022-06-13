@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 	"github.com/dayterr/go_agent_metrics/internal/server"
