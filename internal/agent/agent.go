@@ -52,7 +52,9 @@ type MetricsJSON struct {
 	Sys Gauge
 	TotalAlloc Gauge
 	RandomValue Gauge
+	testGauge Gauge
 	PollCount Counter
+	testCounter Counter
 }
 
 
