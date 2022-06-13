@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"github.com/dayterr/go_agent_metrics/internal/agent"
+	"github.com/dayterr/go_agent_metrics/internal/server"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -43,20 +44,11 @@ func main() {
 	}()
 	go func() {
 		for {
-			<- ticker.C
+			select {
+			case <- ticker.C:
+				server.WriteJSON(l + cfg.StoreFile)
+			}
 
-			file, err := os.OpenFile(l + cfg.StoreFile, os.O_CREATE | os.O_RDWR | os.O_SYNC, 0777)
-			if err != nil {
-				log.Fatal(err)
-			}
-			defer file.Close()
-			jsn, err := handlers.MarshallMetrics()
-			if err != nil {
-				log.Fatal(err)
-			}
-			w := bufio.NewWriter(file)
-			w.Write(jsn)
-			w.Flush()
 		}
 	}()
 	r := handlers.CreateRouter()
