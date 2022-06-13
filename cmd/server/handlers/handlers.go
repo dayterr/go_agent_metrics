@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"html/template"
 	"net/http"
-	"reflect"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
@@ -15,7 +14,16 @@ import (
 var metrics = make(map[string]float64)
 var counters = make(map[string]int64)
 
-var metricJSON agent.MetricsJSON
+type AllMetrics struct {
+	Gauge map[string]float64
+	Counter map[string]int64
+}
+
+var allMetrics AllMetrics = AllMetrics{
+	metrics,
+	counters,
+}
+
 
 func MarshallMetrics() ([]byte, error){
 	jsn, err := json.Marshal(metrics)
@@ -47,10 +55,9 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
-	v := reflect.ValueOf(&metricJSON).Elem()
 	switch m.MType {
 	case agent.GaugeType:
-		m.Value = v.Elem().FieldByName(m.ID).Float()
+		m.Value = allMetrics.Gauge[m.ID]
 		mJSON, err := m.MarshallJSON()
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -58,7 +65,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("content-type", "application/json")
 		w.Write(mJSON)
 	case agent.CounterType:
-		m.Delta = v.Elem().FieldByName(m.ID).Int()
+		m.Delta = allMetrics.Counter[m.ID]
 		mJSON, err := m.MarshallJSON()
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -77,14 +84,12 @@ func PostJSON(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
-	v := reflect.ValueOf(&metricJSON)
 	switch m.MType{
 	case agent.GaugeType:
-		v.Elem().FieldByName(m.ID).SetFloat(m.Value)
+		allMetrics.Gauge[m.ID] = m.Value
 		w.WriteHeader(http.StatusOK)
 	case agent.CounterType:
-		uptValue := v.Elem().FieldByName(m.ID).Int() + m.Delta
-		v.Elem().FieldByName(m.ID).SetInt(uptValue)
+		allMetrics.Counter[m.ID] += m.Delta
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotFound)
@@ -103,7 +108,6 @@ func PostMetric(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	v := reflect.ValueOf(&metricJSON)
 	switch metricType {
 	case agent.GaugeType:
 		valFloat, err := strconv.ParseFloat(value, 64)
@@ -111,7 +115,7 @@ func PostMetric(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		v.Elem().FieldByName(metricName).SetFloat(valFloat)
+		allMetrics.Gauge[metricName] = valFloat
 		w.WriteHeader(http.StatusOK)
 	case agent.CounterType:
 		valInt, err := strconv.Atoi(value)
@@ -119,8 +123,7 @@ func PostMetric(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		uptValue := v.Elem().FieldByName(metricName).Int() + int64(valInt)
-		v.Elem().FieldByName(metricName).SetInt(uptValue)
+		allMetrics.Counter[metricName] = int64(valInt)
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
@@ -136,8 +139,8 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 	}
 	switch metricType {
 	case agent.GaugeType:
-		if _, ok := metrics[metricName]; ok {
-			value := strconv.FormatFloat(metrics[metricName], 'f', -1, 64)
+		if _, ok := allMetrics.Gauge[metricName]; ok {
+			value := strconv.FormatFloat(allMetrics.Gauge[metricName], 'f', -1, 64)
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(value))
 		} else {
@@ -145,8 +148,8 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case agent.CounterType:
-		if _, ok := counters[metricName]; ok {
-			c := strconv.Itoa(int(counters[metricName]))
+		if _, ok := allMetrics.Counter[metricName]; ok {
+			c := strconv.Itoa(int(allMetrics.Counter[metricName]))
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(c))
 		} else {
@@ -160,16 +163,13 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetIndex(w http.ResponseWriter, r *http.Request) {
-	var metrics map[string]interface{}
-	data, _ := json.Marshal(metricJSON)
-	json.Unmarshal(data, &metrics)
 	t, err := template.ParseFiles("cmd/server/index.html")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	err = t.ExecuteTemplate(w, "index.html", metrics)
+	err = t.ExecuteTemplate(w, "index.html", allMetrics.Gauge)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
