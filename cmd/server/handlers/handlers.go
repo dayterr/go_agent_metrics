@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -26,23 +27,7 @@ var allMetrics AllMetrics = AllMetrics{
 
 
 func MarshallMetrics() ([]byte, error){
-	jsn, err := json.Marshal(metrics)
-	if err != nil {
-		return nil, err
-	}
-	return jsn, nil
-}
-
-func MarshallCounters() ([]byte, error){
-	jsn, err := json.Marshal(counters)
-	if err != nil {
-		return nil, err
-	}
-	return jsn, nil
-}
-
-func UnmarshallMetrics() ([]byte, error){
-	jsn, err := json.Marshal(metrics)
+	jsn, err := json.Marshal(allMetrics)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +88,7 @@ func PostMetric(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	value := chi.URLParam(r, "value")
+	value := strings.Trim(chi.URLParam(r, "value"), "\n")
 	if value == "" {
 		w.WriteHeader(http.StatusNotFound)
 		return

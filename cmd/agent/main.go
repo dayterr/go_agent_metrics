@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,15 +16,17 @@ func main() {
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	exitChan := make(chan int)
 	conf := config.GetEnv()
+	fmt.Println(conf)
 	ticker := time.NewTicker(conf.ReportInterval)
 	tickerMetrics := time.NewTicker(conf.PollInterval)
+	var am agent.Storage
 	go func() {
 		for {
 			select {
 			case <-tickerMetrics.C:
-				agent.ReadMetrics()
+				am = agent.ReadMetrics()
 			case <-ticker.C:
-				agent.PostAll()
+				agent.PostAll(am)
 			case s := <-signalChan:
 				switch s {
 				case syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT:
