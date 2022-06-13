@@ -4,15 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/dayterr/go_agent_metrics/internal/config"
-	"strconv"
-
-	//	"fmt"
 	"math/rand"
 	"runtime"
-	//	"strconv"
+	"strconv"
 
 	"github.com/levigross/grequests"
+
+	"github.com/dayterr/go_agent_metrics/internal/config"
 )
 
 const GaugeType = "gauge"
@@ -60,17 +58,17 @@ func (m *Metrics) MarshallJSON() ([]byte, error) {
 var metrics = make(map[string]Gauge)
 var counters = make(map[string]Counter)
 
-type AllMetrics struct {
-	GaugeField map[string]Gauge
-	CounterField map[string]Counter
+type Storage struct {
+	GaugeField map[string]Gauge `json:"Gauge"`
+	CounterField map[string]Counter `json"Counter"`
 }
 
-var allMetrics AllMetrics = AllMetrics{
+var allMetrics Storage = Storage{
 	metrics,
 	counters,
 }
 
-func ReadMetrics() {
+func ReadMetrics() Storage {
 	m := &runtime.MemStats{}
 	runtime.ReadMemStats(m)
 	allMetrics.GaugeField["Alloc"] = Gauge(m.Alloc)
@@ -102,6 +100,7 @@ func ReadMetrics() {
 	allMetrics.GaugeField["TotalAlloc"] = Gauge(m.TotalAlloc)
 	allMetrics.GaugeField["RandomValue"] = Gauge(rand.Float64())
 	allMetrics.CounterField["PollCount"] += 1
+	return allMetrics
 }
 
 func PostCounter(value Counter, metricName string, metricType string) error {
@@ -149,11 +148,11 @@ func PostMetric(value Gauge, metricName string, metricType string) error {
 }
 
 
-func PostAll() {
-	for k, v := range allMetrics.GaugeField {
+func PostAll(am Storage) {
+	for k, v := range am.GaugeField {
 		PostMetric(v, k, "gauge")
 	}
-	for k, v := range allMetrics.CounterField {
+	for k, v := range am.CounterField {
 		PostCounter(v, k, "counter")
 	}
 }
