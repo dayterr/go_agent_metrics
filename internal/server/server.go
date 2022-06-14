@@ -30,9 +30,9 @@ func LoadMetricsFromJSON(cfg config.ConfigLogger, allMetrics agent.Storage) {
 func WriteJSON(path string) {
 	file, err := os.OpenFile(path, os.O_CREATE | os.O_RDWR , 0777)
 	if err != nil {
-		fmt.Println("create error", err)
 		log.Fatal(err)
 	}
+	fmt.Println("created file", file.Name())
 	defer file.Close()
 	jsn, err := handlers.MarshallMetrics()
 	if err != nil {
