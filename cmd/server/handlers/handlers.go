@@ -186,7 +186,7 @@ func WriteJSON(path string) {
 func CreateRouter() chi.Router {
 	ticker := time.NewTicker(3 * time.Second)
 	cfg := config.GetEnvLogger()
-	l, _ := os.Getwd()
+	//l, _ := os.Getwd()
 	r := chi.NewRouter()
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/", PostJSON)
@@ -199,7 +199,7 @@ func CreateRouter() chi.Router {
 		for {
 			select {
 			case <- ticker.C:
-				WriteJSON(l + cfg.StoreFile)
+				WriteJSON(cfg.StoreFile)
 			}
 		}
 	}()
