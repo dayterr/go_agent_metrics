@@ -3,7 +3,6 @@ package server
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 	"github.com/dayterr/go_agent_metrics/internal/config"
@@ -13,7 +12,6 @@ import (
 )
 
 func LoadMetricsFromJSON(cfg config.ConfigLogger, allMetrics agent.Storage) {
-	fmt.Println("I'm working")
 	if cfg.Restore {
 		file, err := ioutil.ReadFile(cfg.StoreFile)
 		if err != nil {
@@ -32,7 +30,6 @@ func WriteJSON(path string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("created file", file.Name())
 	defer file.Close()
 	jsn, err := handlers.MarshallMetrics()
 	if err != nil {

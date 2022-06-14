@@ -1,11 +1,16 @@
 package handlers
 
 import (
+	"bufio"
 	"encoding/json"
+	"github.com/dayterr/go_agent_metrics/internal/config"
 	"html/template"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -14,6 +19,8 @@ import (
 
 var metrics = make(map[string]float64)
 var counters = make(map[string]int64)
+
+var ticker time.Ticker
 
 type AllMetrics struct {
 	Gauge map[string]float64
@@ -161,7 +168,25 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func WriteJSON(path string) {
+	file, err := os.OpenFile(path, os.O_CREATE | os.O_RDWR | os.O_TRUNC, 0777)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	jsn, err := MarshallMetrics()
+	if err != nil {
+		log.Fatal(err)
+	}
+	w := bufio.NewWriter(file)
+	w.Write(jsn)
+	w.Flush()
+}
+
 func CreateRouter() chi.Router {
+	ticker := time.NewTicker(3 * time.Second)
+	cfg := config.GetEnvLogger()
+	l, _ := os.Getwd()
 	r := chi.NewRouter()
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/", PostJSON)
@@ -170,5 +195,13 @@ func CreateRouter() chi.Router {
 	r.Post("/value/", GetValue)
 	r.Get("/value/{metricType}/{metricName}", GetMetric)
 	r.Get("/", GetIndex)
+	go func() {
+		for {
+			select {
+			case <- ticker.C:
+				WriteJSON(l + cfg.StoreFile)
+			}
+		}
+	}()
 	return r
 }
