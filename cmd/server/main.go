@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
@@ -26,25 +27,27 @@ var port = config.GetPort()
 func main() {
 	cfg := config.GetEnvLogger()
 	ticker := time.NewTicker(cfg.StoreInterval)
-	//l, _ := os.Getwd()
+	l, _ := os.Getwd()
 	time.AfterFunc(time.Second, func() {
 		if cfg.Restore {
-			file, err := ioutil.ReadFile(cfg.StoreFile)
-			if err != nil {
-				log.Fatal(err)
+			if _, err := os.Stat(l + cfg.StoreFile); err == nil {
+				file, err := ioutil.ReadFile(l + cfg.StoreFile)
+				if err != nil {
+					log.Fatal(err)
+				}
+				err = json.Unmarshal(file, &allMetrics)
+				if err != nil {
+					log.Fatal(err)
+				}
+				agent.PostAll(allMetrics)
 			}
-			err = json.Unmarshal(file, &allMetrics)
-			if err != nil {
-				log.Fatal(err)
-			}
-			agent.PostAll(allMetrics)
 		}
 	})
 	go func() {
 		for {
 			select {
 			case <- ticker.C:
-				server.WriteJSON(cfg.StoreFile)
+				server.WriteJSON(l + cfg.StoreFile)
 			}
 		}
 	}()
