@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/agent"
@@ -8,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
@@ -42,15 +44,21 @@ func main() {
 			agent.PostAll(allMetrics)
 		}
 	})
-	go func() {
-		fmt.Println("working 2")
-		for {
-			select {
-			case <- ticker.C:
-				server.WriteJSON(cfg.StoreFile)
-			}
+	time.AfterFunc(time.Second * 2, func() {
+		file, err := os.OpenFile(cfg.StoreFile, os.O_CREATE | os.O_RDWR | os.O_TRUNC, 0777)
+		if err != nil {
+			log.Fatal(err)
 		}
-	}()
+		fmt.Println("created file", file.Name())
+		defer file.Close()
+		jsn, err := handlers.MarshallMetrics()
+		if err != nil {
+			log.Fatal(err)
+		}
+		w := bufio.NewWriter(file)
+		w.Write(jsn)
+		w.Flush()
+	})
 	r := handlers.CreateRouter()
 	http.ListenAndServe(port, r)
 }
