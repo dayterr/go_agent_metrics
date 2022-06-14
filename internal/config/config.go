@@ -15,7 +15,7 @@ type Config struct {
 }
 
 type ConfigLogger struct {
-	StoreInterval time.Duration `env:"STORE_INTERVAL" envDefault:"300s"`
+	StoreInterval time.Duration `env:"STORE_INTERVAL" envDefault:"15s"`
 	StoreFile string `env:"STORE_FILE" envDefault:"/tmp/devops-metrics-db.json"`
 	Restore bool `env:"RESTORE" envDefault:"true"`
 }
