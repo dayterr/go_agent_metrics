@@ -16,7 +16,6 @@ func main() {
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	exitChan := make(chan int)
 	conf := config.GetEnv()
-	fmt.Println(conf)
 	ticker := time.NewTicker(conf.ReportInterval)
 	tickerMetrics := time.NewTicker(conf.PollInterval)
 	var am agent.Storage
