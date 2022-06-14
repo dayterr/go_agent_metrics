@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
@@ -30,6 +31,9 @@ func main() {
 	//l, _ := os.Getwd()
 	time.AfterFunc(time.Second, func() {
 		if cfg.Restore {
+			if _, err := os.Stat(cfg.StoreFile); os.IsNotExist(err) {
+				fmt.Println("not here", cfg.StoreFile)
+			}
 			file, err := ioutil.ReadFile(cfg.StoreFile)
 			if err != nil {
 				fmt.Println("trying to read the file")
