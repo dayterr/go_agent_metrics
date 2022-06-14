@@ -28,13 +28,11 @@ var port = config.GetPort()
 func main() {
 	cfg := config.GetEnvLogger()
 	ticker := time.NewTicker(cfg.StoreInterval)
-	//l, _ := os.Getwd()
 	time.AfterFunc(time.Second, func() {
 		if cfg.Restore {
 			if _, err := os.Stat(cfg.StoreFile); err == nil {
 				file, err := ioutil.ReadFile(cfg.StoreFile)
 				if err != nil {
-					fmt.Println("here we are")
 					log.Fatal(err)
 				}
 				err = json.Unmarshal(file, &allMetrics)
