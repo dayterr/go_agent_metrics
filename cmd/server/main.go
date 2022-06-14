@@ -28,13 +28,10 @@ var port = config.GetPort()
 func main() {
 	cfg := config.GetEnvLogger()
 	ticker := time.NewTicker(cfg.StoreInterval)
-	//l, _ := os.Getwd()
+	l, _ := os.Getwd()
 	time.AfterFunc(time.Second, func() {
 		if cfg.Restore {
-			if _, err := os.Stat(cfg.StoreFile); os.IsNotExist(err) {
-				fmt.Println("not here", cfg.StoreFile)
-			}
-			file, err := ioutil.ReadFile(cfg.StoreFile)
+			file, err := ioutil.ReadFile(l + cfg.StoreFile)
 			if err != nil {
 				fmt.Println("trying to read the file")
 				log.Fatal(err)
@@ -51,7 +48,7 @@ func main() {
 		for {
 			select {
 			case <- ticker.C:
-				server.WriteJSON(cfg.StoreFile)
+				server.WriteJSON(l + cfg.StoreFile)
 			}
 		}
 	}()
