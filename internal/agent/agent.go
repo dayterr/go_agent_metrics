@@ -134,6 +134,7 @@ func PostMetric(value Gauge, metricName string, metricType string) error {
 		return err
 	}
 	url = fmt.Sprintf("http://%v/update", cfg.Address)
+	fmt.Println(url)
 	metric := Metrics{ID: metricName, MType: metricType, Value: float64(value)}
 	mJSON, err := metric.MarshallJSON()
 	if err != nil {
@@ -142,6 +143,7 @@ func PostMetric(value Gauge, metricName string, metricType string) error {
    	_, err = grequests.Post(url, &grequests.RequestOptions{JSON: mJSON,
    		Headers: map[string]string{"ContentType": "application/json"}})
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 	return nil
