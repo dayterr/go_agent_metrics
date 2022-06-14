@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/agent"
+	"github.com/dayterr/go_agent_metrics/internal/server"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -26,7 +27,7 @@ var port = config.GetPort()
 
 func main() {
 	cfg := config.GetEnvLogger()
-	//ticker := time.NewTicker(cfg.StoreInterval)
+	ticker := time.NewTicker(cfg.StoreInterval)
 	l, _ := os.Getwd()
 	time.AfterFunc(time.Second, func() {
 		if cfg.Restore {
@@ -42,15 +43,15 @@ func main() {
 			agent.PostAll(allMetrics)
 		}
 	})
-	/*go func() {
+	func() {
 		fmt.Println("working 2")
 		for {
 			select {
 			case <- ticker.C:
-				server.WriteJSON(cfg.StoreFile)
+				server.WriteJSON(l + cfg.StoreFile)
 			}
 		}
-	}()*/
+	}()
 	r := handlers.CreateRouter()
 	http.ListenAndServe(port, r)
 }
