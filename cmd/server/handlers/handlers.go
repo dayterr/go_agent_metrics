@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -161,8 +162,13 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func hey() {
+	fmt.Println("I'm func")
+}
+
 func CreateRouter() chi.Router {
 	r := chi.NewRouter()
+	hey()
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/", PostJSON)
 		r.Post("/{metricType}/{metricName}/{value}", PostMetric)
