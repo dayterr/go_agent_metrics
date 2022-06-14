@@ -3,6 +3,7 @@ package handlers
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -170,6 +171,7 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 func WriteJSON(path string) {
 	file, err := os.OpenFile(path, os.O_CREATE | os.O_RDWR | os.O_TRUNC, 0777)
 	if err != nil {
+		fmt.Println("trouble opening the file")
 		log.Fatal(err)
 	}
 	defer file.Close()
