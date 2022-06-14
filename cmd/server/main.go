@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/agent"
-	"github.com/dayterr/go_agent_metrics/internal/server"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -28,7 +27,7 @@ var port = config.GetPort()
 
 func main() {
 	cfg := config.GetEnvLogger()
-	ticker := time.NewTicker(cfg.StoreInterval)
+	//ticker := time.NewTicker(cfg.StoreInterval)
 	//l, _ := os.Getwd()
 	time.AfterFunc(time.Second, func() {
 		if cfg.Restore {
