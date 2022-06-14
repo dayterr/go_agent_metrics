@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
@@ -25,11 +26,10 @@ var port = config.GetPort()
 func main() {
 	cfg := config.GetEnvLogger()
 	//ticker := time.NewTicker(cfg.StoreInterval)
-	//l, _ := os.Getwd()
-	//f := server.LoadMetricsFromJSON(cfg, allMetrics)
+	l, _ := os.Getwd()
 	time.AfterFunc(time.Second, func() {
 		if cfg.Restore {
-			file, err := ioutil.ReadFile(cfg.StoreFile)
+			file, err := ioutil.ReadFile(l + cfg.StoreFile)
 			if err != nil {
 				log.Fatal(err)
 			}
