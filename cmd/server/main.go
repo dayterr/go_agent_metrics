@@ -44,19 +44,21 @@ func main() {
 		}
 	})
 	time.AfterFunc(time.Second * 2, func() {
-		file, err := os.OpenFile(cfg.StoreFile, os.O_CREATE | os.O_RDWR | os.O_TRUNC, 0777)
-		if err != nil {
-			log.Fatal(err)
+		for {
+			file, err := os.OpenFile(cfg.StoreFile, os.O_CREATE | os.O_RDWR | os.O_TRUNC, 0777)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println("created file", file.Name())
+			defer file.Close()
+			jsn, err := handlers.MarshallMetrics()
+			if err != nil {
+				log.Fatal(err)
+			}
+			w := bufio.NewWriter(file)
+			w.Write(jsn)
+			w.Flush()
 		}
-		fmt.Println("created file", file.Name())
-		defer file.Close()
-		jsn, err := handlers.MarshallMetrics()
-		if err != nil {
-			log.Fatal(err)
-		}
-		w := bufio.NewWriter(file)
-		w.Write(jsn)
-		w.Flush()
 	})
 	r := handlers.CreateRouter()
 	http.ListenAndServe(port, r)
