@@ -76,6 +76,7 @@ func PostJSON(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
+	fmt.Println(allMetrics)
 	switch m.MType{
 	case agent.GaugeType:
 		allMetrics.Gauge[m.ID] = m.Value
