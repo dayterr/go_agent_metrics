@@ -3,7 +3,6 @@ package handlers
 import (
 	"bufio"
 	"encoding/json"
-	"github.com/dayterr/go_agent_metrics/internal/config"
 	"html/template"
 	"log"
 	"net/http"
@@ -184,9 +183,6 @@ func WriteJSON(path string) {
 }
 
 func CreateRouter() chi.Router {
-	ticker := time.NewTicker(3 * time.Second)
-	cfg := config.GetEnvLogger()
-	//l, _ := os.Getwd()
 	r := chi.NewRouter()
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/", PostJSON)
@@ -195,13 +191,5 @@ func CreateRouter() chi.Router {
 	r.Post("/value/", GetValue)
 	r.Get("/value/{metricType}/{metricName}", GetMetric)
 	r.Get("/", GetIndex)
-	go func() {
-		for {
-			select {
-			case <- ticker.C:
-				WriteJSON(cfg.StoreFile)
-			}
-		}
-	}()
 	return r
 }
