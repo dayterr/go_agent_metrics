@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
