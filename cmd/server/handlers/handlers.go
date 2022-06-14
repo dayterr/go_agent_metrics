@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -35,6 +36,7 @@ func MarshallMetrics() ([]byte, error){
 }
 
 func GetValue(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("hey there")
 	var m agent.Metrics
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
@@ -69,6 +71,7 @@ func PostJSON(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
+	fmt.Println(m)
 	switch m.MType{
 	case agent.GaugeType:
 		allMetrics.Gauge[m.ID] = m.Value
