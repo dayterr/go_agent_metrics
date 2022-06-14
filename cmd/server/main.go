@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 	"github.com/dayterr/go_agent_metrics/internal/server"
 	"io/ioutil"
@@ -33,6 +34,7 @@ func main() {
 			if _, err := os.Stat(l + cfg.StoreFile); err == nil {
 				file, err := ioutil.ReadFile(l + cfg.StoreFile)
 				if err != nil {
+					fmt.Println("here we are")
 					log.Fatal(err)
 				}
 				err = json.Unmarshal(file, &allMetrics)
