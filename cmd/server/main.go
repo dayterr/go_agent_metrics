@@ -1,10 +1,12 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/dayterr/go_agent_metrics/internal/agent"
-	"github.com/dayterr/go_agent_metrics/internal/server"
+	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
@@ -23,10 +25,23 @@ var port = config.GetPort()
 
 func main() {
 	cfg := config.GetEnvLogger()
-	ticker := time.NewTicker(cfg.StoreInterval)
+	//ticker := time.NewTicker(cfg.StoreInterval)
 	//l, _ := os.Getwd()
-	go func() {
-		server.LoadMetricsFromJSON(cfg, allMetrics)
+	//f := server.LoadMetricsFromJSON(cfg, allMetrics)
+	time.AfterFunc(time.Second, func() {
+		if cfg.Restore {
+			file, err := ioutil.ReadFile(cfg.StoreFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+			err = json.Unmarshal(file, &allMetrics)
+			if err != nil {
+				log.Fatal(err)
+			}
+			agent.PostAll(allMetrics)
+		}
+	})
+	/*go func() {
 		fmt.Println("working 2")
 		for {
 			select {
@@ -34,7 +49,7 @@ func main() {
 				server.WriteJSON(cfg.StoreFile)
 			}
 		}
-	}()
+	}()*/
 	r := handlers.CreateRouter()
 	http.ListenAndServe(port, r)
 }
