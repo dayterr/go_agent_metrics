@@ -52,6 +52,7 @@ func main() {
 
 		}
 	}()
+	fmt.Println(port)
 	r := handlers.CreateRouter()
 	http.ListenAndServe(port, r)
 }
