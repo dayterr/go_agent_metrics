@@ -76,15 +76,16 @@ func PostJSON(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
-	fmt.Println(allMetrics)
 	switch m.MType{
 	case agent.GaugeType:
+		fmt.Println(m.Value)
 		allMetrics.Gauge[m.ID] = m.Value
 		w.WriteHeader(http.StatusOK)
 	case agent.CounterType:
 		allMetrics.Counter[m.ID] += m.Delta
 		w.WriteHeader(http.StatusOK)
 	default:
+		fmt.Println("Oopsie")
 		w.WriteHeader(http.StatusNotFound)
 	}
 }
