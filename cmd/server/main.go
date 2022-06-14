@@ -43,7 +43,7 @@ func main() {
 			agent.PostAll(allMetrics)
 		}
 	})
-	func() {
+	go func() {
 		fmt.Println("working 2")
 		for {
 			select {
