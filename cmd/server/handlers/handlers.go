@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/dayterr/go_agent_metrics/internal/config"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -32,6 +34,22 @@ var allMetrics AllMetrics = AllMetrics{
 	counters,
 }
 
+func LoadMetricsFromJSON() {
+	cfg := config.GetEnvLogger()
+	l, _ := os.Getwd()
+	if cfg.Restore {
+		if _, err := os.Stat(cfg.StoreFile); err == nil {
+			file, err := ioutil.ReadFile(l + cfg.StoreFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+			err = json.Unmarshal(file, &allMetrics)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+	}
+}
 
 func MarshallMetrics() ([]byte, error){
 	jsn, err := json.Marshal(allMetrics)
@@ -78,14 +96,12 @@ func PostJSON(w http.ResponseWriter, r *http.Request) {
 	}
 	switch m.MType{
 	case agent.GaugeType:
-		fmt.Println(m.Value)
 		allMetrics.Gauge[m.ID] = m.Value
 		w.WriteHeader(http.StatusOK)
 	case agent.CounterType:
 		allMetrics.Counter[m.ID] += m.Delta
 		w.WriteHeader(http.StatusOK)
 	default:
-		fmt.Println("Oopsie")
 		w.WriteHeader(http.StatusNotFound)
 	}
 }
@@ -187,6 +203,7 @@ func WriteJSON(path string) {
 }
 
 func CreateRouter() chi.Router {
+	LoadMetricsFromJSON()
 	r := chi.NewRouter()
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/", PostJSON)
