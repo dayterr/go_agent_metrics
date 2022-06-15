@@ -36,10 +36,9 @@ var allMetrics AllMetrics = AllMetrics{
 
 func LoadMetricsFromJSON() {
 	cfg := config.GetEnvLogger()
-	l, _ := os.Getwd()
 	if cfg.Restore {
 		if _, err := os.Stat(cfg.StoreFile); err == nil {
-			file, err := ioutil.ReadFile(l + cfg.StoreFile)
+			file, err := ioutil.ReadFile(cfg.StoreFile)
 			if err != nil {
 				log.Fatal(err)
 			}
