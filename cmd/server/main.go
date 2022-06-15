@@ -1,13 +1,10 @@
 package main
 
 import (
-	"github.com/dayterr/go_agent_metrics/internal/agent"
-	"github.com/dayterr/go_agent_metrics/internal/server"
-	"net/http"
-	"time"
-
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
+	"github.com/dayterr/go_agent_metrics/internal/agent"
 	"github.com/dayterr/go_agent_metrics/internal/config"
+	"net/http"
 )
 
 var metrics = make(map[string]agent.Gauge)
@@ -21,7 +18,7 @@ var allMetrics agent.Storage = agent.Storage{
 var port = config.GetPort()
 
 func main() {
-	cfg := config.GetEnvLogger()
+	/*cfg := config.GetEnvLogger()
 	ticker := time.NewTicker(cfg.StoreInterval)
 	go func() {
 		for {
@@ -30,7 +27,7 @@ func main() {
 				server.WriteJSON(cfg.StoreFile)
 			}
 		}
-	}()
+	}()*/
 	r := handlers.CreateRouter()
 	http.ListenAndServe(port, r)
 }
