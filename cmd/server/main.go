@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
 	"github.com/dayterr/go_agent_metrics/internal/agent"
-	"github.com/dayterr/go_agent_metrics/internal/config"
 	"github.com/dayterr/go_agent_metrics/internal/server"
 	"net/http"
 	"time"
@@ -12,15 +11,15 @@ import (
 var metrics = make(map[string]agent.Gauge)
 var counters = make(map[string]agent.Counter)
 
-var port = config.GetPort()
+var port = handlers.GetPort()
 
 func main() {
-	ticker := time.NewTicker(config.StoreInterval)
+	ticker := time.NewTicker(handlers.StoreInterval)
 	go func() {
 		for {
 			select {
 			case <- ticker.C:
-				server.WriteJSON(*config.StoreFile)
+				server.WriteJSON(*handlers.StoreFile)
 			}
 		}
 	}()
