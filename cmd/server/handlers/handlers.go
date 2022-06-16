@@ -49,6 +49,7 @@ func LoadMetricsFromJSON(filename string, isRestored bool) {
 			if err != nil {
 				log.Fatal(err)
 			}
+			fmt.Println("here we are and we read the file")
 		}
 	}
 }
