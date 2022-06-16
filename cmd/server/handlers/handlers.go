@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -187,21 +186,6 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-}
-
-func WriteJSON(path string) {
-	file, err := os.OpenFile(path, os.O_CREATE | os.O_RDWR | os.O_TRUNC, 0777)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-	jsn, err := MarshallMetrics()
-	if err != nil {
-		log.Fatal(err)
-	}
-	w := bufio.NewWriter(file)
-	w.Write(jsn)
-	w.Flush()
 }
 
 func CreateRouter(filename string, isRestored bool) chi.Router {
