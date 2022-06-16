@@ -49,7 +49,6 @@ func LoadMetricsFromJSON(filename string, isRestored bool) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Println("here we are and we read the file")
 		}
 	}
 }
@@ -68,6 +67,8 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
+	fmt.Println(allMetrics)
+	fmt.Println(m.ID)
 	switch m.MType {
 	case agent.GaugeType:
 		m.Value = allMetrics.Gauge[m.ID]
