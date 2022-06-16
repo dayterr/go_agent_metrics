@@ -21,21 +21,18 @@ var (
 func init() {
 	var err error
 	cfg := config.GetEnv()
-	agentFlags := flag.NewFlagSet("", flag.ExitOnError)
-	Address = agentFlags.String("a", cfg.Address, "Address for the server")
-	repIntervalStr := agentFlags.String("r", "10s", "Interval for sending the metrics to the server")
+	Address = flag.String("a", cfg.Address, "Address for the server")
+	repIntervalStr := flag.String("r", "10s", "Interval for sending the metrics to the server")
 	ReportInterval, err = time.ParseDuration(*repIntervalStr)
 	if err != nil {
 		log.Fatal("Flag -r for REPORT_INTERVAL got an incorrect argument")
 	}
-	pollIntervalStr := agentFlags.String("p", "2s", "Interval for polling the metrics")
+	pollIntervalStr := flag.String("p", "2s", "Interval for polling the metrics")
 	PollInterval, err = time.ParseDuration(*pollIntervalStr)
 	if err != nil {
 		log.Fatal("Flag -p got an incorrect argument")
 	}
-	if len(os.Args) >= 2 {
-		agentFlags.Parse(os.Args[1:])
-	}
+	flag.Parse()
 }
 
 func main() {
