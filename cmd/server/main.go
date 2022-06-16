@@ -24,7 +24,7 @@ func init() {
 	cfg := config.GetEnv()
 	cfgLogger := config.GetEnvLogger()
 	Addr = flag.String("a", cfg.Address, "Address for the server")
-	Restore = flag.Bool("r", true, "A bool flag for configuration upload")
+	Restore = flag.Bool("r", cfgLogger.Restore, "A bool flag for configuration upload")
 	StoreInterval = flag.Duration("i", cfgLogger.StoreInterval, "Interval for saving the metrics into the file")
 	StoreFile = flag.String("f", cfgLogger.StoreFile, "file to store the metrics")
 	flag.Parse()
