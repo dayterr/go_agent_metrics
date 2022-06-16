@@ -24,7 +24,6 @@ func init() {
 	ReportInterval = flag.Duration("r", cfg.ReportInterval, "Interval for sending the metrics to the server")
 	PollInterval = flag.Duration("p", cfg.PollInterval, "Interval for polling the metrics")
 	flag.Parse()
-	fmt.Println(*Address, *ReportInterval, *PollInterval)
 }
 
 func main() {

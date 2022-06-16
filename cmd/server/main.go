@@ -29,7 +29,6 @@ func init() {
 	StoreInterval = flag.Duration("i", cfgLogger.StoreInterval, "Interval for saving the metrics into the file")
 	StoreFile = flag.String("f", cfgLogger.StoreFile, "file to store the metrics")
 	flag.Parse()
-	fmt.Println(*Addr, *Restore, *StoreInterval, *StoreFile)
 }
 
 func main() {
