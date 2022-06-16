@@ -3,8 +3,7 @@ package handlers
 import (
 	"bufio"
 	"encoding/json"
-	"flag"
-	"github.com/dayterr/go_agent_metrics/internal/config"
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -34,40 +33,16 @@ var allMetrics AllMetrics = AllMetrics{
 	counters,
 }
 
-var (
-	Addr *string
-	Restore *bool
-	StoreFile *string
-	StoreInterval time.Duration
-)
 
-func init() {
-	var err error
-	cfg := config.GetEnv()
-	cfgLogger := config.GetEnvLogger()
-	serverFlags := flag.NewFlagSet("", flag.ExitOnError)
-	Addr = serverFlags.String("a", cfg.Address, "Address for the server")
-	Restore = serverFlags.Bool("r", true, "A bool flag for configuration upload")
-	intervalStr := serverFlags.String("i", "300s", "Interval for saving the metrics into the file")
-	StoreFile = serverFlags.String("f", cfgLogger.StoreFile, "file to store the metrics")
-	StoreInterval, err = time.ParseDuration(*intervalStr)
-	if err != nil {
-		log.Fatal("Flag -i got an incorrect argument")
-	}
-	if len(os.Args) >= 2 {
-		serverFlags.Parse(os.Args[1:])
-	}
-}
-
-func GetPort() string {
-	port := ":" + strings.Split(*Addr, ":")[1]
+func GetPort(addr string) string {
+	port := ":" + strings.Split(addr, ":")[1]
 	return port
 }
 
-func LoadMetricsFromJSON() {
-	if *Restore {
-		if _, err := os.Stat(*StoreFile); err == nil {
-			file, err := ioutil.ReadFile(*StoreFile)
+func LoadMetricsFromJSON(filename string, isRestored bool) {
+	if isRestored {
+		if _, err := os.Stat(filename); err == nil {
+			file, err := ioutil.ReadFile(filename)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -201,12 +176,12 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetIndex(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("cmd/server/index.html")
+	t, err := template.ParseFiles("/Users/ruth/coding/Golang/go_agent_metrics/cmd/server/index.html")
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 	err = t.ExecuteTemplate(w, "index.html", allMetrics.Gauge)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -229,8 +204,8 @@ func WriteJSON(path string) {
 	w.Flush()
 }
 
-func CreateRouter() chi.Router {
-	LoadMetricsFromJSON()
+func CreateRouter(filename string, isRestored bool) chi.Router {
+	LoadMetricsFromJSON(filename, isRestored)
 	r := chi.NewRouter()
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/", PostJSON)

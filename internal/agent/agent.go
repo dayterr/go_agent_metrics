@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/dayterr/go_agent_metrics/cmd/agent/flags"
 	"github.com/levigross/grequests"
 	"math/rand"
 	"runtime"
@@ -103,14 +102,14 @@ func ReadMetrics() Storage {
 	return allMetrics
 }
 
-func PostCounter(value Counter, metricName string, metricType string) error {
-	url := fmt.Sprintf("http://%v/update/%v/%v/%v", *flags.Address, metricType, metricName, value)
+func PostCounter(value Counter, metricName string, metricType string, address string) error {
+	url := fmt.Sprintf("http://%v/update/%v/%v/%v", address, metricType, metricName, value)
 	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string{metricName: strconv.Itoa(int(value))},
 		Headers: map[string]string{"ContentType": "text/plain"}})
 	if err != nil {
 		return err
 	}
-	url = fmt.Sprintf("http://%v/update", *flags.Address)
+	url = fmt.Sprintf("http://%v/update", address)
 	metric := Metrics{ID: metricName, MType: metricType, Delta: int64(value)}
 	mJSON, err := metric.MarshallJSON()
 	if err != nil {
@@ -124,14 +123,14 @@ func PostCounter(value Counter, metricName string, metricType string) error {
 	return nil
 }
 
-func PostMetric(value Gauge, metricName string, metricType string) error {
-	url := fmt.Sprintf("http://%v/update/%v/%v/%v", *flags.Address, metricType, metricName, value)
+func PostMetric(value Gauge, metricName string, metricType string, address string) error {
+	url := fmt.Sprintf("http://%v/update/%v/%v/%v", address, metricType, metricName, value)
 	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string{metricName: strconv.Itoa(int(value))},
 		Headers: map[string]string{"ContentType": "text/plain"}})
 	if err != nil {
 		return err
 	}
-	url = fmt.Sprintf("http://%v/update", *flags.Address)
+	url = fmt.Sprintf("http://%v/update", address)
 	metric := Metrics{ID: metricName, MType: metricType, Value: float64(value)}
 	mJSON, err := metric.MarshallJSON()
 	if err != nil {
@@ -146,12 +145,12 @@ func PostMetric(value Gauge, metricName string, metricType string) error {
 }
 
 
-func PostAll(am Storage) {
+func PostAll(am Storage, address string) {
 	for k, v := range am.GaugeField {
-		PostMetric(v, k, "gauge")
+		PostMetric(v, k, "gauge", address)
 	}
 	for k, v := range am.CounterField {
-		PostCounter(v, k, "counter")
+		PostCounter(v, k, "counter", address)
 	}
 }
 
