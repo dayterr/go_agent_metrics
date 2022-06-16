@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 	"github.com/dayterr/go_agent_metrics/internal/config"
@@ -28,6 +29,7 @@ func init() {
 	StoreInterval = flag.Duration("i", cfgLogger.StoreInterval, "Interval for saving the metrics into the file")
 	StoreFile = flag.String("f", cfgLogger.StoreFile, "file to store the metrics")
 	flag.Parse()
+	fmt.Println(*Addr, *Restore, *StoreInterval, *StoreFile)
 }
 
 func main() {
