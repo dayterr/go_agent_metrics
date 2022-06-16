@@ -15,13 +15,12 @@ var counters = make(map[string]agent.Counter)
 var port = config.GetPort()
 
 func main() {
-	cfg := config.GetEnvLogger()
-	ticker := time.NewTicker(cfg.StoreInterval)
+	ticker := time.NewTicker(config.StoreInterval)
 	go func() {
 		for {
 			select {
 			case <- ticker.C:
-				server.WriteJSON(cfg.StoreFile)
+				server.WriteJSON(*config.StoreFile)
 			}
 		}
 	}()

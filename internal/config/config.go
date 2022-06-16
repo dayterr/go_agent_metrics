@@ -1,12 +1,34 @@
 package config
 
 import (
+	"flag"
 	"log"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/caarlos0/env/v6"
 )
+
+var (
+	addr *string
+	Restore *bool
+	StoreFile *string
+	StoreInterval time.Duration
+)
+
+func init() {
+	var err error
+	addr = flag.String("a", os.Getenv("ADDRESS"), "Address for the server")
+	Restore = flag.Bool("r", true, "A bool flag for configuration upload")
+	intervalStr := flag.String("i", os.Getenv("STORE_INTERVAL"), "Interval for saving the etrics into the file")
+	StoreFile = flag.String("f", os.Getenv("STORE_FILE"), "file to store the metrics")
+	StoreInterval, err = time.ParseDuration(*intervalStr)
+	if err != nil {
+		log.Fatal("Flag -i got an incorrect argument")
+	}
+	flag.Parse()
+}
 
 type Config struct {
 	Address string `env:"ADDRESS" envDefault:"localhost:8080"`
@@ -17,7 +39,7 @@ type Config struct {
 type ConfigLogger struct {
 	StoreInterval time.Duration `env:"STORE_INTERVAL" envDefault:"300s"`
 	StoreFile string `env:"STORE_FILE" envDefault:"/tmp/devops-metrics-db.json"`
-	Restore bool `env:"RESTORE" envDefault:"true"`
+	Restore bool `env:"RESTORE" envDefault:"false"`
 }
 
 func GetEnv() Config {
@@ -39,7 +61,6 @@ func GetEnvLogger() ConfigLogger {
 }
 
 func GetPort() string {
-	cfg := GetEnv()
-	port := ":" + strings.Split(cfg.Address, ":")[1]
+	port := ":" + strings.Split(*addr, ":")[1]
 	return port
 }
