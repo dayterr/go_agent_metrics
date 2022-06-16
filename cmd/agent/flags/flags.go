@@ -2,7 +2,6 @@ package flags
 
 import (
 	"flag"
-	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/config"
 	"log"
 	"os"
@@ -33,5 +32,4 @@ func init() {
 	if len(os.Args) >= 2 {
 		agentFlags.Parse(os.Args[1:])
 	}
-	fmt.Println(*Address)
 }

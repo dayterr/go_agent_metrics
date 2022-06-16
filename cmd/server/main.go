@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 	"github.com/dayterr/go_agent_metrics/internal/server"
@@ -24,7 +23,6 @@ func main() {
 			}
 		}
 	}()
-	fmt.Println(port)
 	r := handlers.CreateRouter()
 	http.ListenAndServe(port, r)
 }
