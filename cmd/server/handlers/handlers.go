@@ -3,7 +3,7 @@ package handlers
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
+	"flag"
 	"github.com/dayterr/go_agent_metrics/internal/config"
 	"html/template"
 	"io/ioutil"
@@ -34,10 +34,40 @@ var allMetrics AllMetrics = AllMetrics{
 	counters,
 }
 
+var (
+	Addr *string
+	Restore *bool
+	StoreFile *string
+	StoreInterval time.Duration
+)
+
+func init() {
+	var err error
+	cfg := config.GetEnv()
+	cfgLogger := config.GetEnvLogger()
+	serverFlags := flag.NewFlagSet("", flag.ExitOnError)
+	Addr = serverFlags.String("a", cfg.Address, "Address for the server")
+	Restore = serverFlags.Bool("r", true, "A bool flag for configuration upload")
+	intervalStr := serverFlags.String("i", "300s", "Interval for saving the metrics into the file")
+	StoreFile = serverFlags.String("f", cfgLogger.StoreFile, "file to store the metrics")
+	StoreInterval, err = time.ParseDuration(*intervalStr)
+	if err != nil {
+		log.Fatal("Flag -i got an incorrect argument")
+	}
+	if len(os.Args) >= 2 {
+		serverFlags.Parse(os.Args[1:])
+	}
+}
+
+func GetPort() string {
+	port := ":" + strings.Split(*Addr, ":")[1]
+	return port
+}
+
 func LoadMetricsFromJSON() {
-	if *config.Restore {
-		if _, err := os.Stat(*config.StoreFile); err == nil {
-			file, err := ioutil.ReadFile(*config.StoreFile)
+	if *Restore {
+		if _, err := os.Stat(*StoreFile); err == nil {
+			file, err := ioutil.ReadFile(*StoreFile)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -187,7 +217,6 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 func WriteJSON(path string) {
 	file, err := os.OpenFile(path, os.O_CREATE | os.O_RDWR | os.O_TRUNC, 0777)
 	if err != nil {
-		fmt.Println("trouble opening the file")
 		log.Fatal(err)
 	}
 	defer file.Close()

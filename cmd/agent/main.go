@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/dayterr/go_agent_metrics/cmd/agent/flags"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,8 +14,8 @@ func main() {
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	exitChan := make(chan int)
-	ticker := time.NewTicker(agent.ReportInterval)
-	tickerMetrics := time.NewTicker(agent.PollInterval)
+	ticker := time.NewTicker(flags.ReportInterval)
+	tickerMetrics := time.NewTicker(flags.PollInterval)
 	var am agent.Storage
 	go func() {
 		for {

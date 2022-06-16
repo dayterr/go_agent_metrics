@@ -3,17 +3,15 @@ package agent
 import (
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
-	"log"
+	"github.com/dayterr/go_agent_metrics/cmd/agent/flags"
+	"github.com/levigross/grequests"
 	"math/rand"
-	"os"
 	"runtime"
 	"strconv"
-	"time"
-
-	"github.com/levigross/grequests"
 )
+
+
 
 const GaugeType = "gauge"
 const CounterType = "counter"
@@ -70,28 +68,6 @@ var allMetrics Storage = Storage{
 	counters,
 }
 
-var (
-	Address *string
-	ReportInterval time.Duration
-	PollInterval time.Duration
-)
-
-func init() {
-	var err error
-	Address = flag.String("a", os.Getenv("ADDRESS"), "Address for the server")
-	repIntervalStr := flag.String("r", os.Getenv("REPORT_INTERVAL"), "Interval for sending the metrics to the server")
-	ReportInterval, err = time.ParseDuration(*repIntervalStr)
-	if err != nil {
-		log.Fatal("Flag -r got an incorrect argument")
-	}
-	pollIntervalStr := flag.String("p", os.Getenv("POLL_INTERVAL"), "Interval for polling the metrics")
-	PollInterval, err = time.ParseDuration(*pollIntervalStr)
-	if err != nil {
-		log.Fatal("Flag -p got an incorrect argument")
-	}
-	flag.Parse()
-}
-
 func ReadMetrics() Storage {
 	m := &runtime.MemStats{}
 	runtime.ReadMemStats(m)
@@ -128,13 +104,13 @@ func ReadMetrics() Storage {
 }
 
 func PostCounter(value Counter, metricName string, metricType string) error {
-	url := fmt.Sprintf("http://%v/update/%v/%v/%v", Address, metricType, metricName, value)
+	url := fmt.Sprintf("http://%v/update/%v/%v/%v", flags.Address, metricType, metricName, value)
 	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string{metricName: strconv.Itoa(int(value))},
 		Headers: map[string]string{"ContentType": "text/plain"}})
 	if err != nil {
 		return err
 	}
-	url = fmt.Sprintf("http://%v/update", Address)
+	url = fmt.Sprintf("http://%v/update", flags.Address)
 	metric := Metrics{ID: metricName, MType: metricType, Delta: int64(value)}
 	mJSON, err := metric.MarshallJSON()
 	if err != nil {
@@ -149,13 +125,13 @@ func PostCounter(value Counter, metricName string, metricType string) error {
 }
 
 func PostMetric(value Gauge, metricName string, metricType string) error {
-	url := fmt.Sprintf("http://%v/update/%v/%v/%v", Address, metricType, metricName, value)
+	url := fmt.Sprintf("http://%v/update/%v/%v/%v", flags.Address, metricType, metricName, value)
 	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string{metricName: strconv.Itoa(int(value))},
 		Headers: map[string]string{"ContentType": "text/plain"}})
 	if err != nil {
 		return err
 	}
-	url = fmt.Sprintf("http://%v/update", Address)
+	url = fmt.Sprintf("http://%v/update", flags.Address)
 	metric := Metrics{ID: metricName, MType: metricType, Value: float64(value)}
 	mJSON, err := metric.MarshallJSON()
 	if err != nil {
@@ -178,3 +154,4 @@ func PostAll(am Storage) {
 		PostCounter(v, k, "counter")
 	}
 }
+
