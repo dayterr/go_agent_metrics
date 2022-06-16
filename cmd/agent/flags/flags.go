@@ -2,6 +2,8 @@ package flags
 
 import (
 	"flag"
+	"fmt"
+	"github.com/dayterr/go_agent_metrics/internal/config"
 	"log"
 	"os"
 	"time"
@@ -15,7 +17,9 @@ var (
 
 func init() {
 	var err error
+	cfg := config.GetEnv()
 	agentFlags := flag.NewFlagSet("", flag.ExitOnError)
+	Address = agentFlags.String("a", cfg.Address, "Address for the server")
 	repIntervalStr := agentFlags.String("r", "10s", "Interval for sending the metrics to the server")
 	ReportInterval, err = time.ParseDuration(*repIntervalStr)
 	if err != nil {
@@ -26,8 +30,8 @@ func init() {
 	if err != nil {
 		log.Fatal("Flag -p got an incorrect argument")
 	}
-
 	if len(os.Args) >= 2 {
 		agentFlags.Parse(os.Args[1:])
 	}
+	fmt.Println(*Address)
 }
