@@ -67,8 +67,6 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
-	fmt.Println(allMetrics)
-	fmt.Println(m.ID, m.MType, m.Value, m.Delta)
 	switch m.MType {
 	case agent.GaugeType:
 		m.Value = allMetrics.Gauge[m.ID]
@@ -77,6 +75,8 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 		}
 		w.Header().Set("content-type", "application/json")
+		fmt.Println(allMetrics)
+		fmt.Println(m.ID, m.MType, m.Value, m.Delta)
 		w.Write(mJSON)
 	case agent.CounterType:
 		m.Delta = allMetrics.Counter[m.ID]
@@ -85,6 +85,8 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 		}
 		w.Header().Set("content-type", "application/json")
+		fmt.Println(allMetrics)
+		fmt.Println(m.ID, m.MType, m.Value, m.Delta)
 		w.Write(mJSON)
 	default:
 		w.WriteHeader(http.StatusBadRequest)
