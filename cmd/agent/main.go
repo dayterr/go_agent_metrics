@@ -11,17 +11,12 @@ import (
 	"github.com/dayterr/go_agent_metrics/internal/config"
 )
 
-var (
-	Address *string
-	ReportInterval *time.Duration
-	PollInterval *time.Duration
-)
+var cfg = config.GetEnv()
 
 func init() {
-	cfg := config.GetEnv()
-	Address = flag.String("a", cfg.Address, "Address for the server")
-	ReportInterval = flag.Duration("r", cfg.ReportInterval, "Interval for sending the metrics to the server")
-	PollInterval = flag.Duration("p", cfg.PollInterval, "Interval for polling the metrics")
+	flag.StringVar(&cfg.Address, "a", cfg.Address, "Address for the server")
+	flag.DurationVar(&cfg.ReportInterval, "r", cfg.ReportInterval, "Interval for sending the metrics to the server")
+	flag.DurationVar(&cfg.PollInterval, "p", cfg.PollInterval, "Interval for polling the metrics")
 	flag.Parse()
 }
 
@@ -29,8 +24,8 @@ func main() {
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	exitChan := make(chan int)
-	ticker := time.NewTicker(*ReportInterval)
-	tickerMetrics := time.NewTicker(*PollInterval)
+	ticker := time.NewTicker(cfg.ReportInterval)
+	tickerMetrics := time.NewTicker(cfg.PollInterval)
 	var am agent.Storage
 	go func() {
 		for {
@@ -38,7 +33,7 @@ func main() {
 			case <-tickerMetrics.C:
 				am = agent.ReadMetrics()
 			case <-ticker.C:
-				agent.PostAll(am, *Address)
+				agent.PostAll(am, cfg.Address)
 			case s := <-signalChan:
 				switch s {
 				case syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT:

@@ -13,34 +13,28 @@ import (
 var metrics = make(map[string]agent.Gauge)
 var counters = make(map[string]agent.Counter)
 
-var (
-	Addr *string
-	Restore *bool
-	StoreFile *string
-	StoreInterval *time.Duration
-)
+var Cfg = config.GetEnv()
+var CfgLogger = config.GetEnvLogger()
 
 func init() {
-	cfg := config.GetEnv()
-	cfgLogger := config.GetEnvLogger()
-	Addr = flag.String("a", cfg.Address, "Address for the server")
-	Restore = flag.Bool("r", cfgLogger.Restore, "A bool flag for configuration upload")
-	StoreInterval = flag.Duration("i", cfgLogger.StoreInterval, "Interval for saving the metrics into the file")
-	StoreFile = flag.String("f", cfgLogger.StoreFile, "file to store the metrics")
+	flag.StringVar(&Cfg.Address, "a", Cfg.Address, "Address for the server")
+	flag.BoolVar(&CfgLogger.Restore, "r", CfgLogger.Restore, "A bool flag for configuration upload")
+	flag.DurationVar(&CfgLogger.StoreInterval, "i", CfgLogger.StoreInterval, "Interval for saving the metrics into the file")
+	flag.StringVar(&CfgLogger.StoreFile, "f", CfgLogger.StoreFile, "file to store the metrics")
 	flag.Parse()
 }
 
 func main() {
-	var port = handlers.GetPort(*Addr)
-	ticker := time.NewTicker(*StoreInterval)
+	var port = handlers.GetPort(Cfg.Address)
+	ticker := time.NewTicker(CfgLogger.StoreInterval)
 	go func() {
 		for {
 			select {
 			case <- ticker.C:
-				server.WriteJSON(*StoreFile)
+				server.WriteJSON(CfgLogger.StoreFile)
 			}
 		}
 	}()
-	r := handlers.CreateRouter(*StoreFile, *Restore)
+	r := handlers.CreateRouter(CfgLogger.StoreFile, CfgLogger.Restore)
 	http.ListenAndServe(port, r)
 }
