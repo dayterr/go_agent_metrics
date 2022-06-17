@@ -17,7 +17,7 @@ func main() {
 	flag.StringVar(&cfg.Address, "a", cfg.Address, "Address for the server")
 	flag.DurationVar(&cfg.ReportInterval, "r", cfg.ReportInterval, "Interval for sending the metrics to the server")
 	flag.DurationVar(&cfg.PollInterval, "p", cfg.PollInterval, "Interval for polling the metrics")
-	flag.Parse()
+	flag.CommandLine.Parse(os.Args[1:])
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	exitChan := make(chan int)

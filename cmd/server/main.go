@@ -7,6 +7,7 @@ import (
 	"github.com/dayterr/go_agent_metrics/internal/config"
 	"github.com/dayterr/go_agent_metrics/internal/server"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -22,7 +23,7 @@ func main() {
 	flag.BoolVar(&CfgLogger.Restore, "r", CfgLogger.Restore, "A bool flag for configuration upload")
 	flag.DurationVar(&CfgLogger.StoreInterval, "i", CfgLogger.StoreInterval, "Interval for saving the metrics into the file")
 	flag.StringVar(&CfgLogger.StoreFile, "f", CfgLogger.StoreFile, "file to store the metrics")
-	flag.Parse()
+	flag.CommandLine.Parse(os.Args[1:])
 	var port = handlers.GetPort(Cfg.Address)
 	ticker := time.NewTicker(CfgLogger.StoreInterval)
 	go func() {
