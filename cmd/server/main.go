@@ -14,11 +14,9 @@ import (
 var metrics = make(map[string]agent.Gauge)
 var counters = make(map[string]agent.Counter)
 
-var Cfg = config.GetEnv()
-var CfgLogger = config.GetEnvLogger()
-
-
 func main() {
+	var Cfg = config.GetEnv()
+	var CfgLogger = config.GetEnvLogger()
 	flag.StringVar(&Cfg.Address, "a", Cfg.Address, "Address for the server")
 	flag.BoolVar(&CfgLogger.Restore, "r", CfgLogger.Restore, "A bool flag for configuration upload")
 	flag.DurationVar(&CfgLogger.StoreInterval, "i", CfgLogger.StoreInterval, "Interval for saving the metrics into the file")
