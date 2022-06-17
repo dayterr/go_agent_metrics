@@ -68,7 +68,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	}
 	fmt.Println(allMetrics)
-	fmt.Println(m.ID, m.Value)
+	fmt.Println(m.ID, m.MType, m.Value)
 	switch m.MType {
 	case agent.GaugeType:
 		m.Value = allMetrics.Gauge[m.ID]
