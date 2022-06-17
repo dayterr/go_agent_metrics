@@ -16,15 +16,13 @@ var counters = make(map[string]agent.Counter)
 var Cfg = config.GetEnv()
 var CfgLogger = config.GetEnvLogger()
 
-func init() {
+
+func main() {
 	flag.StringVar(&Cfg.Address, "a", Cfg.Address, "Address for the server")
 	flag.BoolVar(&CfgLogger.Restore, "r", CfgLogger.Restore, "A bool flag for configuration upload")
 	flag.DurationVar(&CfgLogger.StoreInterval, "i", CfgLogger.StoreInterval, "Interval for saving the metrics into the file")
 	flag.StringVar(&CfgLogger.StoreFile, "f", CfgLogger.StoreFile, "file to store the metrics")
 	flag.Parse()
-}
-
-func main() {
 	var port = handlers.GetPort(Cfg.Address)
 	ticker := time.NewTicker(CfgLogger.StoreInterval)
 	go func() {
