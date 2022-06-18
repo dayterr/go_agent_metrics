@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,6 +16,7 @@ var Cfg config.Config
 
 func main() {
 	Cfg = config.GetEnv()
+	fmt.Println("before", Cfg)
 	flag.DurationVar(&Cfg.ReportInterval, "r", Cfg.ReportInterval, "Interval for sending the metrics to the server")
 	flag.DurationVar(&Cfg.PollInterval, "p", Cfg.PollInterval, "Interval for polling the metrics")
 	Cfg = config.GetEnv()
@@ -22,6 +24,7 @@ func main() {
 		flag.StringVar(&Cfg.Address, "a", Cfg.Address, "Address for the server")
 	}
 	flag.CommandLine.Parse(os.Args[1:])
+	fmt.Println("after", Cfg)
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	exitChan := make(chan int)
