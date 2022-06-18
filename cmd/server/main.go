@@ -27,7 +27,9 @@ func main() {
 		flag.BoolVar(&CfgLogger.Restore, "r", CfgLogger.Restore, "A bool flag for configuration upload")
 	}
 	flag.DurationVar(&CfgLogger.StoreInterval, "i", CfgLogger.StoreInterval, "Interval for saving the metrics into the file")
-	flag.StringVar(&CfgLogger.StoreFile, "f", CfgLogger.StoreFile, "file to store the metrics")
+	if CfgLogger.StoreFile == "/tmp/devops-metrics-db.json" {
+		flag.StringVar(&CfgLogger.StoreFile, "f", CfgLogger.StoreFile, "file to store the metrics")
+	}
 	flag.Parse()
 
 	//fmt.Println(CfgLogger.Restore, Cfg.Address)
