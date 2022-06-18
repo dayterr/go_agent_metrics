@@ -32,7 +32,7 @@ func main() {
 
 	//fmt.Println(CfgLogger.Restore, Cfg.Address)
 	var port = handlers.GetPort(Cfg.Address)
-	fmt.Println(port)
+	fmt.Println(CfgLogger, Cfg)
 	ticker := time.NewTicker(CfgLogger.StoreInterval)
 	go func() {
 		for {
