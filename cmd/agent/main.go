@@ -14,7 +14,10 @@ import (
 var Cfg config.Config
 
 func main() {
-	flag.StringVar(&Cfg.Address, "a", Cfg.Address, "Address for the server")
+	Cfg = config.GetEnv()
+	if Cfg.Address == "localhost:8080" {
+		flag.StringVar(&Cfg.Address, "a", Cfg.Address, "Address for the server")
+	}
 	flag.DurationVar(&Cfg.ReportInterval, "r", Cfg.ReportInterval, "Interval for sending the metrics to the server")
 	flag.DurationVar(&Cfg.PollInterval, "p", Cfg.PollInterval, "Interval for polling the metrics")
 	flag.CommandLine.Parse(os.Args[1:])
