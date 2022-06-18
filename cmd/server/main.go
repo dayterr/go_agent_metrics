@@ -8,7 +8,6 @@ import (
 	"github.com/dayterr/go_agent_metrics/internal/config"
 	"github.com/dayterr/go_agent_metrics/internal/server"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -19,15 +18,21 @@ var Cfg config.Config
 var CfgLogger config.ConfigLogger
 
 func main() {
-	flag.StringVar(&Cfg.Address, "a", Cfg.Address, "Address for the server")
-	flag.BoolVar(&CfgLogger.Restore, "r", CfgLogger.Restore, "A bool flag for configuration upload")
-	flag.DurationVar(&CfgLogger.StoreInterval, "i", CfgLogger.StoreInterval, "Interval for saving the metrics into the file")
-	flag.StringVar(&CfgLogger.StoreFile, "f", CfgLogger.StoreFile, "file to store the metrics")
-	flag.CommandLine.Parse(os.Args[1:])
 	Cfg = config.GetEnv()
 	CfgLogger = config.GetEnvLogger()
-	fmt.Println(CfgLogger.Restore)
+	if Cfg.Address == "localhost:8080" {
+		flag.StringVar(&Cfg.Address, "a", Cfg.Address, "Address for the server")
+	}
+	if CfgLogger.Restore == true {
+		flag.BoolVar(&CfgLogger.Restore, "r", CfgLogger.Restore, "A bool flag for configuration upload")
+	}
+	flag.DurationVar(&CfgLogger.StoreInterval, "i", CfgLogger.StoreInterval, "Interval for saving the metrics into the file")
+	flag.StringVar(&CfgLogger.StoreFile, "f", CfgLogger.StoreFile, "file to store the metrics")
+	flag.Parse()
+
+	//fmt.Println(CfgLogger.Restore, Cfg.Address)
 	var port = handlers.GetPort(Cfg.Address)
+	fmt.Println(port)
 	ticker := time.NewTicker(CfgLogger.StoreInterval)
 	go func() {
 		for {
