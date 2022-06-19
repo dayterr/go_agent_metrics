@@ -3,7 +3,6 @@ package handlers
 import (
 	"compress/gzip"
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -207,16 +206,12 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 func GetIndex(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "text/html; charset=utf-8")
 	t, err := template.ParseFiles("cmd/server/handlers/index.html")
-	//t, err := template.ParseFiles("/Users/ruth/coding/Golang/go_agent_metrics/cmd/server/index.html")
 	if err != nil {
-		fmt.Println("error1", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	err = t.ExecuteTemplate(w, "index.html", allMetrics.Gauge)
-	fmt.Println("hey there")
 	if err != nil {
-		fmt.Println("error2", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
