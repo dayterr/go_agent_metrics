@@ -27,7 +27,7 @@ func main() {
 	if CfgLogger.Restore == true {
 		flag.BoolVar(&CfgLogger.Restore, "r", CfgLogger.Restore, "A bool flag for configuration upload")
 	}
-	if CfgLogger.StoreInterval == 5 * time.Second {
+	if CfgLogger.StoreInterval == 300 * time.Second {
 		flag.DurationVar(&CfgLogger.StoreInterval, "i", CfgLogger.StoreInterval, "Interval for saving the metrics into the file")
 	}
 	if CfgLogger.StoreFile == "/tmp/devops-metrics-db.json" {
