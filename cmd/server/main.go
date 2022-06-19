@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 	"github.com/dayterr/go_agent_metrics/internal/config"
@@ -20,7 +19,6 @@ var CfgLogger config.ConfigLogger
 func main() {
 	Cfg = config.GetEnv()
 	CfgLogger = config.GetEnvLogger()
-	fmt.Println("before", Cfg, CfgLogger)
 	if Cfg.Address == "localhost:8080" {
 		flag.StringVar(&Cfg.Address, "a", Cfg.Address, "Address for the server")
 	}
@@ -34,10 +32,7 @@ func main() {
 		flag.StringVar(&CfgLogger.StoreFile, "f", CfgLogger.StoreFile, "file to store the metrics")
 	}
 	flag.Parse()
-	fmt.Println("after", Cfg, CfgLogger)
-	//fmt.Println(CfgLogger.Restore, Cfg.Address)
 	var port = handlers.GetPort(Cfg.Address)
-	fmt.Println(CfgLogger, Cfg)
 	ticker := time.NewTicker(CfgLogger.StoreInterval)
 	go func() {
 		for {

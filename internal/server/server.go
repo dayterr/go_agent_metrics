@@ -2,9 +2,13 @@ package server
 
 import (
 	"bufio"
+	"compress/gzip"
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
+	"io"
 	"log"
+	"net/http"
 	"os"
+	"strings"
 )
 
 func WriteJSON(path string) {
