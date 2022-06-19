@@ -207,12 +207,14 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 func GetIndex(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("/cmd/server/index.html")
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("error1", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	err = t.ExecuteTemplate(w, "index.html", allMetrics.Gauge)
+	fmt.Println("hey there")
 	if err != nil {
+		fmt.Println("error2", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
