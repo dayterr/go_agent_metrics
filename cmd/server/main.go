@@ -29,6 +29,8 @@ func main() {
 	}
 	if CfgLogger.StoreInterval == 300 * time.Second {
 		flag.DurationVar(&CfgLogger.StoreInterval, "i", CfgLogger.StoreInterval, "Interval for saving the metrics into the file")
+	} else {
+		_ := flag.Duration("i", CfgLogger.StoreInterval, "Interval for saving the metrics into the file")
 	}
 	if CfgLogger.StoreFile == "/tmp/devops-metrics-db.json" {
 		flag.StringVar(&CfgLogger.StoreFile, "f", CfgLogger.StoreFile, "file to store the metrics")
