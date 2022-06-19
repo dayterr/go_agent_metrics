@@ -205,7 +205,8 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetIndex(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("/cmd/server/index.html")
+	t, err := template.ParseFiles("template/index.html")
+	//t, err := template.ParseFiles("/Users/ruth/coding/Golang/go_agent_metrics/cmd/server/index.html")
 	if err != nil {
 		fmt.Println("error1", err)
 		w.WriteHeader(http.StatusInternalServerError)
