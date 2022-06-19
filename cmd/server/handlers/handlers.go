@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -32,6 +34,34 @@ var allMetrics AllMetrics = AllMetrics{
 	counters,
 }
 
+type gzipWriter struct {
+	http.ResponseWriter
+	Writer io.Writer
+}
+
+func (w gzipWriter) Write(b []byte) (int, error) {
+	return w.Writer.Write(b)
+}
+
+func gzipHandle(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		gz, err := gzip.NewWriterLevel(w, gzip.BestSpeed)
+		if err != nil {
+			io.WriteString(w, err.Error())
+			return
+		}
+		defer gz.Close()
+
+		w.Header().Set("Content-Encoding", "gzip")
+		next.ServeHTTP(gzipWriter{ResponseWriter: w, Writer: gz}, r)
+	})
+}
 
 func GetPort(addr string) string {
 	port := ":" + strings.Split(addr, ":")[1]
@@ -191,6 +221,7 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 func CreateRouter(filename string, isRestored bool) chi.Router {
 	LoadMetricsFromJSON(filename, isRestored)
 	r := chi.NewRouter()
+	r.Use(gzipHandle)
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/", PostJSON)
 		r.Post("/{metricType}/{metricName}/{value}", PostMetric)
