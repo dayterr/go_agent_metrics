@@ -24,9 +24,7 @@ func main() {
 	if Cfg.Address == "localhost:8080" {
 		flag.StringVar(&Cfg.Address, "a", Cfg.Address, "Address for the server")
 	}
-	if CfgLogger.Restore == true {
-		flag.BoolVar(&CfgLogger.Restore, "r", CfgLogger.Restore, "A bool flag for configuration upload")
-	}
+	flag.BoolVar(&CfgLogger.Restore, "r", CfgLogger.Restore, "A bool flag for configuration upload")
 	if CfgLogger.StoreInterval == 300 * time.Second {
 		flag.DurationVar(&CfgLogger.StoreInterval, "i", CfgLogger.StoreInterval, "Interval for saving the metrics into the file")
 	} else {
