@@ -205,6 +205,7 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetIndex(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", "text/html; charset=utf-8")
 	t, err := template.ParseFiles("cmd/server/handlers/index.html")
 	//t, err := template.ParseFiles("/Users/ruth/coding/Golang/go_agent_metrics/cmd/server/index.html")
 	if err != nil {
