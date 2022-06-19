@@ -11,6 +11,8 @@ import (
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 )
 
+const address = "localhost:8080"
+
 func TestPostGauge(t *testing.T) {
 
 	tests := []struct {
@@ -25,7 +27,7 @@ func TestPostGauge(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := handlers.CreateRouter()
+			r := handlers.CreateRouter("", false)
 			ts := httptest.NewUnstartedServer(r)
 			url := "127.0.0.1:8080"
 			l, err := net.Listen("tcp", url)
@@ -33,7 +35,7 @@ func TestPostGauge(t *testing.T) {
 			ts.Listener = l
 			ts.Start()
 			defer ts.Close()
-			v := agent.PostMetric(tt.value, tt.metricName, tt.metricType)
+			v := agent.PostMetric(tt.value, tt.metricName, tt.metricType, address)
 			assert.Nil(t, v)
 		})
 	}
@@ -53,7 +55,7 @@ func TestPostCounter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := handlers.CreateRouter()
+			r := handlers.CreateRouter("", false)
 			ts := httptest.NewUnstartedServer(r)
 			url := "127.0.0.1:8080"
 			l, err := net.Listen("tcp", url)
@@ -61,7 +63,7 @@ func TestPostCounter(t *testing.T) {
 			ts.Listener = l
 			ts.Start()
 			defer ts.Close()
-			v := agent.PostCounter(tt.value, tt.metricName, tt.metricType)
+			v := agent.PostCounter(tt.value, tt.metricName, tt.metricType, address)
 			assert.Nil(t, v)
 		})
 	}
