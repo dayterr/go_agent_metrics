@@ -36,10 +36,8 @@ func main() {
 	ticker := time.NewTicker(CfgLogger.StoreInterval)
 	go func() {
 		for {
-			select {
-			case <- ticker.C:
-				server.WriteJSON(CfgLogger.StoreFile)
-			}
+			<- ticker.C
+			server.WriteJSON(CfgLogger.StoreFile)
 		}
 	}()
 	r := handlers.CreateRouter(CfgLogger.StoreFile, CfgLogger.Restore)
