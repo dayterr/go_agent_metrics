@@ -59,7 +59,7 @@ var counters = make(map[string]Counter)
 
 type Storage struct {
 	GaugeField map[string]Gauge `json:"Gauge"`
-	CounterField map[string]Counter `json"Counter"`
+	CounterField map[string]Counter `json:"Counter"`
 }
 
 var allMetrics Storage = Storage{
