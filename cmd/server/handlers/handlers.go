@@ -3,6 +3,7 @@ package handlers
 import (
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"github.com/go-chi/chi/v5"
 	"html/template"
@@ -57,6 +58,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 	var m agent.Metrics
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 	}
 	switch m.MType {
@@ -64,6 +66,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 		m.Value = allMetrics.GaugeField[m.ID].ToFloat()
 		mJSON, err := json.Marshal(m)
 		if err != nil {
+			fmt.Println(err)
 			w.WriteHeader(http.StatusBadRequest)
 		}
 		w.Header().Set("content-type", "application/json")
