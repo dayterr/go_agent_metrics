@@ -20,9 +20,8 @@ type Metrics struct {
 	Value float64 `json:"value,omitempty"`
 }
 
-var allMetrics = storage.New()
-
 func ReadMetrics() storage.Storage {
+	var allMetrics = storage.New()
 	m := &runtime.MemStats{}
 	runtime.ReadMemStats(m)
 	allMetrics.GaugeField["Alloc"] = storage.Gauge(m.Alloc)
