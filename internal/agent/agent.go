@@ -64,8 +64,8 @@ func PostCounter(value storage.Counter, metricName string, address string) error
 	if err != nil {
 		return err
 	}*/
-	//url := fmt.Sprintf("http://%v/update", address)
-	url := fmt.Sprintf("http://%v/update/%v/%v/%v", address, CounterType, metricName, value)
+	url := fmt.Sprintf("http://%v/update", address)
+	//url := fmt.Sprintf("http://%v/update/%v/%v/%v", address, CounterType, metricName, value)
 	metric := Metrics{ID: metricName, MType: CounterType, Delta: int64(value)}
 	mJSON, err := json.Marshal(metric)
 	if err != nil {
@@ -86,8 +86,8 @@ func PostGauge(value storage.Gauge, metricName string, address string) error {
 	if err != nil {
 		return err
 	}*/
-	//url := fmt.Sprintf("http://%v/update", address)
-	url := fmt.Sprintf("http://%v/update/%v/%v/%v", address, GaugeType, metricName, value)
+	url := fmt.Sprintf("http://%v/update", address)
+	//url := fmt.Sprintf("http://%v/update/%v/%v/%v", address, GaugeType, metricName, value)
 	metric := Metrics{ID: metricName, MType: GaugeType, Value: float64(value)}
 	mJSON, err := json.Marshal(metric)
 	if err != nil {
