@@ -1,39 +1,36 @@
 package main
 
 import (
-	"flag"
+	"github.com/dayterr/go_agent_metrics/internal/storage"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/dayterr/go_agent_metrics/internal/agent"
-	"github.com/dayterr/go_agent_metrics/internal/config"
+	agent2 "github.com/dayterr/go_agent_metrics/internal/config/agent"
 )
 
-var Cfg config.Config
+var Cfg agent2.Config
 
 func main() {
-	Cfg = config.GetEnv()
-	flag.DurationVar(&Cfg.ReportInterval, "r", Cfg.ReportInterval, "Interval for sending the metrics to the server")
-	flag.DurationVar(&Cfg.PollInterval, "p", Cfg.PollInterval, "Interval for polling the metrics")
-	Cfg = config.GetEnv()
-	if Cfg.Address == "localhost:8080" {
-		flag.StringVar(&Cfg.Address, "a", Cfg.Address, "Address for the server")
+	Cfg, err := agent2.GetEnv()
+	if err != nil {
+		log.Fatal(err)
 	}
-	flag.Parse()
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	exitChan := make(chan int)
-	ticker := time.NewTicker(Cfg.ReportInterval)
-	tickerMetrics := time.NewTicker(Cfg.PollInterval)
-	var am agent.Storage
+	tickerCollectMetrics := time.NewTicker(Cfg.ReportInterval)
+	tickerReportMetrics := time.NewTicker(Cfg.PollInterval)
+	var am storage.Storage
 	go func() {
 		for {
 			select {
-			case <-tickerMetrics.C:
+			case <-tickerReportMetrics.C:
 				am = agent.ReadMetrics()
-			case <-ticker.C:
+			case <-tickerCollectMetrics.C:
 				agent.PostAll(am, Cfg.Address)
 			case s := <-signalChan:
 				switch s {

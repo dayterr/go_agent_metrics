@@ -2,116 +2,71 @@ package agent
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/levigross/grequests"
 	"math/rand"
 	"runtime"
-	"strconv"
+
+	"github.com/dayterr/go_agent_metrics/internal/storage"
 )
 
-
-
-const GaugeType = "gauge"
+const GaugeType = "storage.Gauge"
 const CounterType = "counter"
 
-type Gauge float64
-type Counter int64
-
 type Metrics struct {
-	ID    string   `json:"id"`
-	MType string   `json:"type"`
+	ID    string  `json:"id"`
+	MType string  `json:"type"`
 	Delta int64   `json:"delta,omitempty"`
 	Value float64 `json:"value,omitempty"`
 }
 
-func (m *Metrics) MarshallJSON() ([]byte, error) {
-	switch m.MType {
-	case GaugeType:
-		aliasValue := &struct {
-			ID    string `json:"id"`
-			MType string `json:"type"`
-			Value float64 `json:"value"`
-		}{
-		ID: m.ID,
-		MType: m.MType,
-		Value: m.Value,
-		}
-		return json.Marshal(aliasValue)
-	case CounterType:
-		aliasValue := &struct {
-			ID    string `json:"id"`
-			MType string `json:"type"`
-			Delta int64 `json:"delta"`
-		}{
-			ID: m.ID,
-			MType: m.MType,
-			Delta: m.Delta,
-		}
-		return json.Marshal(aliasValue)
-	default:
-		return nil, errors.New("no such metric type")
-	}
-}
+var allMetrics = storage.New()
 
-var metrics = make(map[string]Gauge)
-var counters = make(map[string]Counter)
-
-type Storage struct {
-	GaugeField map[string]Gauge `json:"Gauge"`
-	CounterField map[string]Counter `json:"Counter"`
-}
-
-var allMetrics Storage = Storage{
-	metrics,
-	counters,
-}
-
-func ReadMetrics() Storage {
+func ReadMetrics() storage.Storage {
 	m := &runtime.MemStats{}
 	runtime.ReadMemStats(m)
-	allMetrics.GaugeField["Alloc"] = Gauge(m.Alloc)
-	allMetrics.GaugeField["BuckHashSys"] = Gauge(m.BuckHashSys)
-	allMetrics.GaugeField["Frees"] = Gauge(m.Frees)
-	allMetrics.GaugeField["GCCPUFraction"] = Gauge(m.GCCPUFraction)
-	allMetrics.GaugeField["GCSys"] = Gauge(m.GCSys)
-	allMetrics.GaugeField["HeapAlloc"] = Gauge(m.HeapAlloc)
-	allMetrics.GaugeField["HeapIdle"] = Gauge(m.HeapIdle)
-	allMetrics.GaugeField["HeapInuse"] = Gauge(m.HeapInuse)
-	allMetrics.GaugeField["HeapObjects"] = Gauge(m.HeapObjects)
-	allMetrics.GaugeField["HeapReleased"] = Gauge(m.HeapReleased)
-	allMetrics.GaugeField["HeapSys"] = Gauge(m.HeapSys)
-	allMetrics.GaugeField["LastGC"] = Gauge(m.HeapAlloc)
-	allMetrics.GaugeField["Lookups"] = Gauge(m.Lookups)
-	allMetrics.GaugeField["MCacheInuse"] = Gauge(m.MCacheInuse)
-	allMetrics.GaugeField["MCacheSys"] = Gauge(m.MCacheSys)
-	allMetrics.GaugeField["MSpanInuse"] = Gauge(m.MSpanInuse)
-	allMetrics.GaugeField["MSpanSys"] = Gauge(m.MSpanSys)
-	allMetrics.GaugeField["Mallocs"] = Gauge(m.Mallocs)
-	allMetrics.GaugeField["NextGC"] = Gauge(m.NextGC)
-	allMetrics.GaugeField["NumForcedGC"] = Gauge(m.NumForcedGC)
-	allMetrics.GaugeField["NumGC"] = Gauge(m.NumGC)
-	allMetrics.GaugeField["OtherSys"] = Gauge(m.OtherSys)
-	allMetrics.GaugeField["PauseTotalNs"] = Gauge(m.PauseTotalNs)
-	allMetrics.GaugeField["StackInuse"] = Gauge(m.StackInuse)
-	allMetrics.GaugeField["StackSys"] = Gauge(m.StackSys)
-	allMetrics.GaugeField["Sys"] = Gauge(m.Sys)
-	allMetrics.GaugeField["TotalAlloc"] = Gauge(m.TotalAlloc)
-	allMetrics.GaugeField["RandomValue"] = Gauge(rand.Float64())
+	allMetrics.GaugeField["Alloc"] = storage.Gauge(m.Alloc)
+	allMetrics.GaugeField["BuckHashSys"] = storage.Gauge(m.BuckHashSys)
+	allMetrics.GaugeField["Frees"] = storage.Gauge(m.Frees)
+	allMetrics.GaugeField["GCCPUFraction"] = storage.Gauge(m.GCCPUFraction)
+	allMetrics.GaugeField["GCSys"] = storage.Gauge(m.GCSys)
+	allMetrics.GaugeField["HeapAlloc"] = storage.Gauge(m.HeapAlloc)
+	allMetrics.GaugeField["HeapIdle"] = storage.Gauge(m.HeapIdle)
+	allMetrics.GaugeField["HeapInuse"] = storage.Gauge(m.HeapInuse)
+	allMetrics.GaugeField["HeapObjects"] = storage.Gauge(m.HeapObjects)
+	allMetrics.GaugeField["HeapReleased"] = storage.Gauge(m.HeapReleased)
+	allMetrics.GaugeField["HeapSys"] = storage.Gauge(m.HeapSys)
+	allMetrics.GaugeField["LastGC"] = storage.Gauge(m.HeapAlloc)
+	allMetrics.GaugeField["Lookups"] = storage.Gauge(m.Lookups)
+	allMetrics.GaugeField["MCacheInuse"] = storage.Gauge(m.MCacheInuse)
+	allMetrics.GaugeField["MCacheSys"] = storage.Gauge(m.MCacheSys)
+	allMetrics.GaugeField["MSpanInuse"] = storage.Gauge(m.MSpanInuse)
+	allMetrics.GaugeField["MSpanSys"] = storage.Gauge(m.MSpanSys)
+	allMetrics.GaugeField["Mallocs"] = storage.Gauge(m.Mallocs)
+	allMetrics.GaugeField["NextGC"] = storage.Gauge(m.NextGC)
+	allMetrics.GaugeField["NumForcedGC"] = storage.Gauge(m.NumForcedGC)
+	allMetrics.GaugeField["NumGC"] = storage.Gauge(m.NumGC)
+	allMetrics.GaugeField["OtherSys"] = storage.Gauge(m.OtherSys)
+	allMetrics.GaugeField["PauseTotalNs"] = storage.Gauge(m.PauseTotalNs)
+	allMetrics.GaugeField["StackInuse"] = storage.Gauge(m.StackInuse)
+	allMetrics.GaugeField["StackSys"] = storage.Gauge(m.StackSys)
+	allMetrics.GaugeField["Sys"] = storage.Gauge(m.Sys)
+	allMetrics.GaugeField["TotalAlloc"] = storage.Gauge(m.TotalAlloc)
+	allMetrics.GaugeField["RandomValue"] = storage.Gauge(rand.Float64())
 	allMetrics.CounterField["PollCount"] += 1
 	return allMetrics
 }
 
-func PostCounter(value Counter, metricName string, metricType string, address string) error {
-	url := fmt.Sprintf("http://%v/update/%v/%v/%v", address, metricType, metricName, value)
+func PostCounter(value storage.Counter, metricName string, address string) error {
+	/*url := fmt.Sprintf("http://%v/update/%v/%v/%v", address, CounterType, metricName, value)
 	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string{metricName: strconv.Itoa(int(value))},
 		Headers: map[string]string{"ContentType": "text/plain"}})
 	if err != nil {
 		return err
-	}
-	url = fmt.Sprintf("http://%v/update", address)
-	metric := Metrics{ID: metricName, MType: metricType, Delta: int64(value)}
-	mJSON, err := metric.MarshallJSON()
+	}*/
+	url := fmt.Sprintf("http://%v/update", address)
+	metric := Metrics{ID: metricName, MType: CounterType, Delta: int64(value)}
+	mJSON, err := json.Marshal(metric)
 	if err != nil {
 		return err
 	}
@@ -123,34 +78,32 @@ func PostCounter(value Counter, metricName string, metricType string, address st
 	return nil
 }
 
-func PostMetric(value Gauge, metricName string, metricType string, address string) error {
-	url := fmt.Sprintf("http://%v/update/%v/%v/%v", address, metricType, metricName, value)
+func PostGauge(value storage.Gauge, metricName string, address string) error {
+	/*url := fmt.Sprintf("http://%v/update/%v/%v/%v", address, storage.GaugeType, metricName, value)
 	_, err := grequests.Post(url, &grequests.RequestOptions{Data: map[string]string{metricName: strconv.Itoa(int(value))},
 		Headers: map[string]string{"ContentType": "text/plain"}})
 	if err != nil {
 		return err
-	}
-	url = fmt.Sprintf("http://%v/update", address)
-	metric := Metrics{ID: metricName, MType: metricType, Value: float64(value)}
-	mJSON, err := metric.MarshallJSON()
+	}*/
+	url := fmt.Sprintf("http://%v/update", address)
+	metric := Metrics{ID: metricName, MType: GaugeType, Value: float64(value)}
+	mJSON, err := json.Marshal(metric)
 	if err != nil {
 		return err
 	}
-   	_, err = grequests.Post(url, &grequests.RequestOptions{JSON: mJSON,
-   		Headers: map[string]string{"ContentType": "application/json"}})
+	_, err = grequests.Post(url, &grequests.RequestOptions{JSON: mJSON,
+		Headers: map[string]string{"ContentType": "application/json"}})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-
-func PostAll(am Storage, address string) {
+func PostAll(am storage.Storage, address string) {
 	for k, v := range am.GaugeField {
-		PostMetric(v, k, "gauge", address)
+		PostGauge(v, k, address)
 	}
 	for k, v := range am.CounterField {
-		PostCounter(v, k, "counter", address)
+		PostCounter(v, k, address)
 	}
 }
-
