@@ -62,7 +62,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 	switch m.MType {
 	case agent.GaugeType:
 		m.Value = allMetrics.GaugeField[m.ID].ToFloat()
-		mJSON, err := m.MarshallJSON()
+		mJSON, err := json.Marshal(m)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 		}
@@ -70,7 +70,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 		w.Write(mJSON)
 	case agent.CounterType:
 		m.Delta = allMetrics.CounterField[m.ID].ToInt64()
-		mJSON, err := m.MarshallJSON()
+		mJSON, err := json.Marshal(m)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 		}

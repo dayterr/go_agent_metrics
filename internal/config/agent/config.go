@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var (
+const (
 	DEFAULT_ADDRESS         = "localhost:8080"
 	DEFAULT_REPORT_INTERVAL = time.Duration(10 * time.Second)
 	DEFAULT_POLL_INTERVAL   = time.Duration(2 * time.Second)
