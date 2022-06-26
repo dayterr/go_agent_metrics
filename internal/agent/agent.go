@@ -10,7 +10,7 @@ import (
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 )
 
-const GaugeType = "storage.Gauge"
+const GaugeType = "gauge"
 const CounterType = "counter"
 
 type Metrics struct {
