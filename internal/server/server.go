@@ -8,7 +8,7 @@ import (
 )
 
 func WriteJSON(path string) {
-	file, err := os.OpenFile(path, os.O_CREATE | os.O_RDWR | os.O_TRUNC, 0777)
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0777)
 	if err != nil {
 		log.Fatal(err)
 	}

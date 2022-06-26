@@ -1,45 +1,28 @@
 package main
 
 import (
-	"flag"
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
-	"github.com/dayterr/go_agent_metrics/internal/agent"
-	"github.com/dayterr/go_agent_metrics/internal/config"
-	"github.com/dayterr/go_agent_metrics/internal/server"
+	"github.com/dayterr/go_agent_metrics/internal/config/server"
+	server2 "github.com/dayterr/go_agent_metrics/internal/server"
+	"log"
 	"net/http"
 	"time"
 )
 
-var metrics = make(map[string]agent.Gauge)
-var counters = make(map[string]agent.Counter)
-
-var Cfg config.Config
-var CfgLogger config.ConfigLogger
+var CfgLogger server.ConfigLogger
 
 func main() {
-	Cfg = config.GetEnv()
-	CfgLogger = config.GetEnvLogger()
-	if Cfg.Address == "localhost:8080" {
-		flag.StringVar(&Cfg.Address, "a", Cfg.Address, "Address for the server")
+	CfgLogger, err := server.GetEnvLogger()
+	if err != nil {
+		log.Fatal(err)
 	}
-	_ = flag.Bool("r", CfgLogger.Restore, "A bool flag for configuration upload")
-	if CfgLogger.StoreInterval == 300 * time.Second {
-		flag.DurationVar(&CfgLogger.StoreInterval, "i", CfgLogger.StoreInterval, "Interval for saving the metrics into the file")
-	} else {
-		_ = flag.Duration("i", CfgLogger.StoreInterval, "Interval for saving the metrics into the file")
-	}
-	if CfgLogger.StoreFile == "/tmp/devops-metrics-db.json" {
-		flag.StringVar(&CfgLogger.StoreFile, "f", CfgLogger.StoreFile, "file to store the metrics")
-	}
-	flag.Parse()
-	var port = handlers.GetPort(Cfg.Address)
 	ticker := time.NewTicker(CfgLogger.StoreInterval)
 	go func() {
 		for {
-			<- ticker.C
-			server.WriteJSON(CfgLogger.StoreFile)
+			<-ticker.C
+			server2.WriteJSON(CfgLogger.StoreFile)
 		}
 	}()
 	r := handlers.CreateRouter(CfgLogger.StoreFile, CfgLogger.Restore)
-	http.ListenAndServe(port, r)
+	http.ListenAndServe(CfgLogger.Address, r)
 }
