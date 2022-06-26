@@ -58,7 +58,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 	var m agent.Metrics
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("error1", err)
 		w.WriteHeader(http.StatusBadRequest)
 	}
 	switch m.MType {
@@ -67,7 +67,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 		m.Value = allMetrics.GaugeField[m.ID].ToFloat()
 		mJSON, err := json.Marshal(m)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("error2", err)
 			w.WriteHeader(http.StatusBadRequest)
 		}
 		w.Header().Set("content-type", "application/json")
@@ -77,11 +77,13 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 		m.Delta = allMetrics.CounterField[m.ID].ToInt64()
 		mJSON, err := json.Marshal(m)
 		if err != nil {
+			fmt.Println("error3", err)
 			w.WriteHeader(http.StatusBadRequest)
 		}
 		w.Header().Set("content-type", "application/json")
 		w.Write(mJSON)
 	default:
+		fmt.Println("error4", err)
 		w.WriteHeader(http.StatusBadRequest)
 	}
 }
