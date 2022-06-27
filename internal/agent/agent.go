@@ -16,8 +16,8 @@ const CounterType = "counter"
 type Metrics struct {
 	ID    string  `json:"id"`
 	MType string  `json:"type"`
-	Delta int64   `json:"delta,omitempty"`
-	Value float64 `json:"value,omitempty"`
+	Delta *int64   `json:"delta,omitempty"`
+	Value *float64 `json:"value,omitempty"`
 }
 
 func ReadMetrics() storage.Storage {
@@ -64,8 +64,8 @@ func PostCounter(value storage.Counter, metricName string, address string) error
 		return err
 	}*/
 	url := fmt.Sprintf("http://%v/update", address)
-	//url := fmt.Sprintf("http://%v/update/%v/%v/%v", address, CounterType, metricName, value)
-	metric := Metrics{ID: metricName, MType: CounterType, Delta: int64(value)}
+	delta := value.ToInt64()
+	metric := Metrics{ID: metricName, MType: CounterType, Delta: &delta}
 	mJSON, err := json.Marshal(metric)
 	if err != nil {
 		return err
@@ -87,7 +87,8 @@ func PostGauge(value storage.Gauge, metricName string, address string) error {
 	}*/
 	url := fmt.Sprintf("http://%v/update", address)
 	//url := fmt.Sprintf("http://%v/update/%v/%v/%v", address, GaugeType, metricName, value)
-	metric := Metrics{ID: metricName, MType: GaugeType, Value: float64(value)}
+	v := value.ToFloat()
+	metric := Metrics{ID: metricName, MType: GaugeType, Value: &v}
 	mJSON, err := json.Marshal(metric)
 	if err != nil {
 		return err

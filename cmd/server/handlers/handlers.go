@@ -62,7 +62,8 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 	}
 	switch m.MType {
 	case agent.GaugeType:
-		m.Value = allMetrics.GaugeField[m.ID].ToFloat()
+		v := allMetrics.GaugeField[m.ID].ToFloat()
+		m.Value = &v
 		mJSON, err := json.Marshal(m)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -70,7 +71,8 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("content-type", "application/json")
 		w.Write(mJSON)
 	case agent.CounterType:
-		m.Delta = allMetrics.CounterField[m.ID].ToInt64()
+		d := allMetrics.CounterField[m.ID].ToInt64()
+		m.Delta = &d
 		mJSON, err := json.Marshal(m)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -90,10 +92,10 @@ func PostJSON(w http.ResponseWriter, r *http.Request) {
 	}
 	switch m.MType {
 	case agent.GaugeType:
-		allMetrics.GaugeField[m.ID] = storage.Gauge(m.Value)
+		allMetrics.GaugeField[m.ID] = storage.Gauge(*m.Value)
 		w.WriteHeader(http.StatusOK)
 	case agent.CounterType:
-		allMetrics.CounterField[m.ID] += storage.Counter(m.Delta)
+		allMetrics.CounterField[m.ID] += storage.Counter(*m.Delta)
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotFound)
