@@ -185,7 +185,7 @@ func CreateRouter(filename string, isRestored bool) chi.Router {
 	r.Use(gzipHandle)
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/", PostJSON)
-		//r.Post("/{metricType}/{metricName}/{value}", PostMetric)
+		r.Post("/{metricType}/{metricName}/{value}", PostMetric)
 	})
 	r.Post("/value/", GetValue)
 	r.Get("/value/{metricType}/{metricName}", GetMetric)
