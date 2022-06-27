@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	DEFAULT_ADDRESS         = "localhost:8080"
-	DEFAULT_REPORT_INTERVAL = 10 * time.Second
-	DEFAULT_POLL_INTERVAL   = 2 * time.Second
+	defaultAddress         = "localhost:8080"
+	defaultReportInterval = 10 * time.Second
+	defaultPollInterval   = 2 * time.Second
 )
 
 type Config struct {
@@ -27,22 +27,22 @@ type FlagStruct struct {
 func GetEnv() (Config, error) {
 	var cfg Config
 	fs := FlagStruct{}
-	flag.DurationVar(&fs.ReportInterval, "r", DEFAULT_REPORT_INTERVAL, "Interval for sending the metrics to the server")
+	flag.DurationVar(&fs.ReportInterval, "r", defaultReportInterval, "Interval for sending the metrics to the server")
 	flag.DurationVar(&fs.PollInterval, "p", DEFAULT_POLL_INTERVAL, "Interval for polling the metrics")
-	flag.StringVar(&fs.Address, "a", DEFAULT_ADDRESS, "Address for the server")
+	flag.StringVar(&fs.Address, "a", defaultAddress, "Address for the server")
 	flag.Parse()
 
 	err := env.Parse(&cfg)
 	if err != nil {
 		return Config{}, err
 	}
-	if cfg.ReportInterval == DEFAULT_REPORT_INTERVAL && fs.ReportInterval != DEFAULT_REPORT_INTERVAL {
+	if cfg.ReportInterval == defaultReportInterval && fs.ReportInterval != defaultReportInterval {
 		cfg.ReportInterval = fs.ReportInterval
 	}
-	if cfg.PollInterval == DEFAULT_POLL_INTERVAL && fs.PollInterval != DEFAULT_POLL_INTERVAL{
+	if cfg.PollInterval == defaultPollInterval && fs.PollInterval != defaultPollInterval {
 		cfg.PollInterval = fs.PollInterval
 	}
-	if cfg.Address == DEFAULT_ADDRESS {
+	if cfg.Address == defaultAddress {
 		cfg.Address = fs.Address
 	}
 	return cfg, nil
