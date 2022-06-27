@@ -2,14 +2,15 @@ package agent
 
 import (
 	"flag"
+	"fmt"
 	"github.com/caarlos0/env/v6"
 	"time"
 )
 
 const (
 	DEFAULT_ADDRESS         = "localhost:8080"
-	DEFAULT_REPORT_INTERVAL = time.Duration(10 * time.Second)
-	DEFAULT_POLL_INTERVAL   = time.Duration(2 * time.Second)
+	DEFAULT_REPORT_INTERVAL = 10 * time.Second
+	DEFAULT_POLL_INTERVAL   = 2 * time.Second
 )
 
 type Config struct {
@@ -18,21 +19,32 @@ type Config struct {
 	PollInterval   time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
 }
 
+type FlagStruct struct {
+	Address        string
+	ReportInterval time.Duration
+	PollInterval   time.Duration
+}
+
 func GetEnv() (Config, error) {
 	var cfg Config
+	fs := FlagStruct{}
+	flag.DurationVar(&cfg.ReportInterval, "r", cfg.ReportInterval, "Interval for sending the metrics to the server")
+	flag.DurationVar(&cfg.PollInterval, "p", cfg.PollInterval, "Interval for polling the metrics")
+	flag.StringVar(&cfg.Address, "a", cfg.Address, "Address for the server")
+	flag.Parse()
+
 	err := env.Parse(&cfg)
 	if err != nil {
 		return Config{}, err
 	}
 	if cfg.ReportInterval == DEFAULT_REPORT_INTERVAL {
-		flag.DurationVar(&cfg.ReportInterval, "r", cfg.ReportInterval, "Interval for sending the metrics to the server")
+		cfg.ReportInterval = fs.ReportInterval
 	}
 	if cfg.PollInterval == DEFAULT_POLL_INTERVAL {
-		flag.DurationVar(&cfg.PollInterval, "p", cfg.PollInterval, "Interval for polling the metrics")
+		cfg.PollInterval = fs.PollInterval
 	}
 	if cfg.Address == DEFAULT_ADDRESS {
-		flag.StringVar(&cfg.Address, "a", cfg.Address, "Address for the server")
+		cfg.Address = fs.Address
 	}
-	flag.Parse()
 	return cfg, nil
 }
