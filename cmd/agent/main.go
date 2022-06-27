@@ -24,7 +24,7 @@ func main() {
 	exitChan := make(chan int)
 	tickerCollectMetrics := time.NewTicker(Cfg.ReportInterval)
 	tickerReportMetrics := time.NewTicker(Cfg.PollInterval)
-	var am storage.Storage
+	var am = storage.New()
 	go func() {
 		for {
 			select {
