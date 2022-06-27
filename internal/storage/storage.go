@@ -19,8 +19,8 @@ type Storage struct {
 
 func New() Storage {
 	return Storage{
-		Metrics,
-		Counters,
+		GaugeField: make(map[string]Gauge),
+		CounterField: make(map[string]Counter),
 	}
 }
 
