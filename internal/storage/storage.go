@@ -43,7 +43,7 @@ func (s *Storage) LoadMetricsFromJSON(filename string, isRestored bool) error {
 			if err != nil {
 				return err
 			}
-			err = json.Unmarshal(file, &s)
+			err = json.Unmarshal(file, s)
 			if err != nil {
 				return err
 			}
