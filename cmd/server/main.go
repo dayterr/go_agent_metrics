@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var CfgLogger server.ConfigLogger
+//var CfgLogger server.ConfigLogger
 
 func main() {
 	CfgLogger, err := server.GetEnvLogger()
