@@ -12,8 +12,6 @@ import (
 	agent2 "github.com/dayterr/go_agent_metrics/internal/config/agent"
 )
 
-var Cfg agent2.Config
-
 func main() {
 	Cfg, err := agent2.GetEnv()
 	if err != nil {
