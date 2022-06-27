@@ -44,9 +44,9 @@ func GetEnvLogger() (ConfigLogger, error) {
 	if cfg.Address == defaultAddress{
 		cfg.Address = fs.Address
 	}
-	if cfg.Restore == DEFAULT_RESTORE {
+	/*if cfg.Restore == DEFAULT_RESTORE {
 		cfg.Restore = fs.Restore
-	}
+	}*/
 	if cfg.StoreInterval == defaultStoreInterval {
 		cfg.StoreInterval = fs.StoreInterval
 	}

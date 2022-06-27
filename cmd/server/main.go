@@ -9,8 +9,6 @@ import (
 	"time"
 )
 
-//var CfgLogger server.ConfigLogger
-
 func main() {
 	CfgLogger, err := server.GetEnvLogger()
 	if err != nil {
