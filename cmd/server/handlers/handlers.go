@@ -3,7 +3,6 @@ package handlers
 import (
 	"compress/gzip"
 	"encoding/json"
-	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"github.com/go-chi/chi/v5"
 	"html/template"
@@ -89,7 +88,6 @@ func PostJSON(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
-	fmt.Println(allMetrics)
 	switch m.MType {
 	case agent.GaugeType:
 		allMetrics.GaugeField[m.ID] = storage.Gauge(m.Value)
