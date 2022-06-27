@@ -61,6 +61,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
+	fmt.Println(m)
 	switch m.MType {
 	case agent.GaugeType:
 		fmt.Println(allMetrics)
