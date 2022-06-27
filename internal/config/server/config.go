@@ -9,8 +9,8 @@ import (
 var (
 	defaultAddress        = "localhost:8080"
 	defaultStoreInterval  = 300 * time.Second
-	DEFAULT_STORE_FILE      = "/tmp/devops-metrics-db.json"
-	DEFAULT_RESTORE         = true
+	defaultStoreFile      = "/tmp/devops-metrics-db.json"
+	defaultRestore         = true
 )
 
 type ConfigLogger struct {
@@ -31,9 +31,9 @@ func GetEnvLogger() (ConfigLogger, error) {
 	cfg := ConfigLogger{}
 	fs := FlagStruct{}
 	flag.StringVar(&fs.Address, "a", defaultAddress, "Address for the server")
-	flag.BoolVar(&fs.Restore, "r", DEFAULT_RESTORE, "A bool flag for configuration upload")
+	flag.BoolVar(&fs.Restore, "r", defaultRestore, "A bool flag for configuration upload")
 	flag.DurationVar(&fs.StoreInterval, "i", defaultStoreInterval, "Interval for saving the metrics into the file")
-	flag.StringVar(&fs.StoreFile, "f", DEFAULT_STORE_FILE, "file to store the metrics")
+	flag.StringVar(&fs.StoreFile, "f", defaultStoreFile, "file to store the metrics")
 	flag.Parse()
 
 	err := env.Parse(&cfg)
@@ -50,7 +50,7 @@ func GetEnvLogger() (ConfigLogger, error) {
 	if cfg.StoreInterval == defaultStoreInterval {
 		cfg.StoreInterval = fs.StoreInterval
 	}
-	if cfg.StoreFile == DEFAULT_STORE_FILE {
+	if cfg.StoreFile == defaultStoreFile {
 		cfg.StoreFile = fs.StoreFile
 	}
 	return cfg, nil
