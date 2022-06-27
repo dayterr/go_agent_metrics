@@ -22,15 +22,15 @@ func main() {
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	exitChan := make(chan int)
-	tickerCollectMetrics := time.NewTicker(Cfg.ReportInterval)
-	tickerReportMetrics := time.NewTicker(Cfg.PollInterval)
+	tickerCollectMetrics := time.NewTicker(Cfg.PollInterval)
+	tickerReportMetrics := time.NewTicker(Cfg.ReportInterval)
 	var am = storage.New()
 	go func() {
 		for {
 			select {
-			case <-tickerReportMetrics.C:
-				am = agent.ReadMetrics()
 			case <-tickerCollectMetrics.C:
+				am = agent.ReadMetrics()
+			case <-tickerReportMetrics.C:
 				agent.PostAll(am, Cfg.Address)
 			case s := <-signalChan:
 				switch s {
