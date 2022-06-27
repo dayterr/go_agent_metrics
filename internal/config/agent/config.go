@@ -2,7 +2,6 @@ package agent
 
 import (
 	"flag"
-	"fmt"
 	"github.com/caarlos0/env/v6"
 	"time"
 )
@@ -28,19 +27,19 @@ type FlagStruct struct {
 func GetEnv() (Config, error) {
 	var cfg Config
 	fs := FlagStruct{}
-	flag.DurationVar(&cfg.ReportInterval, "r", cfg.ReportInterval, "Interval for sending the metrics to the server")
-	flag.DurationVar(&cfg.PollInterval, "p", cfg.PollInterval, "Interval for polling the metrics")
-	flag.StringVar(&cfg.Address, "a", cfg.Address, "Address for the server")
+	flag.DurationVar(&fs.ReportInterval, "r", DEFAULT_REPORT_INTERVAL, "Interval for sending the metrics to the server")
+	flag.DurationVar(&fs.PollInterval, "p", DEFAULT_POLL_INTERVAL, "Interval for polling the metrics")
+	flag.StringVar(&fs.Address, "a", DEFAULT_ADDRESS, "Address for the server")
 	flag.Parse()
 
 	err := env.Parse(&cfg)
 	if err != nil {
 		return Config{}, err
 	}
-	if cfg.ReportInterval == DEFAULT_REPORT_INTERVAL {
+	if cfg.ReportInterval == DEFAULT_REPORT_INTERVAL && fs.ReportInterval != DEFAULT_REPORT_INTERVAL {
 		cfg.ReportInterval = fs.ReportInterval
 	}
-	if cfg.PollInterval == DEFAULT_POLL_INTERVAL {
+	if cfg.PollInterval == DEFAULT_POLL_INTERVAL && fs.PollInterval != DEFAULT_POLL_INTERVAL{
 		cfg.PollInterval = fs.PollInterval
 	}
 	if cfg.Address == DEFAULT_ADDRESS {
