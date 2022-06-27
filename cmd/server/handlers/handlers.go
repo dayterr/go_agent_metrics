@@ -3,10 +3,12 @@ package handlers
 import (
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"github.com/go-chi/chi/v5"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -48,6 +50,7 @@ func gzipHandle(next http.Handler) http.Handler {
 func MarshallMetrics() ([]byte, error) {
 	jsn, err := json.Marshal(allMetrics)
 	if err != nil {
+		fmt.Println("here is the problem")
 		return nil, err
 	}
 	return jsn, nil
@@ -180,7 +183,10 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateRouter(filename string, isRestored bool) chi.Router {
-	allMetrics.LoadMetricsFromJSON(filename, isRestored)
+	err := allMetrics.LoadMetricsFromJSON(filename, isRestored)
+	if err != nil {
+		log.Fatal(err)
+	}
 	r := chi.NewRouter()
 	r.Use(gzipHandle)
 	r.Route("/update", func(r chi.Router) {
