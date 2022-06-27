@@ -9,9 +9,6 @@ import (
 type Gauge float64
 type Counter int64
 
-var Metrics = make(map[string]Gauge)
-var Counters = make(map[string]Counter)
-
 type Storage struct {
 	GaugeField   map[string]Gauge   `json:"Gauge"`
 	CounterField map[string]Counter `json:"Counter"`
