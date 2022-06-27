@@ -3,7 +3,6 @@ package handlers
 import (
 	"compress/gzip"
 	"encoding/json"
-	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"github.com/go-chi/chi/v5"
 	"html/template"
@@ -58,32 +57,26 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 	var m agent.Metrics
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
-		fmt.Println("error1", err)
 		w.WriteHeader(http.StatusBadRequest)
 	}
 	switch m.MType {
 	case agent.GaugeType:
-		fmt.Println(allMetrics.GaugeField[m.ID])
 		m.Value = allMetrics.GaugeField[m.ID].ToFloat()
 		mJSON, err := json.Marshal(m)
 		if err != nil {
-			fmt.Println("error2", err)
 			w.WriteHeader(http.StatusBadRequest)
 		}
 		w.Header().Set("content-type", "application/json")
 		w.Write(mJSON)
 	case agent.CounterType:
-		fmt.Println(allMetrics.CounterField[m.ID])
 		m.Delta = allMetrics.CounterField[m.ID].ToInt64()
 		mJSON, err := json.Marshal(m)
 		if err != nil {
-			fmt.Println("error3", err)
 			w.WriteHeader(http.StatusBadRequest)
 		}
 		w.Header().Set("content-type", "application/json")
 		w.Write(mJSON)
 	default:
-		fmt.Println("error4", err)
 		w.WriteHeader(http.StatusBadRequest)
 	}
 }
@@ -192,7 +185,7 @@ func CreateRouter(filename string, isRestored bool) chi.Router {
 	r.Use(gzipHandle)
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/", PostJSON)
-		r.Post("/{metricType}/{metricName}/{value}", PostMetric)
+		//r.Post("/{metricType}/{metricName}/{value}", PostMetric)
 	})
 	r.Post("/value/", GetValue)
 	r.Get("/value/{metricType}/{metricName}", GetMetric)
