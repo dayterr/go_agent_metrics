@@ -14,11 +14,6 @@ type Storage struct {
 	CounterField map[string]Counter
 }
 
-type TempStorage struct {
-	GaugeField   map[string]Gauge   `json:"Gauge"`
-	CounterField map[string]Counter `json:"Counter"`
-}
-
 func New() Storage {
 	return Storage{
 		GaugeField: make(map[string]Gauge),
@@ -45,16 +40,9 @@ func (s Storage) LoadMetricsFromJSON(filename string, isRestored bool) error {
 			if err != nil {
 				return err
 			}
-			var ts TempStorage
-			err = json.Unmarshal(file, &ts)
+			err = json.Unmarshal(file, &s)
 			if err != nil {
 				return err
-			}
-			for k, v := range ts.GaugeField {
-				s.GaugeField[k] = v
-			}
-			for k, v := range ts.CounterField {
-				s.CounterField[k] = v
 			}
 		}
 	}
