@@ -10,6 +10,11 @@ type Gauge float64
 type Counter int64
 
 type Storage struct {
+	GaugeField   map[string]Gauge
+	CounterField map[string]Counter
+}
+
+type TempStorage struct {
 	GaugeField   map[string]Gauge   `json:"Gauge"`
 	CounterField map[string]Counter `json:"Counter"`
 }
@@ -40,9 +45,16 @@ func (s Storage) LoadMetricsFromJSON(filename string, isRestored bool) error {
 			if err != nil {
 				return err
 			}
-			err = json.Unmarshal(file, s)
+			var ts TempStorage
+			err = json.Unmarshal(file, &ts)
 			if err != nil {
 				return err
+			}
+			for k, v := range ts.GaugeField {
+				s.GaugeField[k] = v
+			}
+			for k, v := range ts.CounterField {
+				s.CounterField[k] = v
 			}
 		}
 	}
