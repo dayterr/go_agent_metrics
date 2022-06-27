@@ -28,7 +28,7 @@ func GetEnv() (Config, error) {
 	var cfg Config
 	fs := FlagStruct{}
 	flag.DurationVar(&fs.ReportInterval, "r", defaultReportInterval, "Interval for sending the metrics to the server")
-	flag.DurationVar(&fs.PollInterval, "p", DEFAULT_POLL_INTERVAL, "Interval for polling the metrics")
+	flag.DurationVar(&fs.PollInterval, "p", defaultPollInterval, "Interval for polling the metrics")
 	flag.StringVar(&fs.Address, "a", defaultAddress, "Address for the server")
 	flag.Parse()
 
