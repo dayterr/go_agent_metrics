@@ -36,7 +36,7 @@ func (c Counter) ToInt() int {
 	return int(c)
 }
 
-func (s Storage) LoadMetricsFromJSON(filename string, isRestored bool) error {
+func (s *Storage) LoadMetricsFromJSON(filename string, isRestored bool) error {
 	if isRestored {
 		if _, err := os.Stat(filename); err == nil {
 			file, err := ioutil.ReadFile(filename)
