@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"net"
 	"net/http/httptest"
 	"testing"
@@ -17,13 +18,13 @@ func TestPostGauge(t *testing.T) {
 
 	tests := []struct {
 		name       string
-		value      agent.Gauge
+		value      storage.Gauge
 		metricName string
 		metricType string
 		want       error
 	}{
-		{name: "no error for gauge metric", value: agent.Gauge(63.3), metricName: "Some_Metric", metricType: "gauge", want: nil},
-		{name: "no error for gauge metric without decimal part", value: agent.Gauge(63), metricName: "Some_Metric", metricType: "gauge", want: nil},
+		{name: "no error for gauge metric", value: storage.Gauge(63.3), metricName: "Some_Metric", metricType: "gauge", want: nil},
+		{name: "no error for gauge metric without decimal part", value: storage.Gauge(63), metricName: "Some_Metric", metricType: "gauge", want: nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -35,7 +36,7 @@ func TestPostGauge(t *testing.T) {
 			ts.Listener = l
 			ts.Start()
 			defer ts.Close()
-			v := agent.PostMetric(tt.value, tt.metricName, tt.metricType, address)
+			v := agent.PostGauge(tt.value, tt.metricName, address)
 			assert.Nil(t, v)
 		})
 	}
@@ -45,13 +46,13 @@ func TestPostGauge(t *testing.T) {
 func TestPostCounter(t *testing.T) {
 	tests := []struct {
 		name       string
-		value      agent.Counter
+		value      storage.Counter
 		metricName string
 		metricType string
 		want       error
 	}{
-		{name: "no error for counter metric", value: agent.Counter(63), metricName: "Some_Counter", metricType: "counter", want: nil},
-		{name: "no error for counter metric zero", value: agent.Counter(0), metricName: "Some_Counter", metricType: "counter", want: nil},
+		{name: "no error for counter metric", value: storage.Counter(63), metricName: "Some_Counter", metricType: "counter", want: nil},
+		{name: "no error for counter metric zero", value: storage.Counter(0), metricName: "Some_Counter", metricType: "counter", want: nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -63,7 +64,7 @@ func TestPostCounter(t *testing.T) {
 			ts.Listener = l
 			ts.Start()
 			defer ts.Close()
-			v := agent.PostCounter(tt.value, tt.metricName, tt.metricType, address)
+			v := agent.PostCounter(tt.value, tt.metricName, address)
 			assert.Nil(t, v)
 		})
 	}
