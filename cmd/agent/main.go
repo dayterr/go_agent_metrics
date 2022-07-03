@@ -13,7 +13,8 @@ import (
 )
 
 func main() {
-	agent := agent.Agent{Storage: storage.InMemoryStorage{}}
+	s := storage.NewIMS()
+	agent := agent.Agent{Storage: s}
 	Cfg, err := agent2.GetEnv()
 	if err != nil {
 		log.Fatal(err)

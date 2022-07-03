@@ -8,7 +8,7 @@ import (
 	"runtime"
 )
 
-func New() InMemoryStorage {
+func NewIMS() InMemoryStorage {
 	return InMemoryStorage{
 		GaugeField: make(map[string]Gauge),
 		CounterField: make(map[string]Counter),
