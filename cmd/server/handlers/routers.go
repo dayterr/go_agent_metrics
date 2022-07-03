@@ -28,7 +28,7 @@ func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandl
 	r.Post("/value/", h.GetValue)
 	r.Get("/value/{metricType}/{metricName}", h.GetMetric)
 	r.Get("/", h.GetIndex)
-	return r, h
+	return r
 }
 
 /*func CreateRouterWithSyncHandler(filename string, isRestored bool) chi.Router {
