@@ -7,7 +7,8 @@ import (
 )
 
 func CreateRouterWithAsyncHandler(filename string, isRestored bool) (chi.Router, AsyncHandler) {
-	h := AsyncHandler{storage: storage.InMemoryStorage{}}
+	s := storage.NewIMS()
+	h := AsyncHandler{storage: s}
 	if isRestored {
 		err := h.storage.LoadMetricsFromFile(filename)
 		if err != nil {
