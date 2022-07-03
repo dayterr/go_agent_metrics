@@ -26,5 +26,6 @@ func main() {
 		}
 	}()
 	r := handlers.CreateRouterWithAsyncHandler(CfgLogger.StoreFile, CfgLogger.Restore, h)
+
 	http.ListenAndServe(CfgLogger.Address, r)
 }
