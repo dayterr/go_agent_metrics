@@ -1,13 +1,7 @@
 package main
 
 import (
-	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
-
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 	agent2 "github.com/dayterr/go_agent_metrics/internal/config/agent"
 )
