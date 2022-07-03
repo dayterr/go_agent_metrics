@@ -12,6 +12,7 @@ import (
 
 func main() {
 	CfgLogger, err := server.GetEnvLogger()
+	fmt.Println(CfgLogger)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -20,10 +21,7 @@ func main() {
 	go func() {
 		for {
 			<-ticker.C
-			jsn, err := h.MarshallMetrics()
-			if err != nil {
-				fmt.Println("error", err)
-			}
+			jsn, _ := h.MarshallMetrics()
 			server2.WriteJSON(CfgLogger.StoreFile, jsn)
 		}
 	}()
