@@ -14,6 +14,8 @@ type Storager interface {
 	ReadMetrics()
 	GetGauges() map[string]Gauge
 	GetCounters() map[string]Counter
+	CheckGaugeByName(name string) bool
+	CheckCounterByName(name string) bool
 }
 
 type InMemoryStorage struct {

@@ -15,12 +15,13 @@ func main() {
 		log.Fatal(err)
 	}
 	ticker := time.NewTicker(CfgLogger.StoreInterval)
+	r, h := handlers.CreateRouterWithAsyncHandler(CfgLogger.StoreFile, CfgLogger.Restore)
 	go func() {
 		for {
 			<-ticker.C
-			server2.WriteJSON(CfgLogger.StoreFile)
+			jsn, _ := h.MarshallMetrics()
+			server2.WriteJSON(CfgLogger.StoreFile, jsn)
 		}
 	}()
-	r := handlers.CreateRouterWithAsyncHandler(CfgLogger.StoreFile, CfgLogger.Restore)
 	http.ListenAndServe(CfgLogger.Address, r)
 }

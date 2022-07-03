@@ -1,13 +1,16 @@
 package handlers
 
 import (
+	"bufio"
 	"compress/gzip"
 	"encoding/json"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"github.com/go-chi/chi/v5"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -21,8 +24,6 @@ type AsyncHandler struct {
 type SyncHandler struct {
 	storage storage.Storager
 }
-
-var allMetrics = storage.New()
 
 type gzipWriter struct {
 	http.ResponseWriter
@@ -53,12 +54,27 @@ func gzipHandle(next http.Handler) http.Handler {
 	})
 }
 
-func MarshallMetrics() ([]byte, error) {
-	jsn, err := json.Marshal(allMetrics)
+func (ah AsyncHandler) MarshallMetrics() ([]byte, error) {
+	jsn, err := json.Marshal(ah.storage)
 	if err != nil {
 		return nil, err
 	}
 	return jsn, nil
+}
+
+func (ah AsyncHandler) WriteJSON(path string) {
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0777)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	jsn, err := ah.MarshallMetrics()
+	if err != nil {
+		log.Fatal(err)
+	}
+	w := bufio.NewWriter(file)
+	w.Write(jsn)
+	w.Flush()
 }
 
 func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
@@ -69,7 +85,7 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 	}
 	switch m.MType {
 	case agent.GaugeType:
-		v := allMetrics.GaugeField[m.ID].ToFloat()
+		v := ah.storage.GetGuageByID(m.ID)
 		m.Value = &v
 		mJSON, err := json.Marshal(m)
 		if err != nil {
@@ -78,7 +94,7 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("content-type", "application/json")
 		w.Write(mJSON)
 	case agent.CounterType:
-		d := allMetrics.CounterField[m.ID].ToInt64()
+		d := ah.storage.GetCounterByID(m.ID)
 		m.Delta = &d
 		mJSON, err := json.Marshal(m)
 		if err != nil {
@@ -99,10 +115,10 @@ func (as AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
 	}
 	switch m.MType {
 	case agent.GaugeType:
-		allMetrics.GaugeField[m.ID] = storage.Gauge(*m.Value)
+		as.storage.SetGuage(m.ID, m.Value)
 		w.WriteHeader(http.StatusOK)
 	case agent.CounterType:
-		allMetrics.CounterField[m.ID] += storage.Counter(*m.Delta)
+		as.storage.SetCounter(m.ID, m.Delta)
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotFound)
@@ -128,7 +144,7 @@ func (ah AsyncHandler) PostMetric(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		allMetrics.GaugeField[metricName] = storage.Gauge(valFloat)
+		ah.storage.SetGuage(metricName, &valFloat)
 		w.WriteHeader(http.StatusOK)
 	case agent.CounterType:
 		valInt, err := strconv.Atoi(value)
@@ -136,7 +152,7 @@ func (ah AsyncHandler) PostMetric(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		allMetrics.CounterField[metricName] += storage.Counter(int64(valInt))
+		ah.storage.SetCounterFromMemStats(metricName, int64(valInt))
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
@@ -152,8 +168,8 @@ func (ah AsyncHandler) GetMetric(w http.ResponseWriter, r *http.Request) {
 	}
 	switch metricType {
 	case agent.GaugeType:
-		if _, ok := allMetrics.GaugeField[metricName]; ok {
-			value := strconv.FormatFloat(allMetrics.GaugeField[metricName].ToFloat(), 'f', -1, 64)
+		if ah.storage.CheckGaugeByName(metricName) {
+			value := strconv.FormatFloat(ah.storage.GetGuageByID(metricName), 'f', -1, 64)
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(value))
 		} else {
@@ -161,8 +177,8 @@ func (ah AsyncHandler) GetMetric(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case agent.CounterType:
-		if _, ok := allMetrics.CounterField[metricName]; ok {
-			c := strconv.Itoa(allMetrics.CounterField[metricName].ToInt())
+		if ah.storage.CheckCounterByName(metricName) {
+			c := strconv.Itoa(int(ah.storage.GetCounterByID(metricName)))
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(c))
 		} else {
@@ -182,7 +198,7 @@ func (ah AsyncHandler) GetIndex(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	err = t.ExecuteTemplate(w, "index.html", allMetrics.GaugeField)
+	err = t.ExecuteTemplate(w, "index.html", ah.storage.GetGauges())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

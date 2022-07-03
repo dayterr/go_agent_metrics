@@ -109,3 +109,14 @@ func (s InMemoryStorage) GetGauges() map[string]Gauge {
 func (s InMemoryStorage) GetCounters() map[string]Counter {
 	return s.CounterField
 }
+
+func (s InMemoryStorage) CheckGaugeByName(name string) bool {
+	_, ok := s.GaugeField[name]
+	return ok
+}
+
+func (s InMemoryStorage) CheckCounterByName(name string) bool {
+	_, ok := s.CounterField[name]
+	return ok
+}
+

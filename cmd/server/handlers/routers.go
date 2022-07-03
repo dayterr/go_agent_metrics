@@ -6,7 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func CreateRouterWithAsyncHandler(filename string, isRestored bool) chi.Router {
+func CreateRouterWithAsyncHandler(filename string, isRestored bool) (chi.Router, AsyncHandler) {
 	h := AsyncHandler{storage: storage.InMemoryStorage{}}
 	if isRestored {
 		err := h.storage.LoadMetricsFromFile(filename)
@@ -23,7 +23,7 @@ func CreateRouterWithAsyncHandler(filename string, isRestored bool) chi.Router {
 	r.Post("/value/", h.GetValue)
 	r.Get("/value/{metricType}/{metricName}", h.GetMetric)
 	r.Get("/", h.GetIndex)
-	return r
+	return r, h
 }
 
 /*func CreateRouterWithSyncHandler(filename string, isRestored bool) chi.Router {
