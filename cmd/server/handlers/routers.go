@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"github.com/dayterr/go_agent_metrics/internal/storage"
-	"log"
 	"github.com/go-chi/chi/v5"
+	"log"
 )
 
 func CreateRouterWithAsyncHandler(filename string, isRestored bool) (chi.Router, AsyncHandler) {

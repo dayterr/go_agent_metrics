@@ -1,16 +1,13 @@
 package handlers
 
 import (
-	"bufio"
 	"compress/gzip"
 	"encoding/json"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"github.com/go-chi/chi/v5"
 	"html/template"
 	"io"
-	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 
@@ -60,21 +57,6 @@ func (ah AsyncHandler) MarshallMetrics() ([]byte, error) {
 		return nil, err
 	}
 	return jsn, nil
-}
-
-func (ah AsyncHandler) WriteJSON(path string) {
-	file, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0777)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-	jsn, err := ah.MarshallMetrics()
-	if err != nil {
-		log.Fatal(err)
-	}
-	w := bufio.NewWriter(file)
-	w.Write(jsn)
-	w.Flush()
 }
 
 func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
