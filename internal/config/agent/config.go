@@ -42,7 +42,7 @@ func GetEnv() (Config, error) {
 	if cfg.PollInterval == defaultPollInterval && fs.PollInterval != defaultPollInterval {
 		cfg.PollInterval = fs.PollInterval
 	}
-	if cfg.Address == defaultAddress {
+	if cfg.Address == defaultAddress && fs.Address != defaultAddress {
 		cfg.Address = fs.Address
 	}
 	return cfg, nil

@@ -37,7 +37,7 @@ func (a Agent) Run() {
 			case <-tickerCollectMetrics.C:
 				a.Storage.ReadMetrics()
 			case <-tickerReportMetrics.C:
-				a.PostAll(a.Address)
+				a.PostAll()
 			case s := <-signalChan:
 				switch s {
 				case syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT:
