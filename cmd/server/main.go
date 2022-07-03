@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
 	"github.com/dayterr/go_agent_metrics/internal/config/server"
 	server2 "github.com/dayterr/go_agent_metrics/internal/server"
@@ -19,7 +20,10 @@ func main() {
 	go func() {
 		for {
 			<-ticker.C
-			jsn, _ := h.MarshallMetrics()
+			jsn, err := h.MarshallMetrics()
+			if err != nil {
+				fmt.Println("error", err)
+			}
 			server2.WriteJSON(CfgLogger.StoreFile, jsn)
 		}
 	}()
