@@ -6,9 +6,13 @@ import (
 	"log"
 )
 
-func CreateRouterWithAsyncHandler(filename string, isRestored bool) (chi.Router, AsyncHandler) {
+func NewAsyncHandler() AsyncHandler {
 	s := storage.NewIMS()
 	h := AsyncHandler{storage: s}
+	return h
+}
+
+func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandler) chi.Router {
 	if isRestored {
 		err := h.storage.LoadMetricsFromFile(filename)
 		if err != nil {

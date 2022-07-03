@@ -2,7 +2,6 @@ package server
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 )
@@ -13,7 +12,6 @@ func WriteJSON(path string, jsn []byte) {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	fmt.Println("writing")
 	w := bufio.NewWriter(file)
 	w.Write(jsn)
 	w.Flush()
