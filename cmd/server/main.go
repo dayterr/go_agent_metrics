@@ -21,6 +21,6 @@ func main() {
 			server2.WriteJSON(CfgLogger.StoreFile)
 		}
 	}()
-	r := handlers.CreateRouter(CfgLogger.StoreFile, CfgLogger.Restore)
+	r := handlers.CreateRouterWithAsyncHandler(CfgLogger.StoreFile, CfgLogger.Restore)
 	http.ListenAndServe(CfgLogger.Address, r)
 }

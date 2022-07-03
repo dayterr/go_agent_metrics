@@ -7,13 +7,20 @@ import (
 	"github.com/go-chi/chi/v5"
 	"html/template"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 )
+
+type AsyncHandler struct {
+	storage storage.Storager
+}
+
+type SyncHandler struct {
+	storage storage.Storager
+}
 
 var allMetrics = storage.New()
 
@@ -54,7 +61,7 @@ func MarshallMetrics() ([]byte, error) {
 	return jsn, nil
 }
 
-func GetValue(w http.ResponseWriter, r *http.Request) {
+func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 	var m agent.Metrics
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
@@ -84,7 +91,7 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func PostJSON(w http.ResponseWriter, r *http.Request) {
+func (as AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
 	var m agent.Metrics
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
@@ -102,7 +109,7 @@ func PostJSON(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func PostMetric(w http.ResponseWriter, r *http.Request) {
+func (ah AsyncHandler) PostMetric(w http.ResponseWriter, r *http.Request) {
 	metricType := chi.URLParam(r, "metricType")
 	metricName := chi.URLParam(r, "metricName")
 	if metricName == "" {
@@ -136,7 +143,7 @@ func PostMetric(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetMetric(w http.ResponseWriter, r *http.Request) {
+func (ah AsyncHandler) GetMetric(w http.ResponseWriter, r *http.Request) {
 	metricType := chi.URLParam(r, "metricType")
 	metricName := chi.URLParam(r, "metricName")
 	if metricName == "" {
@@ -168,7 +175,7 @@ func GetMetric(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetIndex(w http.ResponseWriter, r *http.Request) {
+func (ah AsyncHandler) GetIndex(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "text/html; charset=utf-8")
 	t, err := template.ParseFiles("template/index.html")
 	if err != nil {
@@ -182,19 +189,3 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateRouter(filename string, isRestored bool) chi.Router {
-	err := allMetrics.LoadMetricsFromJSON(filename, isRestored)
-	if err != nil {
-		log.Fatal(err)
-	}
-	r := chi.NewRouter()
-	r.Use(gzipHandle)
-	r.Route("/update", func(r chi.Router) {
-		r.Post("/", PostJSON)
-		r.Post("/{metricType}/{metricName}/{value}", PostMetric)
-	})
-	r.Post("/value/", GetValue)
-	r.Get("/value/{metricType}/{metricName}", GetMetric)
-	r.Get("/", GetIndex)
-	return r
-}

@@ -13,6 +13,7 @@ import (
 )
 
 func main() {
+	agent := agent.Agent{Storage: storage.InMemoryStorage{}}
 	Cfg, err := agent2.GetEnv()
 	if err != nil {
 		log.Fatal(err)
@@ -22,14 +23,13 @@ func main() {
 	exitChan := make(chan int)
 	tickerCollectMetrics := time.NewTicker(Cfg.PollInterval)
 	tickerReportMetrics := time.NewTicker(Cfg.ReportInterval)
-	var am = storage.New()
 	go func() {
 		for {
 			select {
 			case <-tickerCollectMetrics.C:
-				am = agent.ReadMetrics()
+				agent.Storage.ReadMetrics()
 			case <-tickerReportMetrics.C:
-				agent.PostAll(am, Cfg.Address)
+				agent.PostAll(Cfg.Address)
 			case s := <-signalChan:
 				switch s {
 				case syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT:
