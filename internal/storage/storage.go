@@ -57,7 +57,7 @@ func (s InMemoryStorage) SetGuage(id string, v *float64) {
 }
 
 func (s InMemoryStorage) SetCounter(id string, v *int64) {
-	s.CounterField[id] = Counter(*v)
+	s.CounterField[id] += Counter(*v)
 }
 
 func (s InMemoryStorage) SetGaugeFromMemStats(id string, value float64) {
