@@ -65,7 +65,7 @@ func (s InMemoryStorage) SetGaugeFromMemStats(id string, value float64) {
 }
 
 func (s InMemoryStorage) SetCounterFromMemStats(id string, value int64) {
-	s.CounterField[id] = Counter(value)
+	s.CounterField[id] += Counter(value)
 }
 
 func (s InMemoryStorage) ReadMetrics() {
