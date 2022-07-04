@@ -3,6 +3,7 @@ package server
 import (
 	"flag"
 	"github.com/caarlos0/env/v6"
+	"log"
 	"time"
 )
 
@@ -40,6 +41,7 @@ func GetEnvLogger() (ConfigLogger, error) {
 	if err != nil {
 		return ConfigLogger{}, err
 	}
+	log.Println(cfg)
 
 	if cfg.Address == defaultAddress{
 		cfg.Address = fs.Address

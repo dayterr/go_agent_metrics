@@ -3,6 +3,7 @@ package agent
 import (
 	"flag"
 	"github.com/caarlos0/env/v6"
+	"log"
 	"time"
 )
 
@@ -33,6 +34,7 @@ func GetEnv() (Config, error) {
 	flag.Parse()
 
 	err := env.Parse(&cfg)
+	log.Println(cfg)
 	if err != nil {
 		return Config{}, err
 	}
