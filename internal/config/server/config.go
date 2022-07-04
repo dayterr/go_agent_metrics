@@ -4,6 +4,7 @@ import (
 	"flag"
 	"github.com/caarlos0/env/v6"
 	"log"
+	"os"
 	"time"
 )
 
@@ -32,6 +33,11 @@ func GetEnvLogger() (ConfigLogger, error) {
 	log.Println("first line in GetEnvLogger")
 	cfg := ConfigLogger{}
 	fs := FlagStruct{}
+	flag.StringVar(&fs.Address, "a", defaultAddress, "Address for the server")
+	flag.BoolVar(&fs.Restore, "r", defaultRestore, "A bool flag for configuration upload")
+	flag.DurationVar(&fs.StoreInterval, "i", defaultStoreInterval, "Interval for saving the metrics into the file")
+	flag.StringVar(&fs.StoreFile, "f", defaultStoreFile, "file to store the metrics")
+	flag.Parse()
 
 	err := env.Parse(&cfg)
 	log.Println("err server config", err)
@@ -41,16 +47,10 @@ func GetEnvLogger() (ConfigLogger, error) {
 	}
 	log.Println("server config", cfg)
 
-	flag.StringVar(&fs.Address, "a", defaultAddress, "Address for the server")
-	flag.BoolVar(&fs.Restore, "r", defaultRestore, "A bool flag for configuration upload")
-	flag.DurationVar(&fs.StoreInterval, "i", defaultStoreInterval, "Interval for saving the metrics into the file")
-	flag.StringVar(&fs.StoreFile, "f", defaultStoreFile, "file to store the metrics")
-	flag.Parse()
-	
 	if cfg.Address == defaultAddress && fs.Address != defaultAddress {
 		cfg.Address = fs.Address
 	}
-	if cfg.Restore == defaultRestore  && fs.Restore != defaultRestore {
+	if cfg.Restore == defaultRestore && fs.Restore != defaultRestore && os.Getenv("RESTORE") == "" {
 		cfg.Restore = fs.Restore
 	}
 	if cfg.StoreInterval == defaultStoreInterval && fs.StoreInterval != defaultStoreInterval {
