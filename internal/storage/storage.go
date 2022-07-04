@@ -101,7 +101,7 @@ func (s InMemoryStorage) ReadMetrics() {
 	s.SetGaugeFromMemStats("TotalAlloc", float64(m.TotalAlloc))
 	s.SetGaugeFromMemStats("RandomValue", rand.Float64())
 	s.SetCounterFromMemStats("PollCount", 1)
-	log.Println(s)
+	log.Println("metrics read", s)
 }
 
 func (s InMemoryStorage) GetGauges() map[string]Gauge {
