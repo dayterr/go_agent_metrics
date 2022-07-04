@@ -14,7 +14,6 @@ func NewAsyncHandler() AsyncHandler {
 
 func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandler) chi.Router {
 	if isRestored {
-		log.Println("filename is", filename)
 		err := h.storage.LoadMetricsFromFile(filename)
 		if err != nil {
 			log.Fatal(err)
@@ -29,7 +28,6 @@ func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandl
 	r.Post("/value/", h.GetValue)
 	r.Get("/value/{metricType}/{metricName}", h.GetMetric)
 	r.Get("/", h.GetIndex)
-	log.Println("router created")
 	return r
 }
 

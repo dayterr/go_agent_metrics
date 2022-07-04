@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-	log.Println("first line in agent")
 	Cfg, err := agent2.GetEnv()
 	if err != nil {
 		log.Fatal(err)

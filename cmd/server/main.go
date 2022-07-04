@@ -18,10 +18,8 @@ func main() {
 	ticker := time.NewTicker(CfgLogger.StoreInterval)
 	h := handlers.NewAsyncHandler()
 	go func(h handlers.AsyncHandler) {
-		log.Println("starting writing goroutine")
 		for {
 			<-ticker.C
-			log.Println("h is", h)
 			jsn, err := h.MarshallMetrics()
 			if err != nil {
 				log.Fatal(err)
@@ -30,7 +28,6 @@ func main() {
 		}
 	}(h)
 	r := handlers.CreateRouterWithAsyncHandler(CfgLogger.StoreFile, CfgLogger.Restore, h)
-	log.Println("out of goroutine and created router")
 	err = http.ListenAndServe(CfgLogger.Address, r)
 	if err != nil {
 		log.Fatal(err)

@@ -3,14 +3,12 @@ package storage
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"os"
 	"runtime"
 )
 
 func NewIMS() InMemoryStorage {
-	log.Println("creating new storage")
 	return InMemoryStorage{
 		GaugeField: make(map[string]Gauge),
 		CounterField: make(map[string]Counter),
@@ -33,10 +31,9 @@ func (s InMemoryStorage) LoadMetricsFromFile(filename string) error {
 	if _, err := os.Stat(filename); err != nil {
 		file, err := os.Create(filename)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		file.Close()
-		log.Println("created file")
 		return nil
 	}
 	file, err := ioutil.ReadFile(filename)
