@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
 	"github.com/dayterr/go_agent_metrics/internal/config/server"
 	server2 "github.com/dayterr/go_agent_metrics/internal/server"
@@ -16,10 +17,14 @@ func main() {
 	}
 	ticker := time.NewTicker(CfgLogger.StoreInterval)
 	h := handlers.NewAsyncHandler()
+	fmt.Println(h)
 	go func() {
 		for {
 			<-ticker.C
-			jsn, _ := h.MarshallMetrics()
+			jsn, err := h.MarshallMetrics()
+			if err != nil {
+				log.Fatal(err)
+			}
 			server2.WriteJSON(CfgLogger.StoreFile, jsn)
 		}
 	}()
