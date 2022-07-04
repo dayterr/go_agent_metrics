@@ -31,7 +31,7 @@ func (c Counter) ToInt() int {
 
 func (s InMemoryStorage) LoadMetricsFromFile(filename string) error {
 	if _, err := os.Stat(filename); err != nil {
-		file, err := os.Create("GeeksforGeeks.txt")
+		file, err := os.Create(filename)
 		if err != nil {
 			log.Fatal(err)
 		}
