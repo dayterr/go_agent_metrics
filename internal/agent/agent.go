@@ -53,12 +53,16 @@ func PostGauge(value storage.Gauge, metricName string, address string) error {
 func (a Agent) PostAll() {
 	gauges := a.Storage.GetGauges()
 	counters := a.Storage.GetCounters()
-	log.Println("got gauges", gauges)
-	log.Println("got counters", counters)
 	for k, v := range gauges {
-		PostGauge(v, k, a.Address)
+		err := PostGauge(v, k, a.Address)
+		if err != nil {
+			log.Println("err sending gauges", err)
+		}
 	}
 	for k, v := range counters {
-		PostCounter(v, k, a.Address)
+		err := PostCounter(v, k, a.Address)
+		if err != nil {
+			log.Println("err sending counters", err)
+		}
 	}
 }
