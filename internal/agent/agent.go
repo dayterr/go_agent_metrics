@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/levigross/grequests"
+	"log"
 
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 )
@@ -54,9 +55,15 @@ func (a Agent) PostAll() {
 	gauges := a.Storage.GetGauges()
 	counters := a.Storage.GetCounters()
 	for k, v := range gauges {
-		PostGauge(v, k, a.Address)
+		err := PostGauge(v, k, a.Address)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	for k, v := range counters {
-		PostCounter(v, k, a.Address)
+		err := PostCounter(v, k, a.Address)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }

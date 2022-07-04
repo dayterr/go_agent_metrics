@@ -25,5 +25,8 @@ func main() {
 	}()
 	r := handlers.CreateRouterWithAsyncHandler(CfgLogger.StoreFile, CfgLogger.Restore, h)
 
-	http.ListenAndServe(CfgLogger.Address, r)
+	err = http.ListenAndServe(CfgLogger.Address, r)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
