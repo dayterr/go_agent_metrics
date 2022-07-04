@@ -11,7 +11,7 @@ var (
 	defaultAddress        = "localhost:8080"
 	defaultStoreInterval  = 300 * time.Second
 	defaultStoreFile      = "/tmp/devops-metrics-db.json"
-	defaultRestore         = true
+	defaultRestore        = true
 )
 
 type ConfigLogger struct {
