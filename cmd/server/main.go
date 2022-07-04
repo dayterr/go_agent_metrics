@@ -12,6 +12,7 @@ import (
 
 func main() {
 	CfgLogger, err := server.GetEnvLogger()
+	log.Println(CfgLogger)
 	if err != nil {
 		log.Fatal(err)
 	}

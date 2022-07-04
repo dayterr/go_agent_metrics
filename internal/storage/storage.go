@@ -3,6 +3,7 @@ package storage
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"os"
 	"runtime"
@@ -100,6 +101,7 @@ func (s InMemoryStorage) ReadMetrics() {
 	s.SetGaugeFromMemStats("TotalAlloc", float64(m.TotalAlloc))
 	s.SetGaugeFromMemStats("RandomValue", rand.Float64())
 	s.SetCounterFromMemStats("PollCount", 1)
+	log.Println(s)
 }
 
 func (s InMemoryStorage) GetGauges() map[string]Gauge {
