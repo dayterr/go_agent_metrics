@@ -16,7 +16,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cfg, err := agent.GetEnv()
 	ticker := time.NewTicker(CfgLogger.StoreInterval)
 	h := handlers.NewAsyncHandler()
 	go func() {
@@ -31,7 +30,7 @@ func main() {
 	}()
 	r := handlers.CreateRouterWithAsyncHandler(CfgLogger.StoreFile, CfgLogger.Restore, h)
 
-	err = http.ListenAndServe(cfg.Address, r)
+	err = http.ListenAndServe(CfgLogger.Address, r)
 	if err != nil {
 		log.Fatal(err)
 	}
