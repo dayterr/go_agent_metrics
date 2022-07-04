@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"github.com/go-chi/chi/v5"
 	"log"
 )
 
 func NewAsyncHandler() AsyncHandler {
+	fmt.Println("creating handler")
 	s := storage.NewIMS()
 	h := AsyncHandler{storage: s}
 	return h
