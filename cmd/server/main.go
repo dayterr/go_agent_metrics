@@ -17,8 +17,8 @@ func main() {
 	}
 	log.Println("got config")
 	ticker := time.NewTicker(CfgLogger.StoreInterval)
+	log.Println(ticker)
 	h := handlers.NewAsyncHandler()
-	log.Println("handler created", h)
 	go func() {
 		for {
 			<-ticker.C
