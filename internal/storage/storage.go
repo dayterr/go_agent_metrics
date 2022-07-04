@@ -3,6 +3,7 @@ package storage
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"os"
 	"runtime"
@@ -28,17 +29,21 @@ func (c Counter) ToInt() int {
 }
 
 func (s InMemoryStorage) LoadMetricsFromFile(filename string) error {
+	log.Println("first line of LoadMetricsFromFile")
 	if _, err := os.Stat(filename); err != nil {
 		return err
 	}
+	log.Println("file present")
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return err
 	}
+	log.Println("read file")
 	err = json.Unmarshal(file, &s)
 	if err != nil {
 		return err
 	}
+	log.Println("unmarshalled file")
 	return nil
 }
 
