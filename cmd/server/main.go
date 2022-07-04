@@ -12,13 +12,12 @@ import (
 
 func main() {
 	CfgLogger, err := server.GetEnvLogger()
-	log.Println(CfgLogger)
 	if err != nil {
 		log.Fatal(err)
 	}
 	ticker := time.NewTicker(CfgLogger.StoreInterval)
 	h := handlers.NewAsyncHandler()
-	fmt.Println(h)
+	log.Println("handler created", h)
 	go func() {
 		for {
 			<-ticker.C
@@ -26,6 +25,7 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
+			log.Println("metrics jsoned")
 			server2.WriteJSON(CfgLogger.StoreFile, jsn)
 		}
 	}()

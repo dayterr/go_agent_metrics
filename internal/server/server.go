@@ -14,5 +14,6 @@ func WriteJSON(path string, jsn []byte) {
 	defer file.Close()
 	w := bufio.NewWriter(file)
 	w.Write(jsn)
+	log.Println("wrote json")
 	w.Flush()
 }

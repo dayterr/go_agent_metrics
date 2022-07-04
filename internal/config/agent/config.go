@@ -34,7 +34,7 @@ func GetEnv() (Config, error) {
 	flag.Parse()
 
 	err := env.Parse(&cfg)
-	log.Println(cfg)
+	log.Println("agent config", cfg)
 	if err != nil {
 		return Config{}, err
 	}
