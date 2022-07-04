@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
 	"github.com/dayterr/go_agent_metrics/internal/config/server"
 	server2 "github.com/dayterr/go_agent_metrics/internal/server"
@@ -12,7 +11,6 @@ import (
 
 func main() {
 	CfgLogger, err := server.GetEnvLogger()
-	fmt.Println(CfgLogger)
 	if err != nil {
 		log.Fatal(err)
 	}
