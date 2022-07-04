@@ -29,6 +29,7 @@ type FlagStruct struct {
 }
 
 func GetEnvLogger() (ConfigLogger, error) {
+	log.Println("first line in GetEnvLogger")
 	cfg := ConfigLogger{}
 	fs := FlagStruct{}
 	flag.StringVar(&fs.Address, "a", defaultAddress, "Address for the server")
@@ -38,6 +39,7 @@ func GetEnvLogger() (ConfigLogger, error) {
 	flag.Parse()
 
 	err := env.Parse(&cfg)
+	log.Println("err server config", err)
 	if err != nil {
 		return ConfigLogger{}, err
 	}

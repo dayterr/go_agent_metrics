@@ -10,7 +10,9 @@ import (
 )
 
 func main() {
+	log.Println("first line server")
 	CfgLogger, err := server.GetEnvLogger()
+	log.Println("getting config")
 	if err != nil {
 		log.Fatal(err)
 	}
