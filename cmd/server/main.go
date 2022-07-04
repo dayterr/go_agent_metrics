@@ -12,10 +12,10 @@ import (
 func main() {
 	log.Println("first line server")
 	CfgLogger, err := server.GetEnvLogger()
-	log.Println("getting config")
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println("got config")
 	ticker := time.NewTicker(CfgLogger.StoreInterval)
 	h := handlers.NewAsyncHandler()
 	log.Println("handler created", h)

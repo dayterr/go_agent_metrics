@@ -13,6 +13,7 @@ func NewAsyncHandler() AsyncHandler {
 }
 
 func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandler) chi.Router {
+	log.Println("creating router")
 	if isRestored {
 		err := h.storage.LoadMetricsFromFile(filename)
 		if err != nil {
