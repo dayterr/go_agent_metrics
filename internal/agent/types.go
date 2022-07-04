@@ -2,9 +2,6 @@ package agent
 
 import (
 	"github.com/dayterr/go_agent_metrics/internal/storage"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 )
 
