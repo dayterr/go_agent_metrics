@@ -36,7 +36,7 @@ func (s InMemoryStorage) LoadMetricsFromFile(filename string) error {
 			log.Fatal(err)
 		}
 		file.Close()
-
+		log.Println("created file")
 	}
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {
