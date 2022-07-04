@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"os"
 	"runtime"
 )
 
@@ -29,9 +30,14 @@ func (c Counter) ToInt() int {
 }
 
 func (s InMemoryStorage) LoadMetricsFromFile(filename string) error {
-	/*if _, err := os.Stat(filename); err != nil {
-		return err
-	}*/
+	if _, err := os.Stat(filename); err != nil {
+		file, err := os.Create("GeeksforGeeks.txt")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file.Close()
+
+	}
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return err
