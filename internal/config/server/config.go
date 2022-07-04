@@ -49,7 +49,7 @@ func GetEnvLogger() (ConfigLogger, error) {
 	if cfg.Address == defaultAddress && fs.Address != defaultAddress {
 		cfg.Address = fs.Address
 	}
-	if cfg.Restore == defaultRestore && os.Getenv("RESTORE") == "" {
+	if os.Getenv("RESTORE") == "" && fs.Restore != defaultRestore {
 		cfg.Restore = fs.Restore
 	}
 	if cfg.StoreInterval == defaultStoreInterval && fs.StoreInterval != defaultStoreInterval {
