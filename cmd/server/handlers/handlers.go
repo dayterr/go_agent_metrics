@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -56,6 +57,7 @@ func (ah AsyncHandler) MarshallMetrics() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Println("marshall metrics")
 	return jsn, nil
 }
 

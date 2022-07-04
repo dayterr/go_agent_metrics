@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"github.com/levigross/grequests"
-	"log"
 )
 
 const GaugeType = "gauge"
@@ -54,15 +53,9 @@ func (a Agent) PostAll() {
 	gauges := a.Storage.GetGauges()
 	counters := a.Storage.GetCounters()
 	for k, v := range gauges {
-		err := PostGauge(v, k, a.Address)
-		if err != nil {
-			log.Println("err sending gauges", err)
-		}
+		PostGauge(v, k, a.Address)
 	}
 	for k, v := range counters {
-		err := PostCounter(v, k, a.Address)
-		if err != nil {
-			log.Println("err sending counters", err)
-		}
+		PostCounter(v, k, a.Address)
 	}
 }
