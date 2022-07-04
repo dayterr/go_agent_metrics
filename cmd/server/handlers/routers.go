@@ -10,6 +10,7 @@ import (
 func NewAsyncHandler() AsyncHandler {
 	fmt.Println("creating handler")
 	s := storage.NewIMS()
+	log.Println("created storage for handler")
 	h := AsyncHandler{storage: s}
 	return h
 }
