@@ -10,6 +10,7 @@ import (
 )
 
 func NewIMS() InMemoryStorage {
+	log.Println("creating new storage")
 	return InMemoryStorage{
 		GaugeField: make(map[string]Gauge),
 		CounterField: make(map[string]Counter),

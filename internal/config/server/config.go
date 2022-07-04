@@ -45,18 +45,20 @@ func GetEnvLogger() (ConfigLogger, error) {
 	}
 	log.Println("server config", cfg)
 
-	if cfg.Address == defaultAddress{
+	if cfg.Address == defaultAddress && fs.Address != defaultAddress {
 		cfg.Address = fs.Address
 	}
 	/*if cfg.Restore == DEFAULT_RESTORE {
 		cfg.Restore = fs.Restore
 	}*/
-	if cfg.StoreInterval == defaultStoreInterval {
+	if cfg.StoreInterval == defaultStoreInterval && fs.StoreInterval != defaultStoreInterval {
 		cfg.StoreInterval = fs.StoreInterval
 	}
-	if cfg.StoreFile == defaultStoreFile {
+	if cfg.StoreFile == defaultStoreFile && fs.StoreFile != defaultStoreFile {
 		cfg.StoreFile = fs.StoreFile
 	}
+	log.Println("read flags")
+	log.Println("final config", cfg)
 	return cfg, nil
 }
 
