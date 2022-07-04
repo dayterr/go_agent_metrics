@@ -19,7 +19,7 @@ type Metrics struct {
 }
 
 func PostCounter(value storage.Counter, metricName string, address string) error {
-	url := fmt.Sprintf("http://%v/update", address)
+	url := fmt.Sprintf("http://%v/update/", address)
 	delta := value.ToInt64()
 	metric := Metrics{ID: metricName, MType: CounterType, Delta: &delta}
 	mJSON, err := json.Marshal(metric)
@@ -35,7 +35,7 @@ func PostCounter(value storage.Counter, metricName string, address string) error
 }
 
 func PostGauge(value storage.Gauge, metricName string, address string) error {
-	url := fmt.Sprintf("http://%v/update", address)
+	url := fmt.Sprintf("http://%v/update/", address)
 	v := value.ToFloat()
 	metric := Metrics{ID: metricName, MType: GaugeType, Value: &v}
 	mJSON, err := json.Marshal(metric)
