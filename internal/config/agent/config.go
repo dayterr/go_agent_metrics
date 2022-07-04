@@ -36,7 +36,8 @@ func GetEnv() (Config, error) {
 	err := env.Parse(&cfg)
 	log.Println("agent config", cfg)
 	if err != nil {
-		return Config{}, err
+		//return Config{}, err
+		log.Println("agent condfig error", err)
 	}
 	if cfg.ReportInterval == defaultReportInterval && fs.ReportInterval != defaultReportInterval {
 		cfg.ReportInterval = fs.ReportInterval
@@ -47,5 +48,6 @@ func GetEnv() (Config, error) {
 	if cfg.Address == defaultAddress && fs.Address != defaultAddress {
 		cfg.Address = fs.Address
 	}
+	log.Println("final config", cfg)
 	return cfg, nil
 }

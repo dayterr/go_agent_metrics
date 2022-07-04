@@ -4,7 +4,6 @@ import (
 	"flag"
 	"github.com/caarlos0/env/v6"
 	"log"
-	"os"
 	"time"
 )
 
@@ -42,14 +41,15 @@ func GetEnvLogger() (ConfigLogger, error) {
 	err := env.Parse(&cfg)
 	log.Println("err server config", err)
 	if err != nil {
-		return ConfigLogger{}, err
+		//return ConfigLogger{}, err
+		log.Println("server condfig error", err)
 	}
 	log.Println("server config", cfg)
 
 	if cfg.Address == defaultAddress && fs.Address != defaultAddress {
 		cfg.Address = fs.Address
 	}
-	if os.Getenv("RESTORE") == "" && fs.Restore != defaultRestore {
+	if cfg.Restore == defaultRestore  && fs.Restore != defaultRestore {
 		cfg.Restore = fs.Restore
 	}
 	if cfg.StoreInterval == defaultStoreInterval && fs.StoreInterval != defaultStoreInterval {
