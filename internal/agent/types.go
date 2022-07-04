@@ -2,7 +2,6 @@ package agent
 
 import (
 	"github.com/dayterr/go_agent_metrics/internal/storage"
-	"log"
 	"time"
 )
 
@@ -15,7 +14,6 @@ type Agent struct {
 
 func NewAgent(address string, repInt time.Duration, pInt time.Duration) Agent {
 	s := storage.NewIMS()
-	log.Println("created storage for agent")
 	return Agent{
 		Storage: s,
 		Address: address,
