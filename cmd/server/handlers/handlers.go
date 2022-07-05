@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -70,7 +71,8 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if ah.key != "" {
-		hash.EncryptMetric(m, ah.key)
+		m.Hash = hash.EncryptMetric(m, ah.key)
+		log.Println("hash is", m.Hash)
 	}
 
 	switch m.MType {
@@ -106,6 +108,7 @@ func (as AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
 
 	if as.key != "" {
 		m.Hash = hash.EncryptMetric(m, as.key)
+		log.Println("hash is", m.Hash)
 	}
 
 	switch m.MType {
