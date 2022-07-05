@@ -3,6 +3,8 @@ package handlers
 import (
 	"compress/gzip"
 	"encoding/json"
+	"github.com/dayterr/go_agent_metrics/internal/hash"
+	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"github.com/go-chi/chi/v5"
 	"html/template"
@@ -16,6 +18,7 @@ import (
 
 type AsyncHandler struct {
 	storage storage.Storager
+	key     string
 }
 
 type SyncHandler struct {
@@ -60,11 +63,16 @@ func (ah AsyncHandler) MarshallMetrics() ([]byte, error) {
 }
 
 func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
-	var m agent.Metrics
+	var m metric.Metrics
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
+
+	if ah.key != "" {
+		hash.EncryptMetric(m, ah.key)
+	}
+
 	switch m.MType {
 	case agent.GaugeType:
 		v := ah.storage.GetGuageByID(m.ID)
@@ -90,11 +98,16 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 }
 
 func (as AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
-	var m agent.Metrics
+	var m metric.Metrics
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
+
+	if as.key != "" {
+		m.Hash = hash.EncryptMetric(m, as.key)
+	}
+
 	switch m.MType {
 	case agent.GaugeType:
 		as.storage.SetGuage(m.ID, m.Value)
@@ -186,4 +199,3 @@ func (ah AsyncHandler) GetIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-

@@ -16,7 +16,7 @@ func main() {
 		log.Fatal(err)
 	}
 	ticker := time.NewTicker(CfgLogger.StoreInterval)
-	h := handlers.NewAsyncHandler()
+	h := handlers.NewAsyncHandler(CfgLogger.Key)
 	go func(h handlers.AsyncHandler) {
 		for {
 			<-ticker.C

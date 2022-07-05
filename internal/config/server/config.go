@@ -8,17 +8,19 @@ import (
 )
 
 var (
-	defaultAddress        = "localhost:8080"
-	defaultStoreInterval  = 300 * time.Second
-	defaultStoreFile      = "/tmp/devops-metrics-db.json"
-	defaultRestore        = true
+	defaultAddress       = "localhost:8080"
+	defaultStoreInterval = 300 * time.Second
+	defaultStoreFile     = "/tmp/devops-metric-db.json"
+	defaultRestore       = true
+	defaultKey           = ""
 )
 
 type ConfigLogger struct {
 	Address       string        `env:"ADDRESS" envDefault:"localhost:8080"`
 	StoreInterval time.Duration `env:"STORE_INTERVAL" envDefault:"300s"`
-	StoreFile     string        `env:"STORE_FILE" envDefault:"/tmp/devops-metrics-db.json"`
+	StoreFile     string        `env:"STORE_FILE" envDefault:"/tmp/devops-metric-db.json"`
 	Restore       bool          `env:"RESTORE" envDefault:"true"`
+	Key           string        `env:"KEY" envDefault:""`
 }
 
 type FlagStruct struct {
@@ -26,6 +28,7 @@ type FlagStruct struct {
 	StoreInterval time.Duration
 	StoreFile     string
 	Restore       bool
+	Key           string
 }
 
 func GetEnvLogger() (ConfigLogger, error) {
@@ -34,17 +37,16 @@ func GetEnvLogger() (ConfigLogger, error) {
 	fs := FlagStruct{}
 	flag.StringVar(&fs.Address, "a", defaultAddress, "Address for the server")
 	flag.BoolVar(&fs.Restore, "r", defaultRestore, "A bool flag for configuration upload")
-	flag.DurationVar(&fs.StoreInterval, "i", defaultStoreInterval, "Interval for saving the metrics into the file")
-	flag.StringVar(&fs.StoreFile, "f", defaultStoreFile, "file to store the metrics")
+	flag.DurationVar(&fs.StoreInterval, "i", defaultStoreInterval, "Interval for saving the metric into the file")
+	flag.StringVar(&fs.StoreFile, "f", defaultStoreFile, "file to store the metric")
+	flag.StringVar(&fs.Key, "k", defaultKey, "Key for encrypting")
 	flag.Parse()
 
 	err := env.Parse(&cfg)
-	log.Println("err server config", err)
 	if err != nil {
 		//return ConfigLogger{}, err
 		log.Println("server config error", err)
 	}
-	log.Println("server config", cfg)
 
 	if cfg.Address == defaultAddress && fs.Address != defaultAddress {
 		cfg.Address = fs.Address
@@ -58,8 +60,8 @@ func GetEnvLogger() (ConfigLogger, error) {
 	if cfg.StoreFile == defaultStoreFile && fs.StoreFile != defaultStoreFile {
 		cfg.StoreFile = fs.StoreFile
 	}
-	log.Println("read flags")
-	log.Println("final config", cfg)
+	if cfg.Key == defaultKey && fs.Key != defaultKey {
+		cfg.Key = fs.Key
+	}
 	return cfg, nil
 }
-

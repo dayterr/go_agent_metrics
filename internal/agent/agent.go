@@ -3,6 +3,8 @@ package agent
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/dayterr/go_agent_metrics/internal/hash"
+	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"github.com/levigross/grequests"
 )
@@ -10,17 +12,13 @@ import (
 const GaugeType = "gauge"
 const CounterType = "counter"
 
-type Metrics struct {
-	ID    string  `json:"id"`
-	MType string  `json:"type"`
-	Delta *int64   `json:"delta,omitempty"`
-	Value *float64 `json:"value,omitempty"`
-}
-
-func PostCounter(value storage.Counter, metricName string, address string) error {
+func PostCounter(value storage.Counter, metricName string, address string, key string) error {
 	url := fmt.Sprintf("http://%v/update/", address)
 	delta := value.ToInt64()
-	metric := Metrics{ID: metricName, MType: CounterType, Delta: &delta}
+	metric := metric.Metrics{ID: metricName, MType: CounterType, Delta: &delta}
+	if key != "" {
+		metric.Hash = hash.EncryptMetric(metric, key)
+	}
 	mJSON, err := json.Marshal(metric)
 	if err != nil {
 		return err
@@ -33,10 +31,13 @@ func PostCounter(value storage.Counter, metricName string, address string) error
 	return nil
 }
 
-func PostGauge(value storage.Gauge, metricName string, address string) error {
+func PostGauge(value storage.Gauge, metricName string, address string, key string) error {
 	url := fmt.Sprintf("http://%v/update/", address)
 	v := value.ToFloat()
-	metric := Metrics{ID: metricName, MType: GaugeType, Value: &v}
+	metric := metric.Metrics{ID: metricName, MType: GaugeType, Value: &v}
+	if key != "" {
+		metric.Hash = hash.EncryptMetric(metric, key)
+	}
 	mJSON, err := json.Marshal(metric)
 	if err != nil {
 		return err
@@ -53,9 +54,9 @@ func (a Agent) PostAll() {
 	gauges := a.Storage.GetGauges()
 	counters := a.Storage.GetCounters()
 	for k, v := range gauges {
-		PostGauge(v, k, a.Address)
+		PostGauge(v, k, a.Address, a.Key)
 	}
 	for k, v := range counters {
-		PostCounter(v, k, a.Address)
+		PostCounter(v, k, a.Address, a.Key)
 	}
 }

@@ -24,7 +24,4 @@ type InMemoryStorage struct {
 }
 
 type DBStorage struct {
-
 }
-
-

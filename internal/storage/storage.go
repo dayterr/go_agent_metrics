@@ -10,7 +10,7 @@ import (
 
 func NewIMS() InMemoryStorage {
 	return InMemoryStorage{
-		GaugeField: make(map[string]Gauge),
+		GaugeField:   make(map[string]Gauge),
 		CounterField: make(map[string]Counter),
 	}
 }
@@ -124,4 +124,3 @@ func (s InMemoryStorage) CheckCounterByName(name string) bool {
 	_, ok := s.CounterField[name]
 	return ok
 }
-

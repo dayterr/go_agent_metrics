@@ -6,19 +6,21 @@ import (
 )
 
 type Agent struct {
-	Storage storage.Storager
+	Storage        storage.Storager
 	Address        string
 	ReportInterval time.Duration
 	PollInterval   time.Duration
+	Key            string
 }
 
-func NewAgent(address string, repInt time.Duration, pInt time.Duration) Agent {
+func NewAgent(address string, repInt time.Duration, pInt time.Duration, key string) Agent {
 	s := storage.NewIMS()
 	return Agent{
-		Storage: s,
-		Address: address,
+		Storage:        s,
+		Address:        address,
 		ReportInterval: repInt,
-		PollInterval: pInt,
+		PollInterval:   pInt,
+		Key:            key,
 	}
 }
 

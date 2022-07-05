@@ -6,9 +6,9 @@ import (
 	"log"
 )
 
-func NewAsyncHandler() AsyncHandler {
+func NewAsyncHandler(key string) AsyncHandler {
 	s := storage.NewIMS()
-	h := AsyncHandler{storage: s}
+	h := AsyncHandler{storage: s, key: key}
 	return h
 }
 
