@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	_ "github.com/jackc/pgx/v4"
 
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 )
