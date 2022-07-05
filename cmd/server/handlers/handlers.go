@@ -115,7 +115,6 @@ func (as AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-
 	switch m.MType {
 	case agent.GaugeType:
 		as.storage.SetGuage(m.ID, m.Value)
