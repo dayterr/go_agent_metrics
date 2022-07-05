@@ -70,15 +70,14 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	}
 
-	if ah.key != "" {
-		m.Hash = hash.EncryptMetric(m, ah.key)
-		log.Println("hash is", m.Hash)
-	}
-
 	switch m.MType {
 	case agent.GaugeType:
 		v := ah.storage.GetGuageByID(m.ID)
 		m.Value = &v
+		if ah.key != "" {
+			m.Hash = hash.EncryptMetric(m, ah.key)
+			log.Println("hash is", m.Hash)
+		}
 		mJSON, err := json.Marshal(m)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -88,6 +87,10 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 	case agent.CounterType:
 		d := ah.storage.GetCounterByID(m.ID)
 		m.Delta = &d
+		if ah.key != "" {
+			m.Hash = hash.EncryptMetric(m, ah.key)
+			log.Println("hash is", m.Hash)
+		}
 		mJSON, err := json.Marshal(m)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
