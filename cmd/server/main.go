@@ -16,6 +16,7 @@ func main() {
 		log.Fatal(err)
 	}
 	ticker := time.NewTicker(CfgLogger.StoreInterval)
+	log.Println("server config", CfgLogger)
 	var h handlers.AsyncHandler
 	if CfgLogger.DatabaseDSN == "" {
 		h = handlers.NewAsyncHandler(CfgLogger.Key, CfgLogger.DatabaseDSN,false)
