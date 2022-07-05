@@ -8,9 +8,10 @@ import (
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"github.com/go-chi/chi/v5"
-	_ "github.com/jackc/pgx/v4"
+	_ "github.com/lib/pq"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -212,11 +213,13 @@ func (ah AsyncHandler) GetIndex(w http.ResponseWriter, r *http.Request) {
 func (ah AsyncHandler) Ping(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("postgres", ah.dsn)
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	err = db.Ping()
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
