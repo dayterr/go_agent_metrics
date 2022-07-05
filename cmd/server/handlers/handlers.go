@@ -8,13 +8,12 @@ import (
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"github.com/go-chi/chi/v5"
+	_ "github.com/jackc/pgx/v4"
 	"html/template"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
-	_ "github.com/jackc/pgx/v4"
 
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 )
@@ -79,7 +78,6 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 		m.Value = &v
 		if ah.key != "" {
 			m.Hash = hash.EncryptMetric(m, ah.key)
-			log.Println("hash is", m.Hash)
 		}
 		mJSON, err := json.Marshal(m)
 		if err != nil {
@@ -92,7 +90,6 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 		m.Delta = &d
 		if ah.key != "" {
 			m.Hash = hash.EncryptMetric(m, ah.key)
-			log.Println("hash is", m.Hash)
 		}
 		mJSON, err := json.Marshal(m)
 		if err != nil {
@@ -115,7 +112,6 @@ func (as AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
 	hashGot := r.Header.Get("Hash")
 	if hashGot != "" && as.key != "" {
 		hashCheck := hash.EncryptMetric(m, as.key)
-		log.Println("hash is", m.Hash)
 		if !hash.CheckHash(m, hashCheck) {
 			w.WriteHeader(http.StatusBadRequest)
 		}
