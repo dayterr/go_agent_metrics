@@ -60,7 +60,7 @@ func GetEnvLogger() (ConfigLogger, error) {
 	if cfg.StoreInterval == defaultStoreInterval && fs.StoreInterval != defaultStoreInterval {
 		cfg.StoreInterval = fs.StoreInterval
 	}
-	if cfg.StoreFile == defaultStoreFile && fs.StoreFile != defaultStoreFile {
+	if cfg.StoreFile == defaultStoreFile && fs.StoreFile != defaultStoreFile && cfg.DatabaseDSN == "" {
 		cfg.StoreFile = fs.StoreFile
 	}
 	if cfg.Key == defaultKey && fs.Key != defaultKey {
