@@ -24,4 +24,6 @@ type InMemoryStorage struct {
 }
 
 type DBStorage struct {
+	GaugeField   map[string]Gauge
+	CounterField map[string]Counter
 }

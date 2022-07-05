@@ -21,6 +21,7 @@ type ConfigLogger struct {
 	StoreFile     string        `env:"STORE_FILE" envDefault:"/tmp/devops-metric-db.json"`
 	Restore       bool          `env:"RESTORE" envDefault:"true"`
 	Key           string        `env:"KEY" envDefault:""`
+	DatabaseDSN   string        `env:"DATABASE_DSN" envDefault:""`
 }
 
 type FlagStruct struct {
@@ -29,6 +30,7 @@ type FlagStruct struct {
 	StoreFile     string
 	Restore       bool
 	Key           string
+	DatabaseDSN   string
 }
 
 func GetEnvLogger() (ConfigLogger, error) {
@@ -40,6 +42,7 @@ func GetEnvLogger() (ConfigLogger, error) {
 	flag.DurationVar(&fs.StoreInterval, "i", defaultStoreInterval, "Interval for saving the metric into the file")
 	flag.StringVar(&fs.StoreFile, "f", defaultStoreFile, "file to store the metric")
 	flag.StringVar(&fs.Key, "k", defaultKey, "Key for encrypting")
+	flag.StringVar(&fs.DatabaseDSN, "d", "", "Database DSN")
 	flag.Parse()
 
 	err := env.Parse(&cfg)
@@ -62,6 +65,9 @@ func GetEnvLogger() (ConfigLogger, error) {
 	}
 	if cfg.Key == defaultKey && fs.Key != defaultKey {
 		cfg.Key = fs.Key
+	}
+	if cfg.DatabaseDSN == "" && fs.DatabaseDSN != "" {
+		cfg.DatabaseDSN = fs.DatabaseDSN
 	}
 	return cfg, nil
 }

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"compress/gzip"
+	"database/sql"
 	"encoding/json"
 	"github.com/dayterr/go_agent_metrics/internal/hash"
 	"github.com/dayterr/go_agent_metrics/internal/metric"
@@ -20,6 +21,7 @@ import (
 type AsyncHandler struct {
 	storage storage.Storager
 	key     string
+	dsn string
 }
 
 type SyncHandler struct {
@@ -208,4 +210,19 @@ func (ah AsyncHandler) GetIndex(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+}
+
+func (ah AsyncHandler) Ping(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("postgres", ah.dsn)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	err = db.Ping()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	return
 }

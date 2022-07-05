@@ -6,9 +6,14 @@ import (
 	"log"
 )
 
-func NewAsyncHandler(key string) AsyncHandler {
-	s := storage.NewIMS()
-	h := AsyncHandler{storage: s, key: key}
+func NewAsyncHandler(key, dsn string, isDB bool) AsyncHandler {
+	var s storage.Storager
+	if isDB {
+		s = storage.NewDB()
+	} else {
+		s = storage.NewIMS()
+	}
+	h := AsyncHandler{storage: s, key: key, dsn: dsn}
 	return h
 }
 
@@ -28,6 +33,7 @@ func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandl
 	r.Post("/value/", h.GetValue)
 	r.Get("/value/{metricType}/{metricName}", h.GetMetric)
 	r.Get("/", h.GetIndex)
+	r.Get("/ping", h.Ping)
 	return r
 }
 

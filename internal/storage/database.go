@@ -8,33 +8,7 @@ import (
 	"runtime"
 )
 
-func NewIMS() InMemoryStorage {
-	return InMemoryStorage{
-		GaugeField:   make(map[string]Gauge),
-		CounterField: make(map[string]Counter),
-	}
-}
-
-func NewDB() DBStorage {
-	return DBStorage{
-		GaugeField:   make(map[string]Gauge),
-		CounterField: make(map[string]Counter),
-	}
-}
-
-func (g Gauge) ToFloat() float64 {
-	return float64(g)
-}
-
-func (c Counter) ToInt64() int64 {
-	return int64(c)
-}
-
-func (c Counter) ToInt() int {
-	return int(c)
-}
-
-func (s InMemoryStorage) LoadMetricsFromFile(filename string) error {
+func (s DBStorage) LoadMetricsFromFile(filename string) error {
 	if _, err := os.Stat(filename); err != nil {
 		file, err := os.Create(filename)
 		if err != nil {
@@ -54,33 +28,31 @@ func (s InMemoryStorage) LoadMetricsFromFile(filename string) error {
 	return nil
 }
 
-func (s InMemoryStorage) GetGuageByID(id string) float64 {
-	v := s.GaugeField[id].ToFloat()
-	return v
+func (s DBStorage) GetGuageByID(id string) float64 {
+	return 0
 }
 
-func (s InMemoryStorage) GetCounterByID(id string) int64 {
-	v := s.CounterField[id].ToInt64()
-	return v
+func (s DBStorage) GetCounterByID(id string) int64 {
+	return 0
 }
 
-func (s InMemoryStorage) SetGuage(id string, v *float64) {
+func (s DBStorage) SetGuage(id string, v *float64) {
 	s.GaugeField[id] = Gauge(*v)
 }
 
-func (s InMemoryStorage) SetCounter(id string, v *int64) {
+func (s DBStorage) SetCounter(id string, v *int64) {
 	s.CounterField[id] += Counter(*v)
 }
 
-func (s InMemoryStorage) SetGaugeFromMemStats(id string, value float64) {
+func (s DBStorage) SetGaugeFromMemStats(id string, value float64) {
 	s.GaugeField[id] = Gauge(value)
 }
 
-func (s InMemoryStorage) SetCounterFromMemStats(id string, value int64) {
+func (s DBStorage) SetCounterFromMemStats(id string, value int64) {
 	s.CounterField[id] += Counter(value)
 }
 
-func (s InMemoryStorage) ReadMetrics() {
+func (s DBStorage) ReadMetrics() {
 	m := &runtime.MemStats{}
 	runtime.ReadMemStats(m)
 	s.SetGaugeFromMemStats("Alloc", float64(m.Alloc))
@@ -114,20 +86,20 @@ func (s InMemoryStorage) ReadMetrics() {
 	s.SetCounterFromMemStats("PollCount", 1)
 }
 
-func (s InMemoryStorage) GetGauges() map[string]Gauge {
+func (s DBStorage) GetGauges() map[string]Gauge {
 	return s.GaugeField
 }
 
-func (s InMemoryStorage) GetCounters() map[string]Counter {
+func (s DBStorage) GetCounters() map[string]Counter {
 	return s.CounterField
 }
 
-func (s InMemoryStorage) CheckGaugeByName(name string) bool {
+func (s DBStorage) CheckGaugeByName(name string) bool {
 	_, ok := s.GaugeField[name]
 	return ok
 }
 
-func (s InMemoryStorage) CheckCounterByName(name string) bool {
+func (s DBStorage) CheckCounterByName(name string) bool {
 	_, ok := s.CounterField[name]
 	return ok
 }

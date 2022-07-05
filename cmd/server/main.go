@@ -4,6 +4,7 @@ import (
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
 	"github.com/dayterr/go_agent_metrics/internal/config/server"
 	server2 "github.com/dayterr/go_agent_metrics/internal/server"
+	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"log"
 	"net/http"
 	"time"
@@ -16,7 +17,12 @@ func main() {
 		log.Fatal(err)
 	}
 	ticker := time.NewTicker(CfgLogger.StoreInterval)
-	h := handlers.NewAsyncHandler(CfgLogger.Key)
+	var h handlers.AsyncHandler
+	if CfgLogger.DatabaseDSN == "" {
+		h = handlers.NewAsyncHandler(CfgLogger.Key, false)
+	} else {
+		h = handlers.NewAsyncHandler(CfgLogger.Key, true)
+	}
 	go func(h handlers.AsyncHandler) {
 		for {
 			<-ticker.C
