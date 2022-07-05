@@ -106,9 +106,14 @@ func (as AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	}
 
-	if as.key != "" {
-		m.Hash = hash.EncryptMetric(m, as.key)
+	hashGot := r.Header.Get("Hash")
+	if hashGot != "" && as.key != "" {
+		hashCheck := hash.EncryptMetric(m, as.key)
 		log.Println("hash is", m.Hash)
+		if !hash.CheckHash(m, hashCheck) {
+			w.WriteHeader(http.StatusBadRequest)
+		}
+
 	}
 
 	switch m.MType {
