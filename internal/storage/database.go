@@ -49,7 +49,6 @@ func (s DBStorage) LoadMetricsFromFile(filename string) error {
 		return nil
 	}
 	file, err := ioutil.ReadFile(filename)
-	//file, err := ioutil.ReadFile("/Users/ruth/coding/Golang/go_agent_metrics/tmp/devops-metrics-db.json")
 	if err != nil {
 		return err
 	}
@@ -213,7 +212,7 @@ func (s DBStorage) GetGauges() map[string]Gauge {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	rows, err := db.QueryContext(ctx, `SELECT (*) FROM counter;`)
+	rows, err := db.QueryContext(ctx, `SELECT * FROM gauge;`)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -237,7 +236,7 @@ func (s DBStorage) GetCounters() map[string]Counter {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	rows, err := db.QueryContext(ctx, `SELECT (*) FROM counter;`)
+	rows, err := db.QueryContext(ctx, `SELECT * FROM counter;`)
 	if err != nil {
 		log.Fatal(err)
 	}
