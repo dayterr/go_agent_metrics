@@ -223,6 +223,7 @@ func (ah AsyncHandler) Ping(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 	return
 }

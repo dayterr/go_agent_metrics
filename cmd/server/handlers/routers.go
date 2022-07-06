@@ -8,8 +8,12 @@ import (
 
 func NewAsyncHandler(key, dsn string, isDB bool) AsyncHandler {
 	var s storage.Storager
+	var err error
 	if isDB {
-		s = storage.NewDB()
+		s, err = storage.NewDB(dsn)
+		if err != nil {
+			log.Println(err)
+		}
 	} else {
 		s = storage.NewIMS()
 	}

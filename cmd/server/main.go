@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-	log.Println("first line server")
 	CfgLogger, err := server.GetEnvLogger()
 	if err != nil {
 		log.Fatal(err)

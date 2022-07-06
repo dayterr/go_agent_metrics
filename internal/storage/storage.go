@@ -15,13 +15,6 @@ func NewIMS() InMemoryStorage {
 	}
 }
 
-func NewDB() DBStorage {
-	return DBStorage{
-		GaugeField:   make(map[string]Gauge),
-		CounterField: make(map[string]Counter),
-	}
-}
-
 func (g Gauge) ToFloat() float64 {
 	return float64(g)
 }
