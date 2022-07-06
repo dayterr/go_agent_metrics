@@ -49,14 +49,14 @@ func (s InMemoryStorage) LoadMetricsFromFile(filename string) error {
 	return nil
 }
 
-func (s InMemoryStorage) GetGuageByID(id string) float64 {
+func (s InMemoryStorage) GetGuageByID(id string) (float64, error) {
 	v := s.GaugeField[id].ToFloat()
-	return v
+	return v, nil
 }
 
-func (s InMemoryStorage) GetCounterByID(id string) int64 {
+func (s InMemoryStorage) GetCounterByID(id string) (int64, error) {
 	v := s.CounterField[id].ToInt64()
-	return v
+	return v, nil
 }
 
 func (s InMemoryStorage) SetGuage(id string, v *float64) {

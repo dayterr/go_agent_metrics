@@ -75,7 +75,10 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 
 	switch m.MType {
 	case agent.GaugeType:
-		v := ah.storage.GetGuageByID(m.ID)
+		v, err := ah.storage.GetGuageByID(m.ID)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+		}
 		m.Value = &v
 		if ah.key != "" {
 			m.Hash = hash.EncryptMetric(m, ah.key)
@@ -87,7 +90,10 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("content-type", "application/json")
 		w.Write(mJSON)
 	case agent.CounterType:
-		d := ah.storage.GetCounterByID(m.ID)
+		d, err := ah.storage.GetCounterByID(m.ID)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+		}
 		m.Delta = &d
 		if ah.key != "" {
 			m.Hash = hash.EncryptMetric(m, ah.key)
@@ -174,7 +180,12 @@ func (ah AsyncHandler) GetMetric(w http.ResponseWriter, r *http.Request) {
 	switch metricType {
 	case agent.GaugeType:
 		if ah.storage.CheckGaugeByName(metricName) {
-			value := strconv.FormatFloat(ah.storage.GetGuageByID(metricName), 'f', -1, 64)
+			v, err := ah.storage.GetGuageByID(metricName)
+			if err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			value := strconv.FormatFloat(v, 'f', -1, 64)
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(value))
 		} else {
@@ -183,7 +194,12 @@ func (ah AsyncHandler) GetMetric(w http.ResponseWriter, r *http.Request) {
 		}
 	case agent.CounterType:
 		if ah.storage.CheckCounterByName(metricName) {
-			c := strconv.Itoa(int(ah.storage.GetCounterByID(metricName)))
+			v, err := ah.storage.GetCounterByID(metricName)
+			if err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			c := strconv.Itoa(int(v))
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(c))
 		} else {

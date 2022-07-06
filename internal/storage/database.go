@@ -66,7 +66,7 @@ func (s DBStorage) LoadMetricsFromFile(filename string) error {
 	return nil
 }
 
-func (s DBStorage) GetGuageByID(id string) float64 {
+func (s DBStorage) GetGuageByID(id string) (float64, error) {
 	//ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	//defer cancel()
 	db, err := sql.Open("postgres", s.DSN)
@@ -79,12 +79,12 @@ func (s DBStorage) GetGuageByID(id string) float64 {
 	log.Println("row is", row)
 	err = row.Scan(&fl)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
-	return fl
+	return fl, nil
 }
 
-func (s DBStorage) GetCounterByID(id string) int64 {
+func (s DBStorage) GetCounterByID(id string) (int64, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	db, err := sql.Open("postgres", s.DSN)
@@ -96,9 +96,9 @@ func (s DBStorage) GetCounterByID(id string) int64 {
 	row := db.QueryRowContext(ctx, `SELECT Delta FROM counter WHERE ID = $1;`, id)
 	err = row.Scan(&val)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
-	return val
+	return val, nil
 }
 
 func (s DBStorage) SetGuage(id string, v *float64) {

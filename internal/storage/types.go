@@ -5,8 +5,8 @@ type Counter int64
 
 type Storager interface {
 	LoadMetricsFromFile(filename string) error
-	GetGuageByID(id string) float64
-	GetCounterByID(id string) int64
+	GetGuageByID(id string) (float64, error)
+	GetCounterByID(id string) (int64, error)
 	SetGuage(id string, v *float64)
 	SetCounter(id string, v *int64)
 	SetGaugeFromMemStats(id string, value float64)
