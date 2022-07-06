@@ -22,11 +22,13 @@ func NewDB(dsn string) (DBStorage, error) {
 		return DBStorage{}, err
 	}
 	defer db.Close()
-	_, err = db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS gauge (ID text, Value double precision);`)
+	_, err = db.ExecContext(ctx,
+		`CREATE TABLE IF NOT EXISTS gauge (ID text UNIQUE NOT NULL, Value double precision NOT NULL);`)
 	if err != nil {
 		return DBStorage{}, err
 	}
-	_, err = db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS counter (ID text, Delta BIGINT);`)
+	_, err = db.ExecContext(ctx,
+		`CREATE TABLE IF NOT EXISTS counter (ID text UNIQUE NOT NULL, Delta BIGINT NOT NULL);`)
 	if err != nil {
 		return DBStorage{}, err
 	}
@@ -47,12 +49,19 @@ func (s DBStorage) LoadMetricsFromFile(filename string) error {
 		return nil
 	}
 	file, err := ioutil.ReadFile(filename)
+	//file, err := ioutil.ReadFile("/Users/ruth/coding/Golang/go_agent_metrics/tmp/devops-metrics-db.json")
 	if err != nil {
 		return err
 	}
 	err = json.Unmarshal(file, &s)
 	if err != nil {
 		return err
+	}
+	for key, value := range s.GaugeField {
+		s.SetGaugeFromMemStats(key, value.ToFloat())
+	}
+	for key, value := range s.CounterField {
+		s.SetCounterFromMemStats(key, value.ToInt64())
 	}
 	return nil
 }
@@ -119,7 +128,7 @@ func (s DBStorage) SetCounter(id string, v *int64) {
 	defer db.Close()
 
 	_, err = db.ExecContext(ctx,
-		`INSERT INTO counter (ID, Delta) VALUES ($1, $2) ON CONFLICT(ID) DO UPDATE SET Value = counter.Value = $3`,
+		`INSERT INTO counter (ID, Delta) VALUES ($1, $2) ON CONFLICT(ID) DO UPDATE SET Delta = counter.Delta + $3`,
 		id, Gauge(*v), Gauge(*v))
 
 	if err != nil {
@@ -154,7 +163,7 @@ func (s DBStorage) SetCounterFromMemStats(id string, value int64) {
 	defer db.Close()
 
 	_, err = db.ExecContext(ctx,
-		`INSERT INTO counter (ID, Delta) VALUES ($1, $2) ON CONFLICT(ID) DO UPDATE SET Value = counter.Value = $3`,
+		`INSERT INTO counter (ID, Delta) VALUES ($1, $2) ON CONFLICT(ID) DO UPDATE SET Delta = counter.Delta + $3`,
 		id, Counter(value), Counter(value))
 
 	if err != nil {

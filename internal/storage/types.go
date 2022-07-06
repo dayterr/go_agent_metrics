@@ -19,12 +19,12 @@ type Storager interface {
 }
 
 type InMemoryStorage struct {
-	GaugeField   map[string]Gauge
-	CounterField map[string]Counter
+	GaugeField   map[string]Gauge `json:"Gauge"`
+	CounterField map[string]Counter `json:"Counter"`
 }
 
 type DBStorage struct {
-	GaugeField   map[string]Gauge
-	CounterField map[string]Counter
+	GaugeField   map[string]Gauge `json:"Gauge"`
+	CounterField map[string]Counter `json:"Counter"`
 	DSN string
 }

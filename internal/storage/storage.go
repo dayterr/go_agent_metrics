@@ -2,6 +2,7 @@ package storage
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -41,6 +42,7 @@ func (s InMemoryStorage) LoadMetricsFromFile(filename string) error {
 		return err
 	}
 	err = json.Unmarshal(file, &s)
+	fmt.Println(s)
 	if err != nil {
 		return err
 	}
