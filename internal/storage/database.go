@@ -287,32 +287,44 @@ func (s DBStorage) SaveMany(metricsList []metric.Metrics) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	var db *sql.DB
+	db, err := sql.Open("postgres", s.DSN)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
 	tx, err := db.Begin()
-	log.Println("metrics for db", metricsList)
 	if err != nil {
 		return err
 	}
 
 	defer tx.Rollback()
-
-	stmt, err := tx.PrepareContext(ctx, "INSERT INTO $1 (name, $2) VALUES($3, $4)")
+	//
+	stmtGauge, err := tx.PrepareContext(ctx,
+		`INSERT INTO gauge (ID, Value) VALUES ($1, $2) ON CONFLICT(ID) DO UPDATE SET Value = $3`)
 	if err != nil {
 		fmt.Println("err prep context", err)
 		return err
 	}
-	defer stmt.Close()
+	defer stmtGauge.Close()
+
+	stmtCounter, err := tx.PrepareContext(ctx,
+		`INSERT INTO counter (ID, Delta) VALUES ($1, $2) ON CONFLICT(ID) DO UPDATE SET Delta = counter.Delta + $3`)
+	if err != nil {
+		fmt.Println("err prep context", err)
+		return err
+	}
+	defer stmtCounter.Close()
 
 	for _, metric := range metricsList {
 		if metric.MType == "gauge" {
-			_, err := stmt.ExecContext(ctx, metric.MType, "value", metric.ID, metric.Value)
+			_, err := stmtGauge.ExecContext(ctx, metric.ID, metric.Value, metric.Value)
 			if err != nil {
 				return err
 			}
 		} else {
-			_, err := stmt.ExecContext(ctx, metric.MType, "delta", metric.ID, metric.Delta)
+			_, err := stmtCounter.ExecContext(ctx, metric.ID, metric.Delta, metric.Delta)
 			if err != nil {
-				log.Println("err counter", err)
 				return err
 			}
 		}
