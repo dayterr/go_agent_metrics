@@ -11,7 +11,6 @@ import (
 	_ "github.com/lib/pq"
 	"html/template"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -230,13 +229,11 @@ func (ah AsyncHandler) GetIndex(w http.ResponseWriter, r *http.Request) {
 func (ah AsyncHandler) Ping(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("postgres", ah.dsn)
 	if err != nil {
-		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	err = db.Ping()
 	if err != nil {
-		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -250,13 +247,10 @@ func (ah AsyncHandler) PostMany(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&metricList)
 	if err != nil {
-		log.Println("err decoding", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	log.Println("decoded", metricList)
 	err = ah.storage.SaveMany(metricList)
-	log.Println("err saving", err)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return

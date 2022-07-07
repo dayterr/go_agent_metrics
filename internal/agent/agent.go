@@ -8,7 +8,6 @@ import (
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"github.com/levigross/grequests"
-	"log"
 )
 
 const GaugeType = "gauge"
@@ -81,7 +80,7 @@ func (a Agent) PostMany() error {
 		}
 		listMetrics = append(listMetrics, m)
 	}
-	/*for key, value := range a.Storage.GetCounters() {
+	for key, value := range a.Storage.GetCounters() {
 		var m metric.Metrics
 		m.ID = key
 		d := value.ToInt64()
@@ -90,11 +89,10 @@ func (a Agent) PostMany() error {
 			m.Hash = hash.EncryptMetric(m, key)
 		}
 		listMetrics = append(listMetrics, m)
-	}*/
+	}
 
 	jsn, err := json.Marshal(listMetrics)
 	if err != nil {
-		log.Println("err encofing json", err)
 		return err
 	}
 
@@ -102,7 +100,6 @@ func (a Agent) PostMany() error {
 	_, err = grequests.Post(url, &grequests.RequestOptions{JSON: jsn,
 		Headers: map[string]string{"ContentType": "application/json"}, DisableCompression: false})
 	if err != nil {
-		log.Println("err posting requests", err)
 		return err
 	}
 

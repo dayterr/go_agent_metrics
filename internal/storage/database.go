@@ -311,7 +311,6 @@ func (s DBStorage) SaveMany(metricsList []metric.Metrics) error {
 	stmtCounter, err := tx.PrepareContext(ctx,
 		`INSERT INTO counter (ID, Delta) VALUES ($1, $2) ON CONFLICT(ID) DO UPDATE SET Delta = counter.Delta + $3`)
 	if err != nil {
-		fmt.Println("err prep context", err)
 		return err
 	}
 	defer stmtCounter.Close()
