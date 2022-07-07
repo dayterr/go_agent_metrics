@@ -11,6 +11,7 @@ import (
 	_ "github.com/lib/pq"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -247,11 +248,13 @@ func (ah AsyncHandler) PostMany(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&metricList)
 	if err != nil {
+		log.Println("err decoding", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	err = ah.storage.SaveMany(metricList)
 	if err != nil {
+		log.Println("err saving", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

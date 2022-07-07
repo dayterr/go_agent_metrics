@@ -29,7 +29,6 @@ func main() {
 				agentInstance.Storage.ReadMetrics()
 			case <-tickerReportMetrics.C:
 				err := agentInstance.PostMany()
-				fmt.Println("err PostMany", err)
 				if err != nil {
 					agentInstance.PostAll()
 				}
