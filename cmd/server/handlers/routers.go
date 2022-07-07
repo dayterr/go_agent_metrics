@@ -38,6 +38,7 @@ func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandl
 	r.Get("/value/{metricType}/{metricName}", h.GetMetric)
 	r.Get("/", h.GetIndex)
 	r.Get("/ping", h.Ping)
+	r.Post("/updates/", )
 	return r
 }
 

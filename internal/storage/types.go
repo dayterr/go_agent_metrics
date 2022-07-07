@@ -1,5 +1,7 @@
 package storage
 
+import "github.com/dayterr/go_agent_metrics/internal/metric"
+
 type Gauge float64
 type Counter int64
 
@@ -16,6 +18,7 @@ type Storager interface {
 	GetCounters() map[string]Counter
 	CheckGaugeByName(name string) bool
 	CheckCounterByName(name string) bool
+	SaveMany(metricsList []metric.Metrics) error
 }
 
 type InMemoryStorage struct {

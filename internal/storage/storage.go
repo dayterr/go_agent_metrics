@@ -3,6 +3,7 @@ package storage
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -125,4 +126,8 @@ func (s InMemoryStorage) CheckGaugeByName(name string) bool {
 func (s InMemoryStorage) CheckCounterByName(name string) bool {
 	_, ok := s.CounterField[name]
 	return ok
+}
+
+func (s InMemoryStorage) SaveMany(metricsList []metric.Metrics) error {
+	return nil
 }

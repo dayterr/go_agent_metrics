@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"github.com/dayterr/go_agent_metrics/internal/agent"
+	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -280,4 +282,39 @@ func (s DBStorage) CheckCounterByName(name string) bool {
 		return false
 	}
 	return true
+}
+
+func (s DBStorage) SaveMany(metricsList []metric.Metrics) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var db *sql.DB
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+
+	stmt, err := tx.PrepareContext(ctx, "INSERT INTO $1 (name, $2) VALUES($3, $4)")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for _, metric := range metricsList {
+		if metric.MType == agent.GaugeType {
+			_, err := stmt.ExecContext(ctx, metric.MType, "value", metric.ID, metric.Value)
+			if err != nil {
+				return err
+			}
+		} else {
+			_, err := stmt.ExecContext(ctx, metric.MType, "delta", metric.ID, metric.Delta)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

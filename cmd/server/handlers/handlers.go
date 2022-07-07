@@ -244,3 +244,21 @@ func (ah AsyncHandler) Ping(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	return
 }
+
+func (ah AsyncHandler) PostMany(w http.ResponseWriter, r *http.Request) {
+	var metricList []metric.Metrics
+
+	err := json.NewDecoder(r.Body).Decode(&metricList)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = ah.storage.SaveMany(metricList)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}

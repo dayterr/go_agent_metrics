@@ -2,6 +2,7 @@ package agent
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/hash"
 	"github.com/dayterr/go_agent_metrics/internal/metric"
@@ -59,4 +60,46 @@ func (a Agent) PostAll() {
 	for k, v := range counters {
 		PostCounter(v, k, a.Address, a.Key)
 	}
+}
+
+func (a Agent) PostMany() error {
+	var listMetrics []metric.Metrics
+	for key, value := range a.Storage.GetGauges() {
+		var m metric.Metrics
+		m.ID = key
+		v := value.ToFloat()
+		m.Value = &v
+		if a.Key != "" {
+			m.Hash = hash.EncryptMetric(m, key)
+		}
+		listMetrics = append(listMetrics, m)
+	}
+	for key, value := range a.Storage.GetCounters() {
+		var m metric.Metrics
+		m.ID = key
+		d := value.ToInt64()
+		m.Delta = &d
+		if a.Key != "" {
+			m.Hash = hash.EncryptMetric(m, key)
+		}
+		listMetrics = append(listMetrics, m)
+	}
+
+	if len(listMetrics) == 0 {
+		return errors.New("the batch is empty")
+	}
+
+	jsn, err := json.Marshal(listMetrics)
+	if err != nil {
+		return err
+	}
+
+	url := fmt.Sprintf("http://%v/updates/", a.Address)
+	_, err = grequests.Post(url, &grequests.RequestOptions{JSON: jsn,
+		Headers: map[string]string{"ContentType": "application/json"}, DisableCompression: false})
+	if err != nil {
+		return err
+	}
+	
+	return nil
 }
