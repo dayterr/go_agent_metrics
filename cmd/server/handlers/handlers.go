@@ -214,14 +214,16 @@ func (ah AsyncHandler) GetMetric(w http.ResponseWriter, r *http.Request) {
 
 func (ah AsyncHandler) GetIndex(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "text/html; charset=utf-8")
-	t, err := template.ParseFiles("template/index.html")
+	//t, err := template.ParseFiles("template/index.html")
+	t, err := template.ParseFiles("/Users/ruth/coding/Golang/go_agent_metrics/template/index.html")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	err = t.ExecuteTemplate(w, "index.html", ah.storage.GetGauges())
-	if err != nil {
 
+	err = t.ExecuteTemplate(w, "index.html", ah.storage.GetGauges())
+	//err = t.ExecuteTemplate(w, "index.html", ah.storage.GetGauges())
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -252,6 +254,7 @@ func (ah AsyncHandler) PostMany(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
 	err = ah.storage.SaveMany(metricList)
 	if err != nil {
 		log.Println("err saving", err)

@@ -318,6 +318,10 @@ func (s DBStorage) SaveMany(metricsList []metric.Metrics) error {
 	defer stmtCounter.Close()
 
 	for _, metric := range metricsList {
+		log.Println(metric.ID, metric.MType)
+		if metric.ID == "Alloc" {
+			log.Println(metric.ID, *metric.Value)
+		}
 		if metric.MType == "gauge" {
 			_, err := stmtGauge.ExecContext(ctx, metric.ID, metric.Value, metric.Value)
 			if err != nil {
