@@ -47,7 +47,8 @@ func GetEnvLogger() (ConfigLogger, error) {
 
 	err := env.Parse(&cfg)
 	if err != nil {
-		return ConfigLogger{}, err
+		log.Println("err config", err)
+		//return ConfigLogger{}, err
 	}
 
 	if cfg.Address == defaultAddress && fs.Address != defaultAddress {
