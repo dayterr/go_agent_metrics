@@ -64,6 +64,11 @@ func (a Agent) PostAll() {
 
 func (a Agent) PostMany() error {
 	var listMetrics []metric.Metrics
+
+	if len(a.Storage.GetGauges()) == 0 && len(a.Storage.GetCounters()) == 0 {
+		return errors.New("the batch is empty")
+	}
+
 	for key, value := range a.Storage.GetGauges() {
 		var m metric.Metrics
 		m.ID = key
@@ -83,10 +88,6 @@ func (a Agent) PostMany() error {
 			m.Hash = hash.EncryptMetric(m, key)
 		}
 		listMetrics = append(listMetrics, m)
-	}
-
-	if len(listMetrics) == 0 {
-		return errors.New("the batch is empty")
 	}
 
 	jsn, err := json.Marshal(listMetrics)
