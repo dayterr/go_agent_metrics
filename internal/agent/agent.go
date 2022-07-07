@@ -100,6 +100,6 @@ func (a Agent) PostMany() error {
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }

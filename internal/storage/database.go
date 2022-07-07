@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"github.com/dayterr/go_agent_metrics/internal/agent"
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"io/ioutil"
 	"log"
@@ -303,7 +302,7 @@ func (s DBStorage) SaveMany(metricsList []metric.Metrics) error {
 	defer stmt.Close()
 
 	for _, metric := range metricsList {
-		if metric.MType == agent.GaugeType {
+		if metric.MType == "gauge" {
 			_, err := stmt.ExecContext(ctx, metric.MType, "value", metric.ID, metric.Value)
 			if err != nil {
 				return err
