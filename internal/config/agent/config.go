@@ -29,6 +29,7 @@ type FlagStruct struct {
 }
 
 func GetEnv() (Config, error) {
+	log.Println("first line config")
 	var cfg Config
 	fs := FlagStruct{}
 	flag.DurationVar(&fs.ReportInterval, "r", defaultReportInterval, "Interval for sending the metric to the server")
