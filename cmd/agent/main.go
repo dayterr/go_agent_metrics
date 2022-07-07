@@ -27,7 +27,10 @@ func main() {
 			case <-tickerCollectMetrics.C:
 				agentInstance.Storage.ReadMetrics()
 			case <-tickerReportMetrics.C:
-				agentInstance.PostAll()
+				err := agentInstance.PostMany()
+				if err != nil {
+					agentInstance.PostAll()
+				}
 			case s := <-signalChan:
 				switch s {
 				case syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT:

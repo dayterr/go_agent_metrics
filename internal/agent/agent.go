@@ -54,6 +54,7 @@ func PostGauge(value storage.Gauge, metricName string, address string, key strin
 func (a Agent) PostAll() {
 	gauges := a.Storage.GetGauges()
 	counters := a.Storage.GetCounters()
+
 	for k, v := range gauges {
 		PostGauge(v, k, a.Address, a.Key)
 	}

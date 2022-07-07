@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"os"
 	"runtime"
@@ -129,5 +130,6 @@ func (s InMemoryStorage) CheckCounterByName(name string) bool {
 }
 
 func (s InMemoryStorage) SaveMany(metricsList []metric.Metrics) error {
+	log.Println("metrics list is", metricsList)
 	return nil
 }

@@ -249,12 +249,14 @@ func (ah AsyncHandler) PostMany(w http.ResponseWriter, r *http.Request) {
 	var metricList []metric.Metrics
 
 	err := json.NewDecoder(r.Body).Decode(&metricList)
+	log.Println("err decoding PostMany", err)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	err = ah.storage.SaveMany(metricList)
+	log.Println("err saving PostMany", err)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
