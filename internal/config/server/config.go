@@ -69,5 +69,6 @@ func GetEnvLogger() (ConfigLogger, error) {
 	if cfg.DatabaseDSN == "" && fs.DatabaseDSN != "" {
 		cfg.DatabaseDSN = fs.DatabaseDSN
 	}
+	log.Println("server config", cfg)
 	return cfg, nil
 }

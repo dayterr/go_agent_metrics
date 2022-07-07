@@ -54,5 +54,6 @@ func GetEnv() (Config, error) {
 	if cfg.Key == defaultKey && fs.Key != defaultKey {
 		cfg.Key = fs.Key
 	}
+	log.Println("agent config", cfg)
 	return cfg, nil
 }
