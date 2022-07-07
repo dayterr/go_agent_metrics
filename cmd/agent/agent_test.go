@@ -28,7 +28,8 @@ func TestPostGauge(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := handlers.CreateRouter("", false)
+			h := handlers.NewAsyncHandler("", "", false)
+			r := handlers.CreateRouterWithAsyncHandler("", false, h)
 			ts := httptest.NewUnstartedServer(r)
 			url := "127.0.0.1:8080"
 			l, err := net.Listen("tcp", url)
@@ -36,7 +37,7 @@ func TestPostGauge(t *testing.T) {
 			ts.Listener = l
 			ts.Start()
 			defer ts.Close()
-			v := agent.PostGauge(tt.value, tt.metricName, address)
+			v := agent.PostGauge(tt.value, tt.metricName, address, "")
 			assert.Nil(t, v)
 		})
 	}
@@ -56,7 +57,8 @@ func TestPostCounter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := handlers.CreateRouter("", false)
+			h := handlers.NewAsyncHandler("", "", false)
+			r := handlers.CreateRouterWithAsyncHandler("", false, h)
 			ts := httptest.NewUnstartedServer(r)
 			url := "127.0.0.1:8080"
 			l, err := net.Listen("tcp", url)
@@ -64,7 +66,7 @@ func TestPostCounter(t *testing.T) {
 			ts.Listener = l
 			ts.Start()
 			defer ts.Close()
-			v := agent.PostCounter(tt.value, tt.metricName, address)
+			v := agent.PostCounter(tt.value, tt.metricName, address, "")
 			assert.Nil(t, v)
 		})
 	}
