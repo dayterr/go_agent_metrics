@@ -25,12 +25,12 @@ func NewDB(dsn string) (DBStorage, error) {
 	}
 	defer db.Close()
 	_, err = db.ExecContext(ctx,
-		`CREATE TABLE IF NOT EXISTS gauge (ID text UNIQUE NOT NULL, Value double precision);`)
+		`CREATE TABLE IF NOT EXISTS gauge (id serial PRIMARY KEY name text UNIQUE NOT NULL, Value double precision NOT NULL);`)
 	if err != nil {
 		return DBStorage{}, err
 	}
 	_, err = db.ExecContext(ctx,
-		`CREATE TABLE IF NOT EXISTS counter (ID text UNIQUE NOT NULL, Delta BIGINT);`)
+		`CREATE TABLE IF NOT EXISTS counter (id serial PRIMARY KEY name text UNIQUE NOT NULL, Delta BIGINT NOT NULL);`)
 	if err != nil {
 		return DBStorage{}, err
 	}
@@ -76,7 +76,7 @@ func (s DBStorage) GetGuageByID(id string) (float64, error) {
 	}
 	defer db.Close()
 	var fl float64
-	row := db.QueryRow(`SELECT Value FROM gauge WHERE id = $1;`, id)
+	row := db.QueryRow(`SELECT Value FROM gauge WHERE name = $1;`, id)
 	err = row.Scan(&fl)
 	if err != nil {
 		return 0, err
@@ -93,7 +93,7 @@ func (s DBStorage) GetCounterByID(id string) (int64, error) {
 	}
 	defer db.Close()
 	var val int64
-	row := db.QueryRowContext(ctx, `SELECT Delta FROM counter WHERE ID = $1;`, id)
+	row := db.QueryRowContext(ctx, `SELECT Delta FROM counter WHERE name = $1;`, id)
 	err = row.Scan(&val)
 	if err != nil {
 		return 0, err
@@ -261,7 +261,7 @@ func (s DBStorage) CheckGaugeByName(name string) bool {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	_, err = db.QueryContext(ctx, `SELECT Value FROM gauge WHERE ID = $1;`, name)
+	_, err = db.QueryContext(ctx, `SELECT Value FROM gauge WHERE name = $1;`, name)
 	if err != nil {
 		return false
 	}
@@ -276,7 +276,7 @@ func (s DBStorage) CheckCounterByName(name string) bool {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	_, err = db.QueryContext(ctx, `SELECT Delta FROM counter WHERE ID = $1;`, name)
+	_, err = db.QueryContext(ctx, `SELECT Delta FROM counter WHERE name = $1;`, name)
 	if err != nil {
 		return false
 	}
