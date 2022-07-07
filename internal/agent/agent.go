@@ -65,6 +65,7 @@ func (a Agent) PostAll() {
 
 func (a Agent) PostMany() error {
 	var listMetrics []metric.Metrics
+	fmt.Println(a.Storage)
 
 	if len(a.Storage.GetGauges()) == 0 && len(a.Storage.GetCounters()) == 0 {
 		return errors.New("the batch is empty")
@@ -93,6 +94,7 @@ func (a Agent) PostMany() error {
 
 	jsn, err := json.Marshal(listMetrics)
 	if err != nil {
+
 		return err
 	}
 
