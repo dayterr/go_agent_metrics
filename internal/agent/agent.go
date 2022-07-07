@@ -81,7 +81,7 @@ func (a Agent) PostMany() error {
 		}
 		listMetrics = append(listMetrics, m)
 	}
-	for key, value := range a.Storage.GetCounters() {
+	/*for key, value := range a.Storage.GetCounters() {
 		var m metric.Metrics
 		m.ID = key
 		d := value.ToInt64()
@@ -90,7 +90,7 @@ func (a Agent) PostMany() error {
 			m.Hash = hash.EncryptMetric(m, key)
 		}
 		listMetrics = append(listMetrics, m)
-	}
+	}*/
 
 	jsn, err := json.Marshal(listMetrics)
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"io/ioutil"
 	"log"
@@ -76,7 +77,6 @@ func (s DBStorage) GetGuageByID(id string) (float64, error) {
 	defer db.Close()
 	var fl float64
 	row := db.QueryRow(`SELECT Value FROM gauge WHERE id = $1;`, id)
-	log.Println("row is", row)
 	err = row.Scan(&fl)
 	if err != nil {
 		return 0, err
@@ -289,6 +289,7 @@ func (s DBStorage) SaveMany(metricsList []metric.Metrics) error {
 
 	var db *sql.DB
 	tx, err := db.Begin()
+	log.Println("metrics for db", metricsList)
 	if err != nil {
 		return err
 	}
@@ -297,6 +298,7 @@ func (s DBStorage) SaveMany(metricsList []metric.Metrics) error {
 
 	stmt, err := tx.PrepareContext(ctx, "INSERT INTO $1 (name, $2) VALUES($3, $4)")
 	if err != nil {
+		fmt.Println("err prep context", err)
 		return err
 	}
 	defer stmt.Close()
@@ -310,6 +312,7 @@ func (s DBStorage) SaveMany(metricsList []metric.Metrics) error {
 		} else {
 			_, err := stmt.ExecContext(ctx, metric.MType, "delta", metric.ID, metric.Delta)
 			if err != nil {
+				log.Println("err counter", err)
 				return err
 			}
 		}

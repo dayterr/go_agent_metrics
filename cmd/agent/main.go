@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 	agent2 "github.com/dayterr/go_agent_metrics/internal/config/agent"
 	"log"
@@ -28,6 +29,7 @@ func main() {
 				agentInstance.Storage.ReadMetrics()
 			case <-tickerReportMetrics.C:
 				err := agentInstance.PostMany()
+				fmt.Println("err PostMany", err)
 				if err != nil {
 					agentInstance.PostAll()
 				}
