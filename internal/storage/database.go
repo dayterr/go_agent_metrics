@@ -30,7 +30,7 @@ func NewDB(dsn string) (DBStorage, error) {
 		return DBStorage{}, err
 	}
 	_, err = db.ExecContext(ctx,
-		`CREATE TABLE IF NOT EXISTS counter (id serial PRIMARY KEY, name text UNIQUE NOT NULL, Delta BIGINT NOT NULL);`)
+		`CREATE TABLE IF NOT EXISTS counter (id serial PRIMARY KEY, name text UNIQUE, Delta BIGINT);`)
 	if err != nil {
 		return DBStorage{}, err
 	}
