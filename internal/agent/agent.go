@@ -65,7 +65,6 @@ func (a Agent) PostAll() {
 
 func (a Agent) PostMany() error {
 	var listMetrics []metric.Metrics
-	fmt.Println(a.Storage)
 
 	if len(a.Storage.GetGauges()) == 0 && len(a.Storage.GetCounters()) == 0 {
 		return errors.New("the batch is empty")
@@ -76,6 +75,7 @@ func (a Agent) PostMany() error {
 		m.ID = key
 		v := value.ToFloat()
 		m.Value = &v
+		m.MType = GaugeType
 		if a.Key != "" {
 			m.Hash = hash.EncryptMetric(m, key)
 		}
@@ -86,6 +86,7 @@ func (a Agent) PostMany() error {
 		m.ID = key
 		d := value.ToInt64()
 		m.Delta = &d
+		m.MType = CounterType
 		if a.Key != "" {
 			m.Hash = hash.EncryptMetric(m, key)
 		}

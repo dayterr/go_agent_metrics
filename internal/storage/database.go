@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"io/ioutil"
 	"log"
@@ -305,7 +304,6 @@ func (s DBStorage) SaveMany(metricsList []metric.Metrics) error {
 	stmtGauge, err := tx.PrepareContext(ctx,
 		`INSERT INTO gauge (name, Value) VALUES ($1, $2) ON CONFLICT(name) DO UPDATE SET Value = $3`)
 	if err != nil {
-		fmt.Println("err prep context", err)
 		return err
 	}
 	defer stmtGauge.Close()
@@ -318,10 +316,6 @@ func (s DBStorage) SaveMany(metricsList []metric.Metrics) error {
 	defer stmtCounter.Close()
 
 	for _, metric := range metricsList {
-		log.Println(metric.ID, metric.MType)
-		if metric.ID == "Alloc" {
-			log.Println(metric.ID, *metric.Value)
-		}
 		if metric.MType == "gauge" {
 			_, err := stmtGauge.ExecContext(ctx, metric.ID, metric.Value, metric.Value)
 			if err != nil {
