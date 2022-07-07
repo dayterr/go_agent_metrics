@@ -215,7 +215,7 @@ func (ah AsyncHandler) GetMetric(w http.ResponseWriter, r *http.Request) {
 func (ah AsyncHandler) GetIndex(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "text/html; charset=utf-8")
 	//t, err := template.ParseFiles("template/index.html")
-	t, err := template.ParseFiles("/template/index.html")
+	t, err := template.ParseFiles("template/index.html")
 	if err != nil {
 		log.Println("err", err)
 		w.WriteHeader(http.StatusInternalServerError)
