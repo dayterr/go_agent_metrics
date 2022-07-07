@@ -111,7 +111,7 @@ func (s DBStorage) SetGuage(id string, v *float64) {
 	defer db.Close()
 
 	_, err = db.ExecContext(ctx,
-		`INSERT INTO gauge (ID, Value) VALUES ($1, $2) ON CONFLICT(ID) DO UPDATE SET Value = $3`,
+		`INSERT INTO gauge (name, Value) VALUES ($1, $2) ON CONFLICT(name) DO UPDATE SET Value = $3`,
 		id, Gauge(*v), Gauge(*v))
 	if err != nil {
 		log.Fatal(err)
@@ -128,7 +128,7 @@ func (s DBStorage) SetCounter(id string, v *int64) {
 	defer db.Close()
 
 	_, err = db.ExecContext(ctx,
-		`INSERT INTO counter (ID, Delta) VALUES ($1, $2) ON CONFLICT(ID) DO UPDATE SET Delta = counter.Delta + $3`,
+		`INSERT INTO counter (name, Delta) VALUES ($1, $2) ON CONFLICT(name) DO UPDATE SET Delta = counter.Delta + $3`,
 		id, Gauge(*v), Gauge(*v))
 
 	if err != nil {
@@ -146,7 +146,7 @@ func (s DBStorage) SetGaugeFromMemStats(id string, value float64) {
 	defer db.Close()
 
 	_, err = db.ExecContext(ctx,
-		`INSERT INTO gauge (ID, Value) VALUES ($1, $2) ON CONFLICT(ID) DO UPDATE SET Value = $3`,
+		`INSERT INTO gauge (name, Value) VALUES ($1, $2) ON CONFLICT(name) DO UPDATE SET Value = $3`,
 		id, Gauge(value), Gauge(value))
 	if err != nil {
 		log.Fatal(err)
@@ -163,7 +163,7 @@ func (s DBStorage) SetCounterFromMemStats(id string, value int64) {
 	defer db.Close()
 
 	_, err = db.ExecContext(ctx,
-		`INSERT INTO counter (ID, Delta) VALUES ($1, $2) ON CONFLICT(ID) DO UPDATE SET Delta = counter.Delta + $3`,
+		`INSERT INTO counter (name, Delta) VALUES ($1, $2) ON CONFLICT(name) DO UPDATE SET Delta = counter.Delta + $3`,
 		id, Counter(value), Counter(value))
 
 	if err != nil {
@@ -301,7 +301,7 @@ func (s DBStorage) SaveMany(metricsList []metric.Metrics) error {
 	defer tx.Rollback()
 	//
 	stmtGauge, err := tx.PrepareContext(ctx,
-		`INSERT INTO gauge (ID, Value) VALUES ($1, $2) ON CONFLICT(ID) DO UPDATE SET Value = $3`)
+		`INSERT INTO gauge (name, Value) VALUES ($1, $2) ON CONFLICT(name) DO UPDATE SET Value = $3`)
 	if err != nil {
 		fmt.Println("err prep context", err)
 		return err
@@ -309,7 +309,7 @@ func (s DBStorage) SaveMany(metricsList []metric.Metrics) error {
 	defer stmtGauge.Close()
 
 	stmtCounter, err := tx.PrepareContext(ctx,
-		`INSERT INTO counter (ID, Delta) VALUES ($1, $2) ON CONFLICT(ID) DO UPDATE SET Delta = counter.Delta + $3`)
+		`INSERT INTO counter (name, Delta) VALUES ($1, $2) ON CONFLICT(name) DO UPDATE SET Delta = counter.Delta + $3`)
 	if err != nil {
 		return err
 	}
