@@ -25,12 +25,12 @@ func NewDB(dsn string) (DBStorage, error) {
 	}
 	defer db.Close()
 	_, err = db.ExecContext(ctx,
-		`CREATE TABLE IF NOT EXISTS gauge (ID text UNIQUE NOT NULL, Value double precision NOT NULL);`)
+		`CREATE TABLE IF NOT EXISTS gauge (ID text UNIQUE NOT NULL, Value double precision);`)
 	if err != nil {
 		return DBStorage{}, err
 	}
 	_, err = db.ExecContext(ctx,
-		`CREATE TABLE IF NOT EXISTS counter (ID text UNIQUE NOT NULL, Delta BIGINT NOT NULL);`)
+		`CREATE TABLE IF NOT EXISTS counter (ID text UNIQUE NOT NULL, Delta BIGINT);`)
 	if err != nil {
 		return DBStorage{}, err
 	}
