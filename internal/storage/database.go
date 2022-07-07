@@ -219,8 +219,9 @@ func (s DBStorage) GetGauges() map[string]Gauge {
 	}
 	var name string
 	var value float64
+	var id int
 	for rows.Next() {
-		err = rows.Scan(&name, &value)
+		err = rows.Scan(&id, &name, &value)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -243,8 +244,9 @@ func (s DBStorage) GetCounters() map[string]Counter {
 	}
 	var name string
 	var value int64
+	var id int
 	for rows.Next() {
-		err = rows.Scan(&name, &value)
+		err = rows.Scan(&id, &name, &value)
 		if err != nil {
 			log.Fatal(err)
 		}
