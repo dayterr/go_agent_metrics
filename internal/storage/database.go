@@ -25,7 +25,7 @@ func NewDB(dsn string) (DBStorage, error) {
 	}
 	defer db.Close()
 	_, err = db.ExecContext(ctx,
-		`CREATE TABLE IF NOT EXISTS gauge (id serial PRIMARY KEY, name text UNIQUE NOT NULL, Value double precision NOT NULL);`)
+		`CREATE TABLE IF NOT EXISTS gauge (id serial PRIMARY KEY, name text UNIQUE, Value double precision);`)
 	if err != nil {
 		return DBStorage{}, err
 	}
