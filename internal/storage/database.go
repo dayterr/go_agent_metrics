@@ -330,5 +330,10 @@ func (s DBStorage) SaveMany(metricsList []metric.Metrics) error {
 		}
 	}
 
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
