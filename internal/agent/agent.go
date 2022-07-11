@@ -8,6 +8,8 @@ import (
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"github.com/levigross/grequests"
+	"math/rand"
+	"runtime"
 )
 
 const GaugeType = "gauge"
@@ -61,6 +63,40 @@ func (a Agent) PostAll() {
 	for k, v := range counters {
 		PostCounter(v, k, a.Address, a.Key)
 	}
+}
+
+func (a Agent) ReadMetrics() {
+	m := &runtime.MemStats{}
+	runtime.ReadMemStats(m)
+	a.Storage.SetGaugeFromMemStats("Alloc", float64(m.Alloc))
+	a.Storage.SetGaugeFromMemStats("BuckHashSys", float64(m.BuckHashSys))
+	a.Storage.SetGaugeFromMemStats("Frees", float64(m.Frees))
+	a.Storage.SetGaugeFromMemStats("GCCPUFraction", m.GCCPUFraction)
+	a.Storage.SetGaugeFromMemStats("GCSys", float64(m.GCSys))
+	a.Storage.SetGaugeFromMemStats("HeapAlloc", float64(m.HeapAlloc))
+	a.Storage.SetGaugeFromMemStats("HeapIdle", float64(m.HeapIdle))
+	a.Storage.SetGaugeFromMemStats("HeapInuse", float64(m.HeapInuse))
+	a.Storage.SetGaugeFromMemStats("HeapObjects", float64(m.HeapObjects))
+	a.Storage.SetGaugeFromMemStats("HeapReleased", float64(m.HeapReleased))
+	a.Storage.SetGaugeFromMemStats("HeapSys", float64(m.HeapSys))
+	a.Storage.SetGaugeFromMemStats("LastGC", float64(m.HeapAlloc))
+	a.Storage.SetGaugeFromMemStats("Lookups", float64(m.Lookups))
+	a.Storage.SetGaugeFromMemStats("MCacheInuse", float64(m.MCacheInuse))
+	a.Storage.SetGaugeFromMemStats("MCacheSys", float64(m.MCacheSys))
+	a.Storage.SetGaugeFromMemStats("MSpanInuse", float64(m.MSpanInuse))
+	a.Storage.SetGaugeFromMemStats("MSpanSys", float64(m.MSpanSys))
+	a.Storage.SetGaugeFromMemStats("Mallocs", float64(m.Mallocs))
+	a.Storage.SetGaugeFromMemStats("NextGC", float64(m.NextGC))
+	a.Storage.SetGaugeFromMemStats("NumForcedGC", float64(m.NumForcedGC))
+	a.Storage.SetGaugeFromMemStats("NumGC", float64(m.NumGC))
+	a.Storage.SetGaugeFromMemStats("OtherSys", float64(m.OtherSys))
+	a.Storage.SetGaugeFromMemStats("PauseTotalNs", float64(m.PauseTotalNs))
+	a.Storage.SetGaugeFromMemStats("StackInuse", float64(m.StackInuse))
+	a.Storage.SetGaugeFromMemStats("StackSys", float64(m.StackSys))
+	a.Storage.SetGaugeFromMemStats("Sys", float64(m.Sys))
+	a.Storage.SetGaugeFromMemStats("TotalAlloc", float64(m.TotalAlloc))
+	a.Storage.SetGaugeFromMemStats("RandomValue", rand.Float64())
+	a.Storage.SetCounterFromMemStats("PollCount", 1)
 }
 
 func (a Agent) PostMany() error {

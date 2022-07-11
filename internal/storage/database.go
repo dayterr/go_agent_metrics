@@ -7,9 +7,7 @@ import (
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"os"
-	"runtime"
 	"time"
 )
 
@@ -168,40 +166,6 @@ func (s DBStorage) SetCounterFromMemStats(id string, value int64) {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func (s DBStorage) ReadMetrics() {
-	m := &runtime.MemStats{}
-	runtime.ReadMemStats(m)
-	s.SetGaugeFromMemStats("Alloc", float64(m.Alloc))
-	s.SetGaugeFromMemStats("BuckHashSys", float64(m.BuckHashSys))
-	s.SetGaugeFromMemStats("Frees", float64(m.Frees))
-	s.SetGaugeFromMemStats("GCCPUFraction", m.GCCPUFraction)
-	s.SetGaugeFromMemStats("GCSys", float64(m.GCSys))
-	s.SetGaugeFromMemStats("HeapAlloc", float64(m.HeapAlloc))
-	s.SetGaugeFromMemStats("HeapIdle", float64(m.HeapIdle))
-	s.SetGaugeFromMemStats("HeapInuse", float64(m.HeapInuse))
-	s.SetGaugeFromMemStats("HeapObjects", float64(m.HeapObjects))
-	s.SetGaugeFromMemStats("HeapReleased", float64(m.HeapReleased))
-	s.SetGaugeFromMemStats("HeapSys", float64(m.HeapSys))
-	s.SetGaugeFromMemStats("LastGC", float64(m.HeapAlloc))
-	s.SetGaugeFromMemStats("Lookups", float64(m.Lookups))
-	s.SetGaugeFromMemStats("MCacheInuse", float64(m.MCacheInuse))
-	s.SetGaugeFromMemStats("MCacheSys", float64(m.MCacheSys))
-	s.SetGaugeFromMemStats("MSpanInuse", float64(m.MSpanInuse))
-	s.SetGaugeFromMemStats("MSpanSys", float64(m.MSpanSys))
-	s.SetGaugeFromMemStats("Mallocs", float64(m.Mallocs))
-	s.SetGaugeFromMemStats("NextGC", float64(m.NextGC))
-	s.SetGaugeFromMemStats("NumForcedGC", float64(m.NumForcedGC))
-	s.SetGaugeFromMemStats("NumGC", float64(m.NumGC))
-	s.SetGaugeFromMemStats("OtherSys", float64(m.OtherSys))
-	s.SetGaugeFromMemStats("PauseTotalNs", float64(m.PauseTotalNs))
-	s.SetGaugeFromMemStats("StackInuse", float64(m.StackInuse))
-	s.SetGaugeFromMemStats("StackSys", float64(m.StackSys))
-	s.SetGaugeFromMemStats("Sys", float64(m.Sys))
-	s.SetGaugeFromMemStats("TotalAlloc", float64(m.TotalAlloc))
-	s.SetGaugeFromMemStats("RandomValue", rand.Float64())
-	s.SetCounterFromMemStats("PollCount", 1)
 }
 
 func (s DBStorage) GetGauges() map[string]Gauge {

@@ -13,7 +13,6 @@ type Storager interface {
 	SetCounter(id string, v *int64)
 	SetGaugeFromMemStats(id string, value float64)
 	SetCounterFromMemStats(id string, value int64)
-	ReadMetrics()
 	GetGauges() map[string]Gauge
 	GetCounters() map[string]Counter
 	CheckGaugeByName(name string) bool
