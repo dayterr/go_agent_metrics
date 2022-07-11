@@ -25,7 +25,7 @@ func main() {
 		for {
 			select {
 			case <-tickerCollectMetrics.C:
-				agentInstance.Storage.ReadMetrics()
+				agentInstance.ReadMetrics()
 			case <-tickerReportMetrics.C:
 				err := agentInstance.PostMany()
 				if err != nil {
