@@ -15,7 +15,7 @@ var (
 	defaultKey           = ""
 )
 
-type ConfigLogger struct {
+type ConfigServer struct {
 	Address       string        `env:"ADDRESS" envDefault:"localhost:8080"`
 	StoreInterval time.Duration `env:"STORE_INTERVAL" envDefault:"300s"`
 	StoreFile     string        `env:"STORE_FILE" envDefault:"/tmp/devops-metric-db.json"`
@@ -33,9 +33,9 @@ type FlagStruct struct {
 	DatabaseDSN   string
 }
 
-func GetEnvLogger() (ConfigLogger, error) {
-	log.Println("first line in GetEnvLogger")
-	cfg := ConfigLogger{}
+func GetEnvServer() (ConfigServer, error) {
+	log.Println("first line in GetEnvServer")
+	cfg := ConfigServer{}
 	fs := FlagStruct{}
 	flag.StringVar(&fs.Address, "a", defaultAddress, "Address for the server")
 	flag.BoolVar(&fs.Restore, "r", defaultRestore, "A bool flag for configuration upload")
@@ -47,16 +47,12 @@ func GetEnvLogger() (ConfigLogger, error) {
 
 	err := env.Parse(&cfg)
 	if err != nil {
-		log.Println("err config", err)
-		//return ConfigLogger{}, err
+		return ConfigServer{}, err
 	}
 
 	if cfg.Address == defaultAddress && fs.Address != defaultAddress {
 		cfg.Address = fs.Address
 	}
-	/*if cfg.Restore == defaultRestore && fs.Restore != defaultRestore {
-		cfg.Restore = fs.Restore
-	}*/
 	if cfg.StoreInterval == defaultStoreInterval && fs.StoreInterval != defaultStoreInterval {
 		cfg.StoreInterval = fs.StoreInterval
 	}

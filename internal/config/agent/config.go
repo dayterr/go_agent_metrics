@@ -14,7 +14,7 @@ const (
 	defaultKey            = ""
 )
 
-type Config struct {
+type ConfigAgent struct {
 	Address        string        `env:"ADDRESS" envDefault:"localhost:8080"`
 	ReportInterval time.Duration `env:"REPORT_INTERVAL" envDefault:"10s"`
 	PollInterval   time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
@@ -28,9 +28,9 @@ type FlagStruct struct {
 	Key            string
 }
 
-func GetEnv() (Config, error) {
+func GetEnvAgent() (ConfigAgent, error) {
 	log.Println("first line config")
-	var cfg Config
+	var cfg ConfigAgent
 	fs := FlagStruct{}
 	flag.DurationVar(&fs.ReportInterval, "r", defaultReportInterval, "Interval for sending the metric to the server")
 	flag.DurationVar(&fs.PollInterval, "p", defaultPollInterval, "Interval for polling the metric")
@@ -40,8 +40,7 @@ func GetEnv() (Config, error) {
 
 	err := env.Parse(&cfg)
 	if err != nil {
-		//return Config{}, err
-		log.Println("agent config error", err)
+		return ConfigAgent{}, err
 	}
 	if cfg.ReportInterval == defaultReportInterval && fs.ReportInterval != defaultReportInterval {
 		cfg.ReportInterval = fs.ReportInterval
