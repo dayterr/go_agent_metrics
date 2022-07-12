@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/dayterr/go_agent_metrics/internal/server"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"github.com/go-chi/chi/v5"
 	"log"
@@ -24,8 +25,7 @@ func NewAsyncHandler(key, dsn string, isDB bool) AsyncHandler {
 func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandler) chi.Router {
 	if isRestored {
 		var err error
-		h.storage = storage.NewIMS()
-		h.storage, err = storage.LoadMetricsFromFile(filename)
+		h.storage, err = server.LoadMetricsFromFile(filename)
 		log.Println("uploaded", h.storage)
 		if err != nil {
 			log.Fatal(err)

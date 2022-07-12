@@ -1,11 +1,7 @@
 package storage
 
 import (
-	"encoding/json"
 	"github.com/dayterr/go_agent_metrics/internal/metric"
-	"io/ioutil"
-	"log"
-	"os"
 )
 
 func NewIMS() InMemoryStorage {
@@ -25,36 +21,6 @@ func (c Counter) ToInt64() int64 {
 
 func (c Counter) ToInt() int {
 	return int(c)
-}
-
-func LoadMetricsFromFile(filename string) (InMemoryStorage, error) {
-	if _, err := os.Stat(filename); err != nil {
-		file, err := os.Create(filename)
-		if err != nil {
-			return InMemoryStorage{}, err
-		}
-		file.Close()
-		return InMemoryStorage{}, nil
-	}
-	file, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return InMemoryStorage{}, err
-	}
-
-	s := NewIMS()
-
-	err = json.Unmarshal(file, &s)
-	if err != nil {
-		return InMemoryStorage{}, err
-	}
-	log.Println("unmarshalled", s)
-	for key, value := range s.GaugeField {
-		s.SetGaugeFromMemStats(key, value.ToFloat())
-	}
-	for key, value := range s.CounterField {
-		s.SetCounterFromMemStats(key, value.ToInt64())
-	}
-	return s, nil
 }
 
 func (s InMemoryStorage) GetGuageByID(id string) (float64, error) {
