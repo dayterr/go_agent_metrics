@@ -26,7 +26,7 @@ func (c Counter) ToInt() int {
 	return int(c)
 }
 
-func LoadMetricsFromFile(filename string) (InMemoryStorage, error) {
+func LoadMetricsFromFile(filename string, s InMemoryStorage) (InMemoryStorage, error) {
 	if _, err := os.Stat(filename); err != nil {
 		file, err := os.Create(filename)
 		if err != nil {
@@ -39,8 +39,6 @@ func LoadMetricsFromFile(filename string) (InMemoryStorage, error) {
 	if err != nil {
 		return InMemoryStorage{}, err
 	}
-
-	s := NewIMS()
 
 	err = json.Unmarshal(file, &s)
 	if err != nil {
