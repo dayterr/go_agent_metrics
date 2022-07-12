@@ -3,11 +3,8 @@ package storage
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"github.com/dayterr/go_agent_metrics/internal/metric"
-	"io/ioutil"
 	"log"
-	"os"
 	"time"
 )
 
@@ -32,36 +29,11 @@ func NewDB(dsn string) (DBStorage, error) {
 		return DBStorage{}, err
 	}
 	return DBStorage{
+		DB: db,
+		DSN: dsn,
 		GaugeField:   make(map[string]Gauge),
 		CounterField: make(map[string]Counter),
-		DSN: dsn,
 	}, nil
-}
-
-func (s DBStorage) LoadMetricsFromFile(filename string) error {
-	if _, err := os.Stat(filename); err != nil {
-		file, err := os.Create(filename)
-		if err != nil {
-			return err
-		}
-		file.Close()
-		return nil
-	}
-	file, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(file, &s)
-	if err != nil {
-		return err
-	}
-	for key, value := range s.GaugeField {
-		s.SetGaugeFromMemStats(key, value.ToFloat())
-	}
-	for key, value := range s.CounterField {
-		s.SetCounterFromMemStats(key, value.ToInt64())
-	}
-	return nil
 }
 
 func (s DBStorage) GetGuageByID(id string) (float64, error) {

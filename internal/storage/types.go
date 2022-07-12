@@ -1,12 +1,14 @@
 package storage
 
-import "github.com/dayterr/go_agent_metrics/internal/metric"
+import (
+	"database/sql"
+	"github.com/dayterr/go_agent_metrics/internal/metric"
+)
 
 type Gauge float64
 type Counter int64
 
 type Storager interface {
-	LoadMetricsFromFile(filename string) error
 	GetGuageByID(id string) (float64, error)
 	GetCounterByID(id string) (int64, error)
 	SetGuage(id string, v *float64)
@@ -26,7 +28,8 @@ type InMemoryStorage struct {
 }
 
 type DBStorage struct {
-	GaugeField   map[string]Gauge `json:"Gauge"`
-	CounterField map[string]Counter `json:"Counter"`
+	DB *sql.DB
 	DSN string
+	GaugeField   map[string]Gauge
+	CounterField map[string]Counter
 }
