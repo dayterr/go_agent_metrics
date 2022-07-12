@@ -35,6 +35,7 @@ func LoadMetricsFromFile(filename string) (storage.InMemoryStorage, error) {
 	}
 
 	s := storage.NewIMS()
+	log.Println("s is", s)
 
 	err = json.Unmarshal(file, &s)
 	if err != nil {
