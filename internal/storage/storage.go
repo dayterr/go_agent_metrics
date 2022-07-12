@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"io/ioutil"
+	"log"
 	"os"
 )
 
@@ -26,7 +27,7 @@ func (c Counter) ToInt() int {
 	return int(c)
 }
 
-func LoadMetricsFromFile(filename string, s InMemoryStorage) (InMemoryStorage, error) {
+func LoadMetricsFromFile(filename string) (InMemoryStorage, error) {
 	if _, err := os.Stat(filename); err != nil {
 		file, err := os.Create(filename)
 		if err != nil {
@@ -40,10 +41,13 @@ func LoadMetricsFromFile(filename string, s InMemoryStorage) (InMemoryStorage, e
 		return InMemoryStorage{}, err
 	}
 
+	s := NewIMS()
+
 	err = json.Unmarshal(file, &s)
 	if err != nil {
 		return InMemoryStorage{}, err
 	}
+	log.Println("unmarshalled", s)
 	for key, value := range s.GaugeField {
 		s.SetGaugeFromMemStats(key, value.ToFloat())
 	}
