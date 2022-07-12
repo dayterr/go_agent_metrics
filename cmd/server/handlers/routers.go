@@ -23,9 +23,9 @@ func NewAsyncHandler(key, dsn string, isDB bool) AsyncHandler {
 
 func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandler) chi.Router {
 	if isRestored {
-		s := storage.NewIMS()
-		s, err := storage.LoadMetricsFromFile(filename)
-		h.storage = s
+		var err error
+		h.storage, err = storage.LoadMetricsFromFile(filename)
+		log.Println("uploaded", h.storage)
 		if err != nil {
 			log.Fatal(err)
 		}
