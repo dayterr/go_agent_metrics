@@ -17,7 +17,6 @@ func NewDB(dsn string) (DBStorage, error) {
 	if err != nil {
 		return DBStorage{}, err
 	}
-	defer db.Close()
 	_, err = db.ExecContext(ctx,
 		`CREATE TABLE IF NOT EXISTS gauge (id serial PRIMARY KEY, name text UNIQUE NOT NULL, Value double precision NOT NULL);`)
 	if err != nil {
@@ -39,14 +38,9 @@ func NewDB(dsn string) (DBStorage, error) {
 func (s DBStorage) GetGuageByID(id string) (float64, error) {
 	//ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	//defer cancel()
-	db, err := sql.Open("postgres", s.DSN)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
 	var fl float64
-	row := db.QueryRow(`SELECT Value FROM gauge WHERE name = $1;`, id)
-	err = row.Scan(&fl)
+	row := s.DB.QueryRow(`SELECT Value FROM gauge WHERE name = $1;`, id)
+	err := row.Scan(&fl)
 	if err != nil {
 		return 0, err
 	}
@@ -56,14 +50,9 @@ func (s DBStorage) GetGuageByID(id string) (float64, error) {
 func (s DBStorage) GetCounterByID(id string) (int64, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	db, err := sql.Open("postgres", s.DSN)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
 	var val int64
-	row := db.QueryRowContext(ctx, `SELECT Delta FROM counter WHERE name = $1;`, id)
-	err = row.Scan(&val)
+	row := s.DB.QueryRowContext(ctx, `SELECT Delta FROM counter WHERE name = $1;`, id)
+	err := row.Scan(&val)
 	if err != nil {
 		return 0, err
 	}
@@ -73,13 +62,8 @@ func (s DBStorage) GetCounterByID(id string) (int64, error) {
 func (s DBStorage) SetGuage(id string, v *float64) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	db, err := sql.Open("postgres", s.DSN)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
 
-	_, err = db.ExecContext(ctx,
+	_, err := s.DB.ExecContext(ctx,
 		`INSERT INTO gauge (name, Value) VALUES ($1, $2) ON CONFLICT(name) DO UPDATE SET Value = $3`,
 		id, Gauge(*v), Gauge(*v))
 	if err != nil {
@@ -90,13 +74,8 @@ func (s DBStorage) SetGuage(id string, v *float64) {
 func (s DBStorage) SetCounter(id string, v *int64) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	db, err := sql.Open("postgres", s.DSN)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
 
-	_, err = db.ExecContext(ctx,
+	_, err := s.DB.ExecContext(ctx,
 		`INSERT INTO counter (name, Delta) VALUES ($1, $2) ON CONFLICT(name) DO UPDATE SET Delta = counter.Delta + $3`,
 		id, Gauge(*v), Gauge(*v))
 
@@ -108,13 +87,8 @@ func (s DBStorage) SetCounter(id string, v *int64) {
 func (s DBStorage) SetGaugeFromMemStats(id string, value float64) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	db, err := sql.Open("postgres", s.DSN)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
 
-	_, err = db.ExecContext(ctx,
+	_, err := s.DB.ExecContext(ctx,
 		`INSERT INTO gauge (name, Value) VALUES ($1, $2) ON CONFLICT(name) DO UPDATE SET Value = $3`,
 		id, Gauge(value), Gauge(value))
 	if err != nil {
@@ -125,13 +99,8 @@ func (s DBStorage) SetGaugeFromMemStats(id string, value float64) {
 func (s DBStorage) SetCounterFromMemStats(id string, value int64) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	db, err := sql.Open("postgres", s.DSN)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
 
-	_, err = db.ExecContext(ctx,
+	_, err := s.DB.ExecContext(ctx,
 		`INSERT INTO counter (name, Delta) VALUES ($1, $2) ON CONFLICT(name) DO UPDATE SET Delta = counter.Delta + $3`,
 		id, Counter(value), Counter(value))
 
@@ -143,12 +112,8 @@ func (s DBStorage) SetCounterFromMemStats(id string, value int64) {
 func (s DBStorage) GetGauges() map[string]Gauge {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	db, err := sql.Open("postgres", s.DSN)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-	rows, err := db.QueryContext(ctx, `SELECT * FROM gauge;`)
+
+	rows, err := s.DB.QueryContext(ctx, `SELECT * FROM gauge;`)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -168,12 +133,8 @@ func (s DBStorage) GetGauges() map[string]Gauge {
 func (s DBStorage) GetCounters() map[string]Counter {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	db, err := sql.Open("postgres", s.DSN)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-	rows, err := db.QueryContext(ctx, `SELECT * FROM counter;`)
+
+	rows, err := s.DB.QueryContext(ctx, `SELECT * FROM counter;`)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -193,12 +154,8 @@ func (s DBStorage) GetCounters() map[string]Counter {
 func (s DBStorage) CheckGaugeByName(name string) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	db, err := sql.Open("postgres", s.DSN)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-	_, err = db.QueryContext(ctx, `SELECT Value FROM gauge WHERE name = $1;`, name)
+
+	_, err := s.DB.QueryContext(ctx, `SELECT Value FROM gauge WHERE name = $1;`, name)
 	if err != nil {
 		return false
 	}
@@ -208,12 +165,8 @@ func (s DBStorage) CheckGaugeByName(name string) bool {
 func (s DBStorage) CheckCounterByName(name string) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	db, err := sql.Open("postgres", s.DSN)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-	_, err = db.QueryContext(ctx, `SELECT Delta FROM counter WHERE name = $1;`, name)
+
+	_, err := s.DB.QueryContext(ctx, `SELECT Delta FROM counter WHERE name = $1;`, name)
 	if err != nil {
 		return false
 	}
@@ -224,13 +177,7 @@ func (s DBStorage) SaveMany(metricsList []metric.Metrics) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	db, err := sql.Open("postgres", s.DSN)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	tx, err := db.Begin()
+	tx, err := s.DB.Begin()
 	if err != nil {
 		return err
 	}
