@@ -29,7 +29,7 @@ func LoadMetricsFromFile(filename string) (storage.InMemoryStorage, error) {
 		file.Close()
 		return storage.InMemoryStorage{}, nil
 	}
-	log.Println("filename is ", filename)
+
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return storage.InMemoryStorage{}, err

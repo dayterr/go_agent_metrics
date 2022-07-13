@@ -31,6 +31,7 @@ func main() {
 			server2.WriteJSON(Cfg.StoreFile, jsn)
 		}
 	}(h)
+	log.Println("Cfg.StoreFile", Cfg.StoreFile)
 	r := handlers.CreateRouterWithAsyncHandler(Cfg.StoreFile, Cfg.Restore, h)
 	err = http.ListenAndServe(Cfg.Address, r)
 	if err != nil {
