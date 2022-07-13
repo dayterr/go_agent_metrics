@@ -23,7 +23,6 @@ func WriteJSON(path string, jsn []byte) {
 func LoadMetricsFromFile(filename string) (storage.InMemoryStorage, error) {
 	if _, err := os.Stat(filename); err != nil {
 		file, err := os.Create(filename)
-		log.Println("created file")
 		if err != nil {
 			return storage.InMemoryStorage{}, err
 		}
