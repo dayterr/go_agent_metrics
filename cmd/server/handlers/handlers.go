@@ -109,7 +109,7 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (as AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
+func (ah AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
 	var m metric.Metrics
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
@@ -117,8 +117,8 @@ func (as AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
 	}
 
 	hashGot := r.Header.Get("Hash")
-	if hashGot != "" && as.key != "" {
-		hashCheck := hash.EncryptMetric(m, as.key)
+	if hashGot != "" && ah.key != "" {
+		hashCheck := hash.EncryptMetric(m, ah.key)
 		if !hash.CheckHash(m, hashCheck) {
 			w.WriteHeader(http.StatusBadRequest)
 		}
@@ -126,10 +126,10 @@ func (as AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
 	}
 	switch m.MType {
 	case agent.GaugeType:
-		as.storage.SetGuage(m.ID, m.Value)
+		ah.storage.SetGuage(m.ID, m.Value)
 		w.WriteHeader(http.StatusOK)
 	case agent.CounterType:
-		as.storage.SetCounter(m.ID, m.Delta)
+		ah.storage.SetCounter(m.ID, m.Delta)
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotFound)
@@ -246,7 +246,6 @@ func (ah AsyncHandler) Ping(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	return
 }
 
 func (ah AsyncHandler) PostMany(w http.ResponseWriter, r *http.Request) {
