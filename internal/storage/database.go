@@ -179,10 +179,10 @@ func (s DBStorage) CheckCounterByName(name string) bool {
 	defer cancel()
 
 	_, err := s.DB.QueryContext(ctx, `SELECT Delta FROM counter WHERE name = $1;`, name)
-	if err != nil {
-		return false
+	if err == nil {
+		return true
 	}
-	return true
+	return false
 }
 
 func (s DBStorage) SaveMany(metricsList []metric.Metrics) error {
