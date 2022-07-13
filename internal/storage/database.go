@@ -36,8 +36,6 @@ func NewDB(dsn string) (DBStorage, error) {
 }
 
 func (s DBStorage) GetGuageByID(id string) (float64, error) {
-	//ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	//defer cancel()
 	var fl float64
 	row := s.DB.QueryRow(`SELECT Value FROM gauge WHERE name = $1;`, id)
 	err := row.Scan(&fl)
@@ -166,23 +164,24 @@ func (s DBStorage) CheckGaugeByName(name string) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := s.DB.QueryContext(ctx, `SELECT Value FROM gauge WHERE name = $1;`, name)
-	if err != nil {
-		return false
+	row, err := s.DB.QueryContext(ctx, `SELECT Value FROM gauge WHERE name = $1;`, name)
+	if row.Err() != nil {
+		log.Fatal(err)
 	}
 
-	return true
+	return err == nil
 }
 
 func (s DBStorage) CheckCounterByName(name string) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := s.DB.QueryContext(ctx, `SELECT Delta FROM counter WHERE name = $1;`, name)
-	if err == nil {
-		return true
+	row, err := s.DB.QueryContext(ctx, `SELECT Delta FROM counter WHERE name = $1;`, name)
+	if row.Err() != nil {
+		log.Fatal(err)
 	}
-	return false
+
+	return err == nil
 }
 
 func (s DBStorage) SaveMany(metricsList []metric.Metrics) error {
