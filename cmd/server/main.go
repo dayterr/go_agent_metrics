@@ -21,16 +21,18 @@ func main() {
 	} else {
 		h = handlers.NewAsyncHandler(Cfg.Key, Cfg.DatabaseDSN, true)
 	}
-	go func(h handlers.AsyncHandler) {
-		for {
-			<-ticker.C
-			jsn, err := h.MarshallMetrics()
-			if err != nil {
-				log.Fatal(err)
+	if Cfg.DatabaseDSN == "" {
+		go func(h handlers.AsyncHandler) {
+			for {
+				<-ticker.C
+				jsn, err := h.MarshallMetrics()
+				if err != nil {
+					log.Fatal(err)
+				}
+				server2.WriteJSON(Cfg.StoreFile, jsn)
 			}
-			server2.WriteJSON(Cfg.StoreFile, jsn)
-		}
-	}(h)
+		}(h)
+	}
 	restore := Cfg.Restore && Cfg.DatabaseDSN == ""
 	r := handlers.CreateRouterWithAsyncHandler(Cfg.StoreFile, restore, h)
 	err = http.ListenAndServe(Cfg.Address, r)
