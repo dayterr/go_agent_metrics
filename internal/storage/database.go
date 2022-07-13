@@ -122,6 +122,7 @@ func (s DBStorage) GetGauges() map[string]Gauge {
 	if rows.Err() != nil {
 		log.Fatal(err)
 	}
+
 	var name string
 	var value float64
 	var id int
@@ -143,6 +144,11 @@ func (s DBStorage) GetCounters() map[string]Counter {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	if rows.Err() != nil {
+		log.Fatal(err)
+	}
+
 	var name string
 	var value int64
 	var id int
@@ -164,6 +170,7 @@ func (s DBStorage) CheckGaugeByName(name string) bool {
 	if err != nil {
 		return false
 	}
+
 	return true
 }
 
