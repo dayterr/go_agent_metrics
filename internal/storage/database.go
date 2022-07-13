@@ -114,7 +114,12 @@ func (s DBStorage) GetGauges() map[string]Gauge {
 	defer cancel()
 
 	rows, err := s.DB.QueryContext(ctx, `SELECT * FROM gauge;`)
+
 	if err != nil {
+		log.Fatal(err)
+	}
+
+	if rows.Err() != nil {
 		log.Fatal(err)
 	}
 	var name string
