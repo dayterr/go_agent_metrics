@@ -34,6 +34,7 @@ func LoadMetricsFromFile(filename string) (storage.InMemoryStorage, error) {
 		return storage.InMemoryStorage{}, err
 	}
 
+	log.Println("file is", string(file))
 	s := storage.NewIMS()
 	log.Println("s is", s)
 
