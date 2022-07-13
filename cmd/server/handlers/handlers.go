@@ -188,9 +188,6 @@ func (ah AsyncHandler) GetMetric(w http.ResponseWriter, r *http.Request) {
 			value := strconv.FormatFloat(v, 'f', -1, 64)
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(value))
-		} else {
-			w.WriteHeader(http.StatusNotFound)
-			return
 		}
 	case agent.CounterType:
 		if ah.storage.CheckCounterByName(metricName) {
@@ -202,10 +199,7 @@ func (ah AsyncHandler) GetMetric(w http.ResponseWriter, r *http.Request) {
 			c := strconv.Itoa(int(v))
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(c))
-		} else {
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
+		} 
 	default:
 		w.WriteHeader(http.StatusNotFound)
 		return
