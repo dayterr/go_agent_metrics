@@ -177,6 +177,7 @@ func (ah AsyncHandler) GetMetric(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+
 	switch metricType {
 	case agent.GaugeType:
 		if ah.storage.CheckGaugeByName(metricName) {
@@ -201,8 +202,13 @@ func (ah AsyncHandler) GetMetric(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(c))
 			return
-		} 
+		}
 	default:
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	if !ah.storage.CheckCounterByName(metricName) && !ah.storage.CheckGaugeByName(metricName) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
