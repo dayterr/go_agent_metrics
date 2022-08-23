@@ -10,6 +10,7 @@ import (
 	"github.com/levigross/grequests"
 	"math/rand"
 	"runtime"
+	"github.com/shirou/gopsutil/v3/mem"
 )
 
 const GaugeType = "gauge"
@@ -67,6 +68,7 @@ func (a Agent) PostAll() {
 
 func (a Agent) ReadMetrics() {
 	m := &runtime.MemStats{}
+	v, _ := mem.VirtualMemory()
 	runtime.ReadMemStats(m)
 	a.Storage.SetGaugeFromMemStats("Alloc", float64(m.Alloc))
 	a.Storage.SetGaugeFromMemStats("BuckHashSys", float64(m.BuckHashSys))
@@ -96,6 +98,9 @@ func (a Agent) ReadMetrics() {
 	a.Storage.SetGaugeFromMemStats("Sys", float64(m.Sys))
 	a.Storage.SetGaugeFromMemStats("TotalAlloc", float64(m.TotalAlloc))
 	a.Storage.SetGaugeFromMemStats("RandomValue", rand.Float64())
+	a.Storage.SetGaugeFromMemStats("TotalMemory", float64(v.Total))
+	a.Storage.SetGaugeFromMemStats("FreeMemory", float64(v.Free))
+	a.Storage.SetGaugeFromMemStats("CPUutilization1", float64(v.Used))
 	a.Storage.SetCounterFromMemStats("PollCount", 1)
 }
 
