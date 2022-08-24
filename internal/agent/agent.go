@@ -8,9 +8,9 @@ import (
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"github.com/levigross/grequests"
+	"github.com/shirou/gopsutil/v3/mem"
 	"math/rand"
 	"runtime"
-	"github.com/shirou/gopsutil/v3/mem"
 )
 
 const GaugeType = "gauge"
@@ -98,9 +98,6 @@ func (a Agent) ReadMetrics() {
 	a.Storage.SetGaugeFromMemStats("Sys", float64(m.Sys))
 	a.Storage.SetGaugeFromMemStats("TotalAlloc", float64(m.TotalAlloc))
 	a.Storage.SetGaugeFromMemStats("RandomValue", rand.Float64())
-	a.Storage.SetGaugeFromMemStats("TotalMemory", float64(v.Total))
-	a.Storage.SetGaugeFromMemStats("FreeMemory", float64(v.Free))
-	a.Storage.SetGaugeFromMemStats("CPUutilization1", float64(v.Used))
 	a.Storage.SetCounterFromMemStats("PollCount", 1)
 }
 
