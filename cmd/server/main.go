@@ -10,17 +10,33 @@ import (
 )
 
 func main() {
-	CfgLogger, err := server.GetEnvLogger()
+	Cfg, err := server.GetEnvServer()
 	if err != nil {
 		log.Fatal(err)
 	}
-	ticker := time.NewTicker(CfgLogger.StoreInterval)
-	go func() {
-		for {
-			<-ticker.C
-			server2.WriteJSON(CfgLogger.StoreFile)
-		}
-	}()
-	r := handlers.CreateRouter(CfgLogger.StoreFile, CfgLogger.Restore)
-	http.ListenAndServe(CfgLogger.Address, r)
+	ticker := time.NewTicker(Cfg.StoreInterval)
+	var h handlers.AsyncHandler
+	if Cfg.DatabaseDSN == "" {
+		h = handlers.NewAsyncHandler(Cfg.Key, Cfg.DatabaseDSN, false)
+	} else {
+		h = handlers.NewAsyncHandler(Cfg.Key, Cfg.DatabaseDSN, true)
+	}
+	if Cfg.DatabaseDSN == "" {
+		go func(h handlers.AsyncHandler) {
+			for {
+				<-ticker.C
+				jsn, err := h.MarshallMetrics()
+				if err != nil {
+					log.Fatal(err)
+				}
+				server2.WriteJSON(Cfg.StoreFile, jsn)
+			}
+		}(h)
+	}
+	restore := Cfg.Restore && Cfg.DatabaseDSN == ""
+	r := handlers.CreateRouterWithAsyncHandler(Cfg.StoreFile, restore, h)
+	err = http.ListenAndServe(Cfg.Address, r)
+	if err != nil {
+		log.Fatal("error in server main", err)
+	}
 }

@@ -72,7 +72,8 @@ func TestPostMetric(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := CreateRouter("", false)
+			h := NewAsyncHandler("", "", false)
+			r := CreateRouterWithAsyncHandler("", false, h)
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 			req, _ := testRequest(t, ts, http.MethodPost, tt.url, nil)
@@ -161,7 +162,8 @@ func TestGetMetric(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := CreateRouter("", false)
+			h := NewAsyncHandler("", "", false)
+			r := CreateRouterWithAsyncHandler("", false, h)
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 			tr1, _ := testRequest(t, ts, http.MethodPost, tt.urlPostMetric, nil)

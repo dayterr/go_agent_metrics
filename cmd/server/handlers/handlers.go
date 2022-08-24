@@ -2,9 +2,13 @@ package handlers
 
 import (
 	"compress/gzip"
+	"database/sql"
 	"encoding/json"
+	"github.com/dayterr/go_agent_metrics/internal/hash"
+	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"github.com/go-chi/chi/v5"
+	_ "github.com/lib/pq"
 	"html/template"
 	"io"
 	"log"
@@ -15,7 +19,15 @@ import (
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 )
 
-var allMetrics = storage.New()
+type AsyncHandler struct {
+	storage storage.Storager
+	key     string
+	dsn     string
+}
+
+type SyncHandler struct {
+	storage storage.Storager
+}
 
 type gzipWriter struct {
 	http.ResponseWriter
@@ -46,24 +58,31 @@ func gzipHandle(next http.Handler) http.Handler {
 	})
 }
 
-func MarshallMetrics() ([]byte, error) {
-	jsn, err := json.Marshal(allMetrics)
+func (ah AsyncHandler) MarshallMetrics() ([]byte, error) {
+	jsn, err := json.Marshal(ah.storage)
 	if err != nil {
 		return nil, err
 	}
 	return jsn, nil
 }
 
-func GetValue(w http.ResponseWriter, r *http.Request) {
-	var m agent.Metrics
+func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
+	var m metric.Metrics
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
+
 	switch m.MType {
 	case agent.GaugeType:
-		v := allMetrics.GaugeField[m.ID].ToFloat()
+		v, err := ah.storage.GetGuageByID(m.ID)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+		}
 		m.Value = &v
+		if ah.key != "" {
+			m.Hash = hash.EncryptMetric(m, ah.key)
+		}
 		mJSON, err := json.Marshal(m)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -71,8 +90,14 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("content-type", "application/json")
 		w.Write(mJSON)
 	case agent.CounterType:
-		d := allMetrics.CounterField[m.ID].ToInt64()
+		d, err := ah.storage.GetCounterByID(m.ID)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+		}
 		m.Delta = &d
+		if ah.key != "" {
+			m.Hash = hash.EncryptMetric(m, ah.key)
+		}
 		mJSON, err := json.Marshal(m)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -84,25 +109,34 @@ func GetValue(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func PostJSON(w http.ResponseWriter, r *http.Request) {
-	var m agent.Metrics
+func (ah AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
+	var m metric.Metrics
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
+
+	hashGot := r.Header.Get("Hash")
+	if hashGot != "" && ah.key != "" {
+		hashCheck := hash.EncryptMetric(m, ah.key)
+		if !hash.CheckHash(m, hashCheck) {
+			w.WriteHeader(http.StatusBadRequest)
+		}
+
+	}
 	switch m.MType {
 	case agent.GaugeType:
-		allMetrics.GaugeField[m.ID] = storage.Gauge(*m.Value)
+		ah.storage.SetGuage(m.ID, m.Value)
 		w.WriteHeader(http.StatusOK)
 	case agent.CounterType:
-		allMetrics.CounterField[m.ID] += storage.Counter(*m.Delta)
+		ah.storage.SetCounter(m.ID, m.Delta)
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotFound)
 	}
 }
 
-func PostMetric(w http.ResponseWriter, r *http.Request) {
+func (ah AsyncHandler) PostMetric(w http.ResponseWriter, r *http.Request) {
 	metricType := chi.URLParam(r, "metricType")
 	metricName := chi.URLParam(r, "metricName")
 	if metricName == "" {
@@ -121,7 +155,7 @@ func PostMetric(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		allMetrics.GaugeField[metricName] = storage.Gauge(valFloat)
+		ah.storage.SetGuage(metricName, &valFloat)
 		w.WriteHeader(http.StatusOK)
 	case agent.CounterType:
 		valInt, err := strconv.Atoi(value)
@@ -129,72 +163,107 @@ func PostMetric(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		allMetrics.CounterField[metricName] += storage.Counter(int64(valInt))
+		ah.storage.SetCounterFromMemStats(metricName, int64(valInt))
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
 	}
 }
 
-func GetMetric(w http.ResponseWriter, r *http.Request) {
+func (ah AsyncHandler) GetMetric(w http.ResponseWriter, r *http.Request) {
 	metricType := chi.URLParam(r, "metricType")
 	metricName := chi.URLParam(r, "metricName")
 	if metricName == "" {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+
 	switch metricType {
 	case agent.GaugeType:
-		if _, ok := allMetrics.GaugeField[metricName]; ok {
-			value := strconv.FormatFloat(allMetrics.GaugeField[metricName].ToFloat(), 'f', -1, 64)
+		if ah.storage.CheckGaugeByName(metricName) {
+			v, err := ah.storage.GetGuageByID(metricName)
+			if err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			value := strconv.FormatFloat(v, 'f', -1, 64)
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(value))
-		} else {
-			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 	case agent.CounterType:
-		if _, ok := allMetrics.CounterField[metricName]; ok {
-			c := strconv.Itoa(allMetrics.CounterField[metricName].ToInt())
+		if ah.storage.CheckCounterByName(metricName) {
+			v, err := ah.storage.GetCounterByID(metricName)
+			if err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			c := strconv.Itoa(int(v))
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(c))
-		} else {
-			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 	default:
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+
+	if !ah.storage.CheckCounterByName(metricName) && !ah.storage.CheckGaugeByName(metricName) {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 }
 
-func GetIndex(w http.ResponseWriter, r *http.Request) {
+func (ah AsyncHandler) GetIndex(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "text/html; charset=utf-8")
+	//t, err := template.ParseFiles("template/index.html")
 	t, err := template.ParseFiles("template/index.html")
 	if err != nil {
+		log.Println("err", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	err = t.ExecuteTemplate(w, "index.html", allMetrics.GaugeField)
+
+	err = t.ExecuteTemplate(w, "index.html", ah.storage.GetGauges())
+	//err = t.ExecuteTemplate(w, "index.html", ah.storage.GetGauges())
 	if err != nil {
+		log.Println("err 2", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
 
-func CreateRouter(filename string, isRestored bool) chi.Router {
-	err := allMetrics.LoadMetricsFromJSON(filename, isRestored)
+func (ah AsyncHandler) Ping(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("postgres", ah.dsn)
 	if err != nil {
-		log.Fatal(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
-	r := chi.NewRouter()
-	r.Use(gzipHandle)
-	r.Route("/update", func(r chi.Router) {
-		r.Post("/", PostJSON)
-		r.Post("/{metricType}/{metricName}/{value}", PostMetric)
-	})
-	r.Post("/value/", GetValue)
-	r.Get("/value/{metricType}/{metricName}", GetMetric)
-	r.Get("/", GetIndex)
-	return r
+	err = db.Ping()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (ah AsyncHandler) PostMany(w http.ResponseWriter, r *http.Request) {
+	var metricList []metric.Metrics
+
+	err := json.NewDecoder(r.Body).Decode(&metricList)
+	if err != nil {
+		log.Println("err decoding", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = ah.storage.SaveMany(metricList)
+	if err != nil {
+		log.Println("err saving", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

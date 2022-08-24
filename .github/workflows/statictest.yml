@@ -4,7 +4,8 @@ on:
   pull_request:
   push:
     branches:
-      - increment4
+      - main
+      - increment5
 
 jobs:
 
