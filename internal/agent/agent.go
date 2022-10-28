@@ -4,13 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
+	"runtime"
+
+	"github.com/levigross/grequests"
+	"github.com/shirou/gopsutil/v3/mem"
+
 	"github.com/dayterr/go_agent_metrics/internal/hash"
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
-	"github.com/levigross/grequests"
-	"github.com/shirou/gopsutil/v3/mem"
-	"math/rand"
-	"runtime"
 )
 
 const GaugeType = "gauge"

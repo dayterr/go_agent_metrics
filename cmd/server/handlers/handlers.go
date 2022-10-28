@@ -4,17 +4,19 @@ import (
 	"compress/gzip"
 	"database/sql"
 	"encoding/json"
-	"github.com/dayterr/go_agent_metrics/internal/hash"
-	"github.com/dayterr/go_agent_metrics/internal/metric"
-	"github.com/dayterr/go_agent_metrics/internal/storage"
-	"github.com/go-chi/chi/v5"
-	_ "github.com/lib/pq"
 	"html/template"
 	"io"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/go-chi/chi/v5"
+	_ "github.com/lib/pq"
+
+	"github.com/dayterr/go_agent_metrics/internal/hash"
+	"github.com/dayterr/go_agent_metrics/internal/metric"
+	"github.com/dayterr/go_agent_metrics/internal/storage"
 
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 )
@@ -59,6 +61,7 @@ func gzipHandle(next http.Handler) http.Handler {
 }
 
 func (ah AsyncHandler) MarshallMetrics() ([]byte, error) {
+	// Метод возвращает данные из хранилища в json-формате
 	jsn, err := json.Marshal(ah.storage)
 	if err != nil {
 		return nil, err

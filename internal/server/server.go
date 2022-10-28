@@ -3,10 +3,11 @@ package server
 import (
 	"bufio"
 	"encoding/json"
-	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/dayterr/go_agent_metrics/internal/storage"
 )
 
 func WriteJSON(path string, jsn []byte) {
