@@ -1,12 +1,14 @@
 package main
 
 import (
+	"log"
+	"net/http"
+	_ "net/http/pprof"
+	"time"
+
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
 	"github.com/dayterr/go_agent_metrics/internal/config/server"
 	server2 "github.com/dayterr/go_agent_metrics/internal/server"
-	"log"
-	"net/http"
-	"time"
 )
 
 func main() {

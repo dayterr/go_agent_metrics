@@ -1,10 +1,13 @@
 package handlers
 
 import (
+	"log"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+
 	"github.com/dayterr/go_agent_metrics/internal/server"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
-	"github.com/go-chi/chi/v5"
-	"log"
 )
 
 func NewAsyncHandler(key, dsn string, isDB bool) AsyncHandler {
@@ -23,6 +26,7 @@ func NewAsyncHandler(key, dsn string, isDB bool) AsyncHandler {
 }
 
 func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandler) chi.Router {
+	// Функция для создания нового роутера
 	if isRestored {
 		var err error
 		h.storage, err = server.LoadMetricsFromFile(filename)
@@ -33,6 +37,8 @@ func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandl
 	}
 	r := chi.NewRouter()
 	r.Use(gzipHandle)
+	r.Mount("/debug", middleware.Profiler())
+
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/", h.PostJSON)
 		r.Post("/{metricType}/{metricName}/{value}", h.PostMetric)

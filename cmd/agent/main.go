@@ -1,9 +1,10 @@
 package main
 
 import (
+	"log"
+
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 	agent2 "github.com/dayterr/go_agent_metrics/internal/config/agent"
-	"log"
 )
 
 func main() {

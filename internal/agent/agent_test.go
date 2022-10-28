@@ -1,15 +1,15 @@
-package main
+package agent
 
 import (
-	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"net"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
-	"github.com/stretchr/testify/assert"
 
-	"github.com/dayterr/go_agent_metrics/internal/agent"
+	"github.com/dayterr/go_agent_metrics/internal/storage"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const address = "localhost:8080"
@@ -37,7 +37,7 @@ func TestPostGauge(t *testing.T) {
 			ts.Listener = l
 			ts.Start()
 			defer ts.Close()
-			v := agent.PostGauge(tt.value, tt.metricName, address, "")
+			v := PostGauge(tt.value, tt.metricName, address, "")
 			assert.Nil(t, v)
 		})
 	}
@@ -66,7 +66,7 @@ func TestPostCounter(t *testing.T) {
 			ts.Listener = l
 			ts.Start()
 			defer ts.Close()
-			v := agent.PostCounter(tt.value, tt.metricName, address, "")
+			v := PostCounter(tt.value, tt.metricName, address, "")
 			assert.Nil(t, v)
 		})
 	}

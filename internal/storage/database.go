@@ -3,9 +3,10 @@ package storage
 import (
 	"context"
 	"database/sql"
-	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"log"
 	"time"
+
+	"github.com/dayterr/go_agent_metrics/internal/metric"
 )
 
 func NewDB(dsn string) (DBStorage, error) {
