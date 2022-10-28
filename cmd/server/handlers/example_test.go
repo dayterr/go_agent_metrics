@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"log"
+
 	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
-	"log"
 )
 
 func Example() {
@@ -15,6 +16,7 @@ func Example() {
 	v2 = 3865
 	stor.SetGuage("Alloc", &v1)
 	stor.SetGuage("BuckHashSys", &v2)
+
 	_, err := handler.MarshallMetrics()
 	if err != nil {
 		log.Println("something went wrong")
