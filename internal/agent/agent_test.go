@@ -5,8 +5,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
-
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 
 	"github.com/stretchr/testify/assert"
@@ -28,8 +26,8 @@ func TestPostGauge(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := handlers.NewAsyncHandler("", "", false)
-			r := handlers.CreateRouterWithAsyncHandler("", false, h)
+			h := NewAsyncHandler("", "", false)
+			r := CreateRouterWithAsyncHandler("", false, h)
 			ts := httptest.NewUnstartedServer(r)
 			url := "127.0.0.1:8080"
 			l, err := net.Listen("tcp", url)
@@ -57,8 +55,8 @@ func TestPostCounter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := handlers.NewAsyncHandler("", "", false)
-			r := handlers.CreateRouterWithAsyncHandler("", false, h)
+			h := NewAsyncHandler("", "", false)
+			r := CreateRouterWithAsyncHandler("", false, h)
 			ts := httptest.NewUnstartedServer(r)
 			url := "127.0.0.1:8080"
 			l, err := net.Listen("tcp", url)
