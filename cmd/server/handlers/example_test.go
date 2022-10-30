@@ -3,12 +3,12 @@ package handlers
 import (
 	"log"
 
-	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
+	//"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 )
 
 func Example() {
-	handler := handlers.NewAsyncHandler("", "", false)
+	handler := NewAsyncHandler("", "", false)
 	stor := storage.NewIMS()
 	var v1 float64
 	v1 = 353808
