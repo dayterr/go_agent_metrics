@@ -25,19 +25,19 @@ type AsyncHandler struct {
 	dsn     string
 }
 
-func NewAsyncHandler(key, dsn string, isDB bool) AsyncHandler {
+func NewAsyncHandler(key, dsn string, isDB bool) (AsyncHandler, error) {
 	var s storage.Storager
 	var err error
 	if isDB {
 		s, err = storage.NewDB(dsn)
 		if err != nil {
-			log.Println(err)
+			return AsyncHandler{}, err
 		}
 	} else {
 		s = storage.NewIMS()
 	}
 	h := AsyncHandler{storage: s, key: key, dsn: dsn}
-	return h
+	return h, nil
 }
 
 type gzipWriter struct {
@@ -69,14 +69,14 @@ func gzipHandle(next http.Handler) http.Handler {
 	})
 }
 
-func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandler) chi.Router {
+func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandler) (chi.Router, error) {
 	// Функция для создания нового роутера
 	if isRestored {
 		var err error
 		h.storage, err = server.LoadMetricsFromFile(filename)
 		log.Println("uploaded", h.storage)
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 	}
 	r := chi.NewRouter()
@@ -92,7 +92,7 @@ func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandl
 	//r.Get("/", h.GetIndex)
 	r.Get("/ping", h.Ping)
 	r.Post("/updates/", h.PostMany)
-	return r
+	return r, nil
 }
 
 func (ah AsyncHandler) MarshallMetrics() ([]byte, error) {
