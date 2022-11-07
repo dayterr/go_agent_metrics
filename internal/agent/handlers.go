@@ -109,6 +109,7 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	ctx := r.Context()
@@ -117,6 +118,7 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 		v, err := ah.storage.GetGuageByID(ctx, m.ID)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
+			return
 		}
 		m.Value = &v
 		if ah.key != "" {
@@ -125,6 +127,7 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 		mJSON, err := json.Marshal(m)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
 		w.Header().Set("content-type", "application/json")
 		w.Write(mJSON)
@@ -132,6 +135,7 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 		d, err := ah.storage.GetCounterByID(ctx, m.ID)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
+			return
 		}
 		m.Delta = &d
 		if ah.key != "" {
@@ -140,11 +144,13 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 		mJSON, err := json.Marshal(m)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
 		w.Header().Set("content-type", "application/json")
 		w.Write(mJSON)
 	default:
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 }
 
@@ -153,6 +159,7 @@ func (ah AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	hashGot := r.Header.Get("Hash")
@@ -160,6 +167,7 @@ func (ah AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
 		hashCheck := hash.EncryptMetric(m, ah.key)
 		if !hash.CheckHash(m, hashCheck) {
 			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
 
 	}
@@ -173,6 +181,7 @@ func (ah AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 }
 
@@ -208,6 +217,7 @@ func (ah AsyncHandler) PostMetric(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
+		return
 	}
 }
 
