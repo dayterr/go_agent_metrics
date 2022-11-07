@@ -2,11 +2,13 @@ package server
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
-	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/dayterr/go_agent_metrics/internal/storage"
 )
 
 func WriteJSON(path string, jsn []byte) {
@@ -21,6 +23,7 @@ func WriteJSON(path string, jsn []byte) {
 }
 
 func LoadMetricsFromFile(filename string) (storage.InMemoryStorage, error) {
+	ctx := context.Background()
 	if _, err := os.Stat(filename); err != nil {
 		file, err := os.Create(filename)
 		if err != nil {
@@ -45,10 +48,10 @@ func LoadMetricsFromFile(filename string) (storage.InMemoryStorage, error) {
 	}
 	log.Println("unmarshalled", s)
 	for key, value := range s.GaugeField {
-		s.SetGaugeFromMemStats(key, value.ToFloat())
+		s.SetGaugeFromMemStats(ctx, key, value.ToFloat())
 	}
 	for key, value := range s.CounterField {
-		s.SetCounterFromMemStats(key, value.ToInt64())
+		s.SetCounterFromMemStats(ctx, key, value.ToInt64())
 	}
 	return s, nil
 }

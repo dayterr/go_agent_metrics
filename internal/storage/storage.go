@@ -1,6 +1,9 @@
 package storage
 
 import (
+	"context"
+	"log"
+
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 )
 
@@ -23,57 +26,112 @@ func (c Counter) ToInt() int {
 	return int(c)
 }
 
-func (s InMemoryStorage) GetGuageByID(id string) (float64, error) {
-	v := s.GaugeField[id].ToFloat()
-	return v, nil
-}
-
-func (s InMemoryStorage) GetCounterByID(id string) (int64, error) {
-	v := s.CounterField[id].ToInt64()
-	return v, nil
-}
-
-func (s InMemoryStorage) SetGuage(id string, v *float64) {
-	s.GaugeField[id] = Gauge(*v)
-}
-
-func (s InMemoryStorage) SetCounter(id string, v *int64) {
-	s.CounterField[id] += Counter(*v)
-}
-
-func (s InMemoryStorage) SetGaugeFromMemStats(id string, value float64) {
-	s.GaugeField[id] = Gauge(value)
-}
-
-func (s InMemoryStorage) SetCounterFromMemStats(id string, value int64) {
-	s.CounterField[id] += Counter(value)
-}
-
-func (s InMemoryStorage) GetGauges() map[string]Gauge {
-	return s.GaugeField
-}
-
-func (s InMemoryStorage) GetCounters() map[string]Counter {
-	return s.CounterField
-}
-
-func (s InMemoryStorage) CheckGaugeByName(name string) bool {
-	_, ok := s.GaugeField[name]
-	return ok
-}
-
-func (s InMemoryStorage) CheckCounterByName(name string) bool {
-	_, ok := s.CounterField[name]
-	return ok
-}
-
-func (s InMemoryStorage) SaveMany(metricsList []metric.Metrics) error {
-	for _, metric := range metricsList {
-		if metric.MType == "gauge" {
-			s.GaugeField[metric.ID] = Gauge(*metric.Value)
-		} else {
-			s.CounterField[metric.ID] = Counter(*metric.Delta)
-		}
+func (s InMemoryStorage) GetGuageByID(ctx context.Context, id string) (float64, error) {
+	select {
+	case <-ctx.Done():
+		return 0, ctx.Err()
+	default:
+		v := s.GaugeField[id].ToFloat()
+		return v, nil
 	}
-	return nil
+}
+
+func (s InMemoryStorage) GetCounterByID(ctx context.Context, id string) (int64, error) {
+	select {
+	case <-ctx.Done():
+		return 0, ctx.Err()
+	default:
+		v := s.CounterField[id].ToInt64()
+		return v, nil
+	}
+}
+
+func (s InMemoryStorage) SetGuage(ctx context.Context, id string, v *float64) {
+	select {
+	case <-ctx.Done():
+		log.Println(ctx.Err())
+	default:
+		s.GaugeField[id] = Gauge(*v)
+	}
+}
+
+func (s InMemoryStorage) SetCounter(ctx context.Context, id string, v *int64) {
+	select {
+	case <-ctx.Done():
+		log.Println(ctx.Err())
+	default:
+		s.CounterField[id] += Counter(*v)
+	}
+}
+
+func (s InMemoryStorage) SetGaugeFromMemStats(ctx context.Context, id string, value float64) {
+	select {
+	case <-ctx.Done():
+		log.Println(ctx.Err())
+	default:
+		s.GaugeField[id] = Gauge(value)
+	}
+}
+
+func (s InMemoryStorage) SetCounterFromMemStats(ctx context.Context, id string, value int64) {
+	select {
+	case <-ctx.Done():
+		log.Println(ctx.Err())
+	default:
+		s.CounterField[id] += Counter(value)
+	}
+}
+
+func (s InMemoryStorage) GetGauges(ctx context.Context) (map[string]Gauge, error) {
+	select {
+	case <-ctx.Done():
+		return map[string]Gauge{}, ctx.Err()
+	default:
+		return s.GaugeField, nil
+	}
+}
+
+func (s InMemoryStorage) GetCounters(ctx context.Context) (map[string]Counter, error) {
+	select {
+	case <-ctx.Done():
+		return map[string]Counter{}, ctx.Err()
+	default:
+		return s.CounterField, nil
+	}
+}
+
+func (s InMemoryStorage) CheckGaugeByName(ctx context.Context, name string) bool {
+	select {
+	case <-ctx.Done():
+		return ctx.Err() == nil
+	default:
+		_, ok := s.GaugeField[name]
+		return ok
+	}
+}
+
+func (s InMemoryStorage) CheckCounterByName(ctx context.Context, name string) bool {
+	select {
+	case <-ctx.Done():
+		return ctx.Err() == nil
+	default:
+		_, ok := s.CounterField[name]
+		return ok
+	}
+}
+
+func (s InMemoryStorage) SaveMany(ctx context.Context, metricsList []metric.Metrics) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		for _, metric := range metricsList {
+			if metric.MType == "gauge" {
+				s.GaugeField[metric.ID] = Gauge(*metric.Value)
+			} else {
+				s.CounterField[metric.ID] = Counter(*metric.Delta)
+			}
+		}
+		return nil
+	}
 }

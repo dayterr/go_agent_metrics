@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 )
 

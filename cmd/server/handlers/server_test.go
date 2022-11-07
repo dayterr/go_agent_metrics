@@ -1,12 +1,13 @@
 package handlers
 
 import (
-	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPostMetric(t *testing.T) {
@@ -72,8 +73,10 @@ func TestPostMetric(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := NewAsyncHandler("", "", false)
-			r := CreateRouterWithAsyncHandler("", false, h)
+			h, err := NewAsyncHandler("", "", false)
+			assert.NoError(t, err)
+			r, err := CreateRouterWithAsyncHandler("", false, h)
+			assert.NoError(t, err)
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 			req, _ := testRequest(t, ts, http.MethodPost, tt.url, nil)
@@ -162,8 +165,10 @@ func TestGetMetric(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := NewAsyncHandler("", "", false)
-			r := CreateRouterWithAsyncHandler("", false, h)
+			h, err := NewAsyncHandler("", "", false)
+			assert.NoError(t, err)
+			r, err := CreateRouterWithAsyncHandler("", false, h)
+			assert.NoError(t, err)
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 			tr1, _ := testRequest(t, ts, http.MethodPost, tt.urlPostMetric, nil)

@@ -1,16 +1,20 @@
 package agent
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
+	"math/rand"
+	"runtime"
+
+	"github.com/levigross/grequests"
+	"github.com/shirou/gopsutil/v3/mem"
+
 	"github.com/dayterr/go_agent_metrics/internal/hash"
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
-	"github.com/levigross/grequests"
-	"github.com/shirou/gopsutil/v3/mem"
-	"math/rand"
-	"runtime"
 )
 
 const GaugeType = "gauge"
@@ -55,9 +59,15 @@ func PostGauge(value storage.Gauge, metricName string, address string, key strin
 }
 
 func (a Agent) PostAll() {
-	gauges := a.Storage.GetGauges()
-	counters := a.Storage.GetCounters()
-
+	ctx := context.Background()
+	gauges, err := a.Storage.GetGauges(ctx)
+	if err != nil {
+		log.Println("getting gauges error", err)
+	}
+	counters, err := a.Storage.GetCounters(ctx)
+	if err != nil {
+		log.Println("getting counters error", err)
+	}
 	for k, v := range gauges {
 		PostGauge(v, k, a.Address, a.Key)
 	}
@@ -70,48 +80,62 @@ func (a Agent) ReadMetrics() {
 	m := &runtime.MemStats{}
 	v, _ := mem.VirtualMemory()
 	runtime.ReadMemStats(m)
-	a.Storage.SetGaugeFromMemStats("Alloc", float64(m.Alloc))
-	a.Storage.SetGaugeFromMemStats("BuckHashSys", float64(m.BuckHashSys))
-	a.Storage.SetGaugeFromMemStats("Frees", float64(m.Frees))
-	a.Storage.SetGaugeFromMemStats("GCCPUFraction", m.GCCPUFraction)
-	a.Storage.SetGaugeFromMemStats("GCSys", float64(m.GCSys))
-	a.Storage.SetGaugeFromMemStats("HeapAlloc", float64(m.HeapAlloc))
-	a.Storage.SetGaugeFromMemStats("HeapIdle", float64(m.HeapIdle))
-	a.Storage.SetGaugeFromMemStats("HeapInuse", float64(m.HeapInuse))
-	a.Storage.SetGaugeFromMemStats("HeapObjects", float64(m.HeapObjects))
-	a.Storage.SetGaugeFromMemStats("HeapReleased", float64(m.HeapReleased))
-	a.Storage.SetGaugeFromMemStats("HeapSys", float64(m.HeapSys))
-	a.Storage.SetGaugeFromMemStats("LastGC", float64(m.HeapAlloc))
-	a.Storage.SetGaugeFromMemStats("Lookups", float64(m.Lookups))
-	a.Storage.SetGaugeFromMemStats("MCacheInuse", float64(m.MCacheInuse))
-	a.Storage.SetGaugeFromMemStats("MCacheSys", float64(m.MCacheSys))
-	a.Storage.SetGaugeFromMemStats("MSpanInuse", float64(m.MSpanInuse))
-	a.Storage.SetGaugeFromMemStats("MSpanSys", float64(m.MSpanSys))
-	a.Storage.SetGaugeFromMemStats("Mallocs", float64(m.Mallocs))
-	a.Storage.SetGaugeFromMemStats("NextGC", float64(m.NextGC))
-	a.Storage.SetGaugeFromMemStats("NumForcedGC", float64(m.NumForcedGC))
-	a.Storage.SetGaugeFromMemStats("NumGC", float64(m.NumGC))
-	a.Storage.SetGaugeFromMemStats("OtherSys", float64(m.OtherSys))
-	a.Storage.SetGaugeFromMemStats("PauseTotalNs", float64(m.PauseTotalNs))
-	a.Storage.SetGaugeFromMemStats("StackInuse", float64(m.StackInuse))
-	a.Storage.SetGaugeFromMemStats("StackSys", float64(m.StackSys))
-	a.Storage.SetGaugeFromMemStats("Sys", float64(m.Sys))
-	a.Storage.SetGaugeFromMemStats("TotalAlloc", float64(m.TotalAlloc))
-	a.Storage.SetGaugeFromMemStats("RandomValue", rand.Float64())
-	a.Storage.SetGaugeFromMemStats("TotalMemory", float64(v.Total))
-	a.Storage.SetGaugeFromMemStats("FreeMemory", float64(v.Free))
-	a.Storage.SetGaugeFromMemStats("CPUutilization1", float64(v.Used))
-	a.Storage.SetCounterFromMemStats("PollCount", 1)
+	ctx := context.Background()
+	a.Storage.SetGaugeFromMemStats(ctx, "Alloc", float64(m.Alloc))
+	a.Storage.SetGaugeFromMemStats(ctx, "BuckHashSys", float64(m.BuckHashSys))
+	a.Storage.SetGaugeFromMemStats(ctx, "Frees", float64(m.Frees))
+	a.Storage.SetGaugeFromMemStats(ctx, "GCCPUFraction", m.GCCPUFraction)
+	a.Storage.SetGaugeFromMemStats(ctx, "GCSys", float64(m.GCSys))
+	a.Storage.SetGaugeFromMemStats(ctx, "HeapAlloc", float64(m.HeapAlloc))
+	a.Storage.SetGaugeFromMemStats(ctx, "HeapIdle", float64(m.HeapIdle))
+	a.Storage.SetGaugeFromMemStats(ctx, "HeapInuse", float64(m.HeapInuse))
+	a.Storage.SetGaugeFromMemStats(ctx, "HeapObjects", float64(m.HeapObjects))
+	a.Storage.SetGaugeFromMemStats(ctx, "HeapReleased", float64(m.HeapReleased))
+	a.Storage.SetGaugeFromMemStats(ctx, "HeapSys", float64(m.HeapSys))
+	a.Storage.SetGaugeFromMemStats(ctx, "LastGC", float64(m.HeapAlloc))
+	a.Storage.SetGaugeFromMemStats(ctx, "Lookups", float64(m.Lookups))
+	a.Storage.SetGaugeFromMemStats(ctx, "MCacheInuse", float64(m.MCacheInuse))
+	a.Storage.SetGaugeFromMemStats(ctx, "MCacheSys", float64(m.MCacheSys))
+	a.Storage.SetGaugeFromMemStats(ctx, "MSpanInuse", float64(m.MSpanInuse))
+	a.Storage.SetGaugeFromMemStats(ctx, "MSpanSys", float64(m.MSpanSys))
+	a.Storage.SetGaugeFromMemStats(ctx, "Mallocs", float64(m.Mallocs))
+	a.Storage.SetGaugeFromMemStats(ctx, "NextGC", float64(m.NextGC))
+	a.Storage.SetGaugeFromMemStats(ctx, "NumForcedGC", float64(m.NumForcedGC))
+	a.Storage.SetGaugeFromMemStats(ctx, "NumGC", float64(m.NumGC))
+	a.Storage.SetGaugeFromMemStats(ctx, "OtherSys", float64(m.OtherSys))
+	a.Storage.SetGaugeFromMemStats(ctx, "PauseTotalNs", float64(m.PauseTotalNs))
+	a.Storage.SetGaugeFromMemStats(ctx, "StackInuse", float64(m.StackInuse))
+	a.Storage.SetGaugeFromMemStats(ctx, "StackSys", float64(m.StackSys))
+	a.Storage.SetGaugeFromMemStats(ctx, "Sys", float64(m.Sys))
+	a.Storage.SetGaugeFromMemStats(ctx, "TotalAlloc", float64(m.TotalAlloc))
+	a.Storage.SetGaugeFromMemStats(ctx, "RandomValue", rand.Float64())
+	a.Storage.SetGaugeFromMemStats(ctx, "TotalMemory", float64(v.Total))
+	a.Storage.SetGaugeFromMemStats(ctx, "FreeMemory", float64(v.Free))
+	a.Storage.SetGaugeFromMemStats(ctx, "CPUutilization1", float64(v.Used))
+	a.Storage.SetCounterFromMemStats(ctx, "PollCount", 1)
 }
 
 func (a Agent) PostMany() error {
 	var listMetrics []metric.Metrics
 
-	if len(a.Storage.GetGauges()) == 0 && len(a.Storage.GetCounters()) == 0 {
+	ctx := context.Background()
+	gs, err := a.Storage.GetGauges(ctx)
+	if err != nil {
+		return err
+	}
+	cs, err := a.Storage.GetCounters(ctx)
+	if err != nil {
+		return err
+	}
+	if len(gs) == 0 && len(cs) == 0 {
 		return errors.New("the batch is empty")
 	}
 
-	for key, value := range a.Storage.GetGauges() {
+	gs, err = a.Storage.GetGauges(ctx)
+	if err != nil {
+		return err
+	}
+	for key, value := range gs {
 		var m metric.Metrics
 		m.ID = key
 		v := value.ToFloat()
@@ -122,7 +146,11 @@ func (a Agent) PostMany() error {
 		}
 		listMetrics = append(listMetrics, m)
 	}
-	for key, value := range a.Storage.GetCounters() {
+	cs, err = a.Storage.GetCounters(ctx)
+	if err != nil {
+		return err
+	}
+	for key, value := range cs {
 		var m metric.Metrics
 		m.ID = key
 		d := value.ToInt64()

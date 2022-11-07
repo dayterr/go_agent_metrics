@@ -1,15 +1,13 @@
-package main
+package agent
 
 import (
-	"github.com/dayterr/go_agent_metrics/internal/storage"
 	"net"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/dayterr/go_agent_metrics/cmd/server/handlers"
-	"github.com/stretchr/testify/assert"
+	"github.com/dayterr/go_agent_metrics/internal/storage"
 
-	"github.com/dayterr/go_agent_metrics/internal/agent"
+	"github.com/stretchr/testify/assert"
 )
 
 const address = "localhost:8080"
@@ -28,8 +26,10 @@ func TestPostGauge(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := handlers.NewAsyncHandler("", "", false)
-			r := handlers.CreateRouterWithAsyncHandler("", false, h)
+			h, err := NewAsyncHandler("", "", false)
+			assert.NoError(t, err)
+			r, err := CreateRouterWithAsyncHandler("", false, h)
+			assert.NoError(t, err)
 			ts := httptest.NewUnstartedServer(r)
 			url := "127.0.0.1:8080"
 			l, err := net.Listen("tcp", url)
@@ -37,7 +37,7 @@ func TestPostGauge(t *testing.T) {
 			ts.Listener = l
 			ts.Start()
 			defer ts.Close()
-			v := agent.PostGauge(tt.value, tt.metricName, address, "")
+			v := PostGauge(tt.value, tt.metricName, address, "")
 			assert.Nil(t, v)
 		})
 	}
@@ -57,8 +57,10 @@ func TestPostCounter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := handlers.NewAsyncHandler("", "", false)
-			r := handlers.CreateRouterWithAsyncHandler("", false, h)
+			h, err := NewAsyncHandler("", "", false)
+			assert.NoError(t, err)
+			r, err := CreateRouterWithAsyncHandler("", false, h)
+			assert.NoError(t, err)
 			ts := httptest.NewUnstartedServer(r)
 			url := "127.0.0.1:8080"
 			l, err := net.Listen("tcp", url)
@@ -66,7 +68,7 @@ func TestPostCounter(t *testing.T) {
 			ts.Listener = l
 			ts.Start()
 			defer ts.Close()
-			v := agent.PostCounter(tt.value, tt.metricName, address, "")
+			v := PostCounter(tt.value, tt.metricName, address, "")
 			assert.Nil(t, v)
 		})
 	}

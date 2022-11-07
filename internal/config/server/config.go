@@ -2,9 +2,11 @@ package server
 
 import (
 	"flag"
-	"github.com/caarlos0/env/v6"
-	"log"
 	"time"
+
+	"github.com/caarlos0/env/v6"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -34,7 +36,8 @@ type FlagStruct struct {
 }
 
 func GetEnvServer() (ConfigServer, error) {
-	log.Println("first line in GetEnvServer")
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	log.Print("first line in GetEnvServer")
 	cfg := ConfigServer{}
 	fs := FlagStruct{}
 	flag.StringVar(&fs.Address, "a", defaultAddress, "Address for the server")
@@ -65,6 +68,6 @@ func GetEnvServer() (ConfigServer, error) {
 	if cfg.DatabaseDSN == "" && fs.DatabaseDSN != "" {
 		cfg.DatabaseDSN = fs.DatabaseDSN
 	}
-	log.Println("server config", cfg)
+	log.Print("server config", cfg)
 	return cfg, nil
 }
