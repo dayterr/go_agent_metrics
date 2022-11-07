@@ -26,8 +26,10 @@ func TestPostGauge(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := NewAsyncHandler("", "", false)
-			r := CreateRouterWithAsyncHandler("", false, h)
+			h, err := NewAsyncHandler("", "", false)
+			assert.NoError(t, err)
+			r, err := CreateRouterWithAsyncHandler("", false, h)
+			assert.NoError(t, err)
 			ts := httptest.NewUnstartedServer(r)
 			url := "127.0.0.1:8080"
 			l, err := net.Listen("tcp", url)
@@ -55,8 +57,10 @@ func TestPostCounter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := NewAsyncHandler("", "", false)
-			r := CreateRouterWithAsyncHandler("", false, h)
+			h, err := NewAsyncHandler("", "", false)
+			assert.NoError(t, err)
+			r, err := CreateRouterWithAsyncHandler("", false, h)
+			assert.NoError(t, err)
 			ts := httptest.NewUnstartedServer(r)
 			url := "127.0.0.1:8080"
 			l, err := net.Listen("tcp", url)
