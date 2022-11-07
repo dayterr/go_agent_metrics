@@ -48,11 +48,11 @@ func gzipHandle(next http.Handler) http.Handler {
 		}
 
 		gz, err := gzip.NewWriterLevel(w, gzip.BestSpeed)
-		defer gz.Close()
 		if err != nil {
 			io.WriteString(w, err.Error())
 			return
 		}
+		defer gz.Close()
 
 		w.Header().Set("Content-Encoding", "gzip")
 		next.ServeHTTP(gzipWriter{ResponseWriter: w, Writer: gz}, r)
