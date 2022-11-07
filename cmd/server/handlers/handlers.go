@@ -14,11 +14,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	_ "github.com/lib/pq"
 
+	"github.com/dayterr/go_agent_metrics/internal/agent"
 	"github.com/dayterr/go_agent_metrics/internal/hash"
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
-
-	"github.com/dayterr/go_agent_metrics/internal/agent"
 )
 
 type AsyncHandler struct {
@@ -74,6 +73,7 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	ctx := r.Context()
@@ -82,6 +82,7 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 		v, err := ah.storage.GetGuageByID(ctx, m.ID)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
+			return
 		}
 		m.Value = &v
 		if ah.key != "" {
@@ -90,6 +91,7 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 		mJSON, err := json.Marshal(m)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
 		w.Header().Set("content-type", "application/json")
 		w.Write(mJSON)
@@ -97,6 +99,7 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 		d, err := ah.storage.GetCounterByID(ctx, m.ID)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
+			return
 		}
 		m.Delta = &d
 		if ah.key != "" {
@@ -105,6 +108,7 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 		mJSON, err := json.Marshal(m)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
 		w.Header().Set("content-type", "application/json")
 		w.Write(mJSON)
@@ -118,6 +122,7 @@ func (ah AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&m)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	hashGot := r.Header.Get("Hash")
@@ -125,6 +130,7 @@ func (ah AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
 		hashCheck := hash.EncryptMetric(m, ah.key)
 		if !hash.CheckHash(m, hashCheck) {
 			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
 
 	}

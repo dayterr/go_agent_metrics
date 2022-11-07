@@ -4,17 +4,19 @@ import (
 	"compress/gzip"
 	"database/sql"
 	"encoding/json"
-	"github.com/dayterr/go_agent_metrics/internal/hash"
-	"github.com/dayterr/go_agent_metrics/internal/metric"
-	"github.com/dayterr/go_agent_metrics/internal/server"
-	"github.com/dayterr/go_agent_metrics/internal/storage"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"io"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+
+	"github.com/dayterr/go_agent_metrics/internal/hash"
+	"github.com/dayterr/go_agent_metrics/internal/metric"
+	"github.com/dayterr/go_agent_metrics/internal/server"
+	"github.com/dayterr/go_agent_metrics/internal/storage"
 )
 
 type AsyncHandler struct {
@@ -254,7 +256,6 @@ func (ah AsyncHandler) GetMetric(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
 func (ah AsyncHandler) Ping(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("postgres", ah.dsn)
 	if err != nil {
@@ -290,6 +291,3 @@ func (ah AsyncHandler) PostMany(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
-
-
-
