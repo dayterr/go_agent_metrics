@@ -76,9 +76,10 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	}
 
+	ctx := r.Context()
 	switch m.MType {
 	case agent.GaugeType:
-		v, err := ah.storage.GetGuageByID(m.ID)
+		v, err := ah.storage.GetGuageByID(ctx, m.ID)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 		}
@@ -93,7 +94,7 @@ func (ah AsyncHandler) GetValue(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("content-type", "application/json")
 		w.Write(mJSON)
 	case agent.CounterType:
-		d, err := ah.storage.GetCounterByID(m.ID)
+		d, err := ah.storage.GetCounterByID(ctx, m.ID)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 		}
@@ -127,12 +128,13 @@ func (ah AsyncHandler) PostJSON(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
+	ctx := r.Context()
 	switch m.MType {
 	case agent.GaugeType:
-		ah.storage.SetGuage(m.ID, m.Value)
+		ah.storage.SetGuage(ctx, m.ID, m.Value)
 		w.WriteHeader(http.StatusOK)
 	case agent.CounterType:
-		ah.storage.SetCounter(m.ID, m.Delta)
+		ah.storage.SetCounter(ctx, m.ID, m.Delta)
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotFound)
@@ -151,6 +153,7 @@ func (ah AsyncHandler) PostMetric(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+	ctx := r.Context()
 	switch metricType {
 	case agent.GaugeType:
 		valFloat, err := strconv.ParseFloat(value, 64)
@@ -158,7 +161,7 @@ func (ah AsyncHandler) PostMetric(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		ah.storage.SetGuage(metricName, &valFloat)
+		ah.storage.SetGuage(ctx, metricName, &valFloat)
 		w.WriteHeader(http.StatusOK)
 	case agent.CounterType:
 		valInt, err := strconv.Atoi(value)
@@ -166,7 +169,7 @@ func (ah AsyncHandler) PostMetric(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		ah.storage.SetCounterFromMemStats(metricName, int64(valInt))
+		ah.storage.SetCounterFromMemStats(ctx, metricName, int64(valInt))
 		w.WriteHeader(http.StatusOK)
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
@@ -181,10 +184,11 @@ func (ah AsyncHandler) GetMetric(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ctx := r.Context()
 	switch metricType {
 	case agent.GaugeType:
-		if ah.storage.CheckGaugeByName(metricName) {
-			v, err := ah.storage.GetGuageByID(metricName)
+		if ah.storage.CheckGaugeByName(ctx, metricName) {
+			v, err := ah.storage.GetGuageByID(ctx, metricName)
 			if err != nil {
 				w.WriteHeader(http.StatusNotFound)
 				return
@@ -195,8 +199,8 @@ func (ah AsyncHandler) GetMetric(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case agent.CounterType:
-		if ah.storage.CheckCounterByName(metricName) {
-			v, err := ah.storage.GetCounterByID(metricName)
+		if ah.storage.CheckCounterByName(ctx, metricName) {
+			v, err := ah.storage.GetCounterByID(ctx, metricName)
 			if err != nil {
 				w.WriteHeader(http.StatusNotFound)
 				return
@@ -211,7 +215,7 @@ func (ah AsyncHandler) GetMetric(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !ah.storage.CheckCounterByName(metricName) && !ah.storage.CheckGaugeByName(metricName) {
+	if !ah.storage.CheckCounterByName(ctx, metricName) && !ah.storage.CheckGaugeByName(ctx, metricName) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -226,7 +230,9 @@ func (ah AsyncHandler) GetIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = t.ExecuteTemplate(w, "index.html", ah.storage.GetGauges())
+	ctx := r.Context()
+	gs, err := ah.storage.GetGauges(ctx)
+	err = t.ExecuteTemplate(w, "index.html", gs)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -258,7 +264,8 @@ func (ah AsyncHandler) PostMany(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ah.storage.SaveMany(metricList)
+	ctx := r.Context()
+	err = ah.storage.SaveMany(ctx, metricList)
 	if err != nil {
 		log.Println("err saving", err)
 		w.WriteHeader(http.StatusBadRequest)
