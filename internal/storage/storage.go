@@ -2,9 +2,9 @@ package storage
 
 import (
 	"context"
-	"errors"
-	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"log"
+
+	"github.com/dayterr/go_agent_metrics/internal/metric"
 )
 
 func NewIMS() InMemoryStorage {
@@ -29,7 +29,7 @@ func (c Counter) ToInt() int {
 func (s InMemoryStorage) GetGuageByID(ctx context.Context, id string) (float64, error) {
 	select {
 	case <-ctx.Done():
-		return 0, errors.New("the request was cancelled")
+		return 0, ctx.Err()
 	default:
 		v := s.GaugeField[id].ToFloat()
 		return v, nil
@@ -39,7 +39,7 @@ func (s InMemoryStorage) GetGuageByID(ctx context.Context, id string) (float64, 
 func (s InMemoryStorage) GetCounterByID(ctx context.Context, id string) (int64, error) {
 	select {
 	case <-ctx.Done():
-		return 0, errors.New("the request was cancelled")
+		return 0, ctx.Err()
 	default:
 		v := s.CounterField[id].ToInt64()
 		return v, nil
@@ -49,7 +49,7 @@ func (s InMemoryStorage) GetCounterByID(ctx context.Context, id string) (int64, 
 func (s InMemoryStorage) SetGuage(ctx context.Context, id string, v *float64) {
 	select {
 	case <-ctx.Done():
-		log.Println(errors.New("the request was cancelled"))
+		log.Println(ctx.Err())
 	default:
 		s.GaugeField[id] = Gauge(*v)
 	}
@@ -58,7 +58,7 @@ func (s InMemoryStorage) SetGuage(ctx context.Context, id string, v *float64) {
 func (s InMemoryStorage) SetCounter(ctx context.Context, id string, v *int64) {
 	select {
 	case <-ctx.Done():
-		log.Println(errors.New("the request was cancelled"))
+		log.Println(ctx.Err())
 	default:
 		s.CounterField[id] += Counter(*v)
 	}
@@ -67,7 +67,7 @@ func (s InMemoryStorage) SetCounter(ctx context.Context, id string, v *int64) {
 func (s InMemoryStorage) SetGaugeFromMemStats(ctx context.Context, id string, value float64) {
 	select {
 	case <-ctx.Done():
-		log.Println(errors.New("the request was cancelled"))
+		log.Println(ctx.Err())
 	default:
 		s.GaugeField[id] = Gauge(value)
 	}
@@ -76,7 +76,7 @@ func (s InMemoryStorage) SetGaugeFromMemStats(ctx context.Context, id string, va
 func (s InMemoryStorage) SetCounterFromMemStats(ctx context.Context, id string, value int64) {
 	select {
 	case <-ctx.Done():
-		log.Println(errors.New("the request was cancelled"))
+		log.Println(ctx.Err())
 	default:
 		s.CounterField[id] += Counter(value)
 	}
@@ -85,7 +85,7 @@ func (s InMemoryStorage) SetCounterFromMemStats(ctx context.Context, id string, 
 func (s InMemoryStorage) GetGauges(ctx context.Context) (map[string]Gauge, error) {
 	select {
 	case <-ctx.Done():
-		return map[string]Gauge{}, errors.New("the request was cancelled")
+		return map[string]Gauge{}, ctx.Err()
 	default:
 		return s.GaugeField, nil
 	}
@@ -94,7 +94,7 @@ func (s InMemoryStorage) GetGauges(ctx context.Context) (map[string]Gauge, error
 func (s InMemoryStorage) GetCounters(ctx context.Context) (map[string]Counter, error) {
 	select {
 	case <-ctx.Done():
-		return map[string]Counter{}, errors.New("the request was cancelled")
+		return map[string]Counter{}, ctx.Err()
 	default:
 		return s.CounterField, nil
 	}
@@ -103,7 +103,7 @@ func (s InMemoryStorage) GetCounters(ctx context.Context) (map[string]Counter, e
 func (s InMemoryStorage) CheckGaugeByName(ctx context.Context, name string) bool {
 	select {
 	case <-ctx.Done():
-		return false
+		return ctx.Err() == nil
 	default:
 		_, ok := s.GaugeField[name]
 		return ok
@@ -113,7 +113,7 @@ func (s InMemoryStorage) CheckGaugeByName(ctx context.Context, name string) bool
 func (s InMemoryStorage) CheckCounterByName(ctx context.Context, name string) bool {
 	select {
 	case <-ctx.Done():
-		return false
+		return ctx.Err() == nil
 	default:
 		_, ok := s.CounterField[name]
 		return ok
@@ -123,7 +123,7 @@ func (s InMemoryStorage) CheckCounterByName(ctx context.Context, name string) bo
 func (s InMemoryStorage) SaveMany(ctx context.Context, metricsList []metric.Metrics) error {
 	select {
 	case <-ctx.Done():
-		return errors.New("the request was cancelled")
+		return ctx.Err()
 	default:
 		for _, metric := range metricsList {
 			if metric.MType == "gauge" {

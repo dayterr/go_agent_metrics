@@ -3,7 +3,6 @@ package storage
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"log"
 	"time"
 
@@ -39,8 +38,8 @@ func NewDB(dsn string) (DBStorage, error) {
 
 func (s DBStorage) GetGuageByID(ctx context.Context, id string) (float64, error) {
 	select {
-	case <- ctx.Done():
-		return 0, errors.New("the request was cancelled")
+	case <-ctx.Done():
+		return 0, ctx.Err()
 	default:
 		var fl float64
 		row := s.DB.QueryRowContext(ctx, `SELECT Value FROM gauge WHERE name = $1;`, id)
@@ -55,7 +54,7 @@ func (s DBStorage) GetGuageByID(ctx context.Context, id string) (float64, error)
 func (s DBStorage) GetCounterByID(ctx context.Context, id string) (int64, error) {
 	select {
 	case <-ctx.Done():
-		return 0, errors.New("the request was cancelled")
+		return 0, ctx.Err()
 	default:
 		var val int64
 		row := s.DB.QueryRowContext(ctx, `SELECT Delta FROM counter WHERE name = $1;`, id)
@@ -70,7 +69,7 @@ func (s DBStorage) GetCounterByID(ctx context.Context, id string) (int64, error)
 func (s DBStorage) SetGuage(ctx context.Context, id string, v *float64) {
 	select {
 	case <-ctx.Done():
-		log.Println(errors.New("the request was cancelled"))
+		log.Println(ctx.Err())
 	default:
 		_, err := s.DB.ExecContext(ctx,
 			`INSERT INTO gauge (name, Value) VALUES ($1, $2) ON CONFLICT(name) DO UPDATE SET Value = $3`,
@@ -84,7 +83,7 @@ func (s DBStorage) SetGuage(ctx context.Context, id string, v *float64) {
 func (s DBStorage) SetCounter(ctx context.Context, id string, v *int64) {
 	select {
 	case <-ctx.Done():
-		log.Println(errors.New("the request was cancelled"))
+		log.Println(ctx.Err())
 	default:
 		_, err := s.DB.ExecContext(ctx,
 			`INSERT INTO counter (name, Delta) VALUES ($1, $2) ON CONFLICT(name) DO UPDATE SET Delta = counter.Delta + $3`,
@@ -99,7 +98,7 @@ func (s DBStorage) SetCounter(ctx context.Context, id string, v *int64) {
 func (s DBStorage) SetGaugeFromMemStats(ctx context.Context, id string, value float64) {
 	select {
 	case <-ctx.Done():
-		log.Println(errors.New("the request was cancelled"))
+		log.Println(ctx.Err())
 	default:
 		_, err := s.DB.ExecContext(ctx,
 			`INSERT INTO gauge (name, Value) VALUES ($1, $2) ON CONFLICT(name) DO UPDATE SET Value = $3`,
@@ -113,7 +112,7 @@ func (s DBStorage) SetGaugeFromMemStats(ctx context.Context, id string, value fl
 func (s DBStorage) SetCounterFromMemStats(ctx context.Context, id string, value int64) {
 	select {
 	case <-ctx.Done():
-		log.Println(errors.New("the request was cancelled"))
+		log.Println(ctx.Err())
 	default:
 		_, err := s.DB.ExecContext(ctx,
 			`INSERT INTO counter (name, Delta) VALUES ($1, $2) ON CONFLICT(name) DO UPDATE SET Delta = counter.Delta + $3`,
@@ -128,7 +127,7 @@ func (s DBStorage) SetCounterFromMemStats(ctx context.Context, id string, value 
 func (s DBStorage) GetGauges(ctx context.Context) (map[string]Gauge, error) {
 	select {
 	case <-ctx.Done():
-		return map[string]Gauge{}, errors.New("the request was cancelled")
+		return map[string]Gauge{}, ctx.Err()
 	default:
 		rows, err := s.DB.QueryContext(ctx, `SELECT * FROM gauge;`)
 
@@ -157,7 +156,7 @@ func (s DBStorage) GetGauges(ctx context.Context) (map[string]Gauge, error) {
 func (s DBStorage) GetCounters(ctx context.Context) (map[string]Counter, error) {
 	select {
 	case <-ctx.Done():
-		return map[string]Counter{}, errors.New("the request was cancelled")
+		return map[string]Counter{}, ctx.Err()
 	default:
 		rows, err := s.DB.QueryContext(ctx, `SELECT * FROM counter;`)
 		if err != nil {
@@ -185,7 +184,7 @@ func (s DBStorage) GetCounters(ctx context.Context) (map[string]Counter, error) 
 func (s DBStorage) CheckGaugeByName(ctx context.Context, name string) bool {
 	select {
 	case <-ctx.Done():
-		return false
+		return ctx.Err() == nil
 	default:
 		row, err := s.DB.QueryContext(ctx, `SELECT Value FROM gauge WHERE name = $1;`, name)
 		if row.Err() != nil {
@@ -199,7 +198,7 @@ func (s DBStorage) CheckGaugeByName(ctx context.Context, name string) bool {
 func (s DBStorage) CheckCounterByName(ctx context.Context, name string) bool {
 	select {
 	case <-ctx.Done():
-		return false
+		return ctx.Err() == nil
 	default:
 		row, err := s.DB.QueryContext(ctx, `SELECT Delta FROM counter WHERE name = $1;`, name)
 		if row.Err() != nil {
@@ -213,7 +212,7 @@ func (s DBStorage) CheckCounterByName(ctx context.Context, name string) bool {
 func (s DBStorage) SaveMany(ctx context.Context, metricsList []metric.Metrics) error {
 	select {
 	case <-ctx.Done():
-		return errors.New("the request was cancelled")
+		return ctx.Err()
 	default:
 		tx, err := s.DB.Begin()
 		if err != nil {
