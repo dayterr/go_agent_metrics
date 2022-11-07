@@ -232,6 +232,10 @@ func (ah AsyncHandler) GetIndex(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 	gs, err := ah.storage.GetGauges(ctx)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	err = t.ExecuteTemplate(w, "index.html", gs)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
