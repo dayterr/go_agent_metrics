@@ -43,7 +43,7 @@ func (s DBStorage) GetGuageByID(ctx context.Context, id string) (float64, error)
 		return 0, errors.New("the request was cancelled")
 	default:
 		var fl float64
-		row := s.DB.QueryRow(`SELECT Value FROM gauge WHERE name = $1;`, id)
+		row := s.DB.QueryRowContext(ctx, `SELECT Value FROM gauge WHERE name = $1;`, id)
 		err := row.Scan(&fl)
 		if err != nil {
 			return 0, err
