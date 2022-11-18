@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	_ "net/http/pprof"
 	"time"
@@ -13,8 +14,15 @@ import (
 	server2 "github.com/dayterr/go_agent_metrics/internal/server"
 )
 
+var (
+	buildVersion = "N/A"
+	buildDate    = "N/A"
+	buildCommit  = "N/A"
+)
+
 func main() {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	fmt.Printf("Build version: %v\nBuild date: %v\nBuild commit: %v\n", buildVersion, buildDate, buildCommit)
 	Cfg, err := server.GetEnvServer()
 	if err != nil {
 		log.Fatal().Err(err).Msg("getting config error")
