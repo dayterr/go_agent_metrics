@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/dayterr/go_agent_metrics/internal/agent"
@@ -8,6 +9,7 @@ import (
 )
 
 func main() {
+	fmt.Printf("Build version: %v\nBuild date: %v\nBuild commit: %v\n", buildVersion, buildDate, buildCommit)
 	Cfg, err := agent2.GetEnvAgent()
 	if err != nil {
 		log.Fatal(err)
