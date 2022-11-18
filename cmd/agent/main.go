@@ -8,6 +8,12 @@ import (
 	agent2 "github.com/dayterr/go_agent_metrics/internal/config/agent"
 )
 
+var (
+	buildVersion = "N/A"
+	buildDate    = "N/A"
+	buildCommit  = "N/A"
+)
+
 func main() {
 	fmt.Printf("Build version: %v\nBuild date: %v\nBuild commit: %v\n", buildVersion, buildDate, buildCommit)
 	Cfg, err := agent2.GetEnvAgent()
