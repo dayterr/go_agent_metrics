@@ -23,7 +23,7 @@ func readKey(filepath string) any {
 	}
 
 	block, _ := pem.Decode(bytes)
-	if block == nil {
+	if block == nil || block.Type == "" {
 		log.Fatal().Err(err).Msg("decoding PEM error")
 	}
 
