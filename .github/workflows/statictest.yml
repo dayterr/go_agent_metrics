@@ -4,7 +4,7 @@ on:
   pull_request:
   push:
     branches:
-      - sprint9
+      - main
       - sprint9
 
 jobs:
