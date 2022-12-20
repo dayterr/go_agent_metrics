@@ -4,8 +4,8 @@ on:
   pull_request:
   push:
     branches:
-      - main
-      - sprint8
+      - sprint9
+      - sprint9
 
 jobs:
 
