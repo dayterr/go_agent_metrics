@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/dayterr/go_agent_metrics/internal/encryption"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -75,7 +76,8 @@ func TestPostMetric(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			h, err := NewAsyncHandler("", "", false)
 			assert.NoError(t, err)
-			r, err := CreateRouterWithAsyncHandler("", false, h)
+			e := encryption.NewEncryptor("")
+			r, err := CreateRouterWithAsyncHandler("", false, h, e, []byte("abc"))
 			assert.NoError(t, err)
 			ts := httptest.NewServer(r)
 			defer ts.Close()

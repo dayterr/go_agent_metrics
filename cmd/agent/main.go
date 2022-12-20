@@ -20,6 +20,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	agentInstance := agent.NewAgent(Cfg.Address, Cfg.ReportInterval, Cfg.PollInterval, Cfg.Key)
+	agentInstance := agent.NewAgent(Cfg.Address, Cfg.ReportInterval, Cfg.PollInterval, Cfg.Key, Cfg.CryptoKey)
 	agentInstance.Run()
 }
