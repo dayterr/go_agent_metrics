@@ -7,11 +7,13 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"net/http"
 	"runtime"
 
 	"github.com/levigross/grequests"
 	"github.com/shirou/gopsutil/v3/mem"
 
+	"github.com/dayterr/go_agent_metrics/internal/encryption"
 	"github.com/dayterr/go_agent_metrics/internal/hash"
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
@@ -20,7 +22,7 @@ import (
 const GaugeType = "gauge"
 const CounterType = "counter"
 
-func PostCounter(value storage.Counter, metricName string, address string, key string) error {
+func PostCounter(value storage.Counter, metricName string, address string, key, cryptoKey string) error {
 	url := fmt.Sprintf("http://%v/update/", address)
 	delta := value.ToInt64()
 	metric := metric.Metrics{ID: metricName, MType: CounterType, Delta: &delta}
@@ -31,15 +33,23 @@ func PostCounter(value storage.Counter, metricName string, address string, key s
 	if err != nil {
 		return err
 	}
+
+	client := &http.Client{}
+
+	if cryptoKey != "" {
+		enc := encryption.NewEncryptor(cryptoKey)
+		client.Transport = encryption.NewRoundTripperWithEncryption(enc)
+	}
+
 	_, err = grequests.Post(url, &grequests.RequestOptions{JSON: mJSON,
-		Headers: map[string]string{"ContentType": "application/json"}})
+		Headers: map[string]string{"ContentType": "application/json"}, HTTPClient: client})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func PostGauge(value storage.Gauge, metricName string, address string, key string) error {
+func PostGauge(value storage.Gauge, metricName string, address string, key, cryptoKey string) error {
 	url := fmt.Sprintf("http://%v/update/", address)
 	v := value.ToFloat()
 	metric := metric.Metrics{ID: metricName, MType: GaugeType, Value: &v}
@@ -50,8 +60,16 @@ func PostGauge(value storage.Gauge, metricName string, address string, key strin
 	if err != nil {
 		return err
 	}
+
+	client := &http.Client{}
+
+	if cryptoKey != "" {
+		enc := encryption.NewEncryptor(cryptoKey)
+		client.Transport = encryption.NewRoundTripperWithEncryption(enc)
+	}
+
 	_, err = grequests.Post(url, &grequests.RequestOptions{JSON: mJSON,
-		Headers: map[string]string{"ContentType": "application/json"}})
+		Headers: map[string]string{"ContentType": "application/json"}, HTTPClient: client})
 	if err != nil {
 		return err
 	}

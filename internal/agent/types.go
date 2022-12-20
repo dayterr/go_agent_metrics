@@ -15,9 +15,10 @@ type Agent struct {
 	ReportInterval time.Duration
 	PollInterval   time.Duration
 	Key            string
+	CryptoKey string
 }
 
-func NewAgent(address string, repInt time.Duration, pInt time.Duration, key string) Agent {
+func NewAgent(address string, repInt time.Duration, pInt time.Duration, key, cryptoKey string) Agent {
 	s := storage.NewIMS()
 	return Agent{
 		Storage:        s,
@@ -25,6 +26,7 @@ func NewAgent(address string, repInt time.Duration, pInt time.Duration, key stri
 		ReportInterval: repInt,
 		PollInterval:   pInt,
 		Key:            key,
+		CryptoKey: cryptoKey,
 	}
 }
 

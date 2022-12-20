@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/dayterr/go_agent_metrics/internal/encryption"
 	"net/http"
 	_ "net/http/pprof"
 	"time"
@@ -53,7 +54,8 @@ func main() {
 		}(h)
 	}
 	restore := Cfg.Restore && Cfg.DatabaseDSN == ""
-	r, err := handlers.CreateRouterWithAsyncHandler(Cfg.StoreFile, restore, h)
+	e := encryption.NewEncryptor(Cfg.CryptoKey)
+	r, err := handlers.CreateRouterWithAsyncHandler(Cfg.StoreFile, restore, h, e, []byte(Cfg.Salt))
 	if err != nil {
 		log.Fatal().Err(err).Msg("creating router error")
 	}

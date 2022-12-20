@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"github.com/dayterr/go_agent_metrics/internal/encryption"
+	"context"
 	"log"
+	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -9,6 +12,17 @@ import (
 	"github.com/dayterr/go_agent_metrics/internal/server"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 )
+
+type NextHandler func(next http.Handler) http.Handler
+type Salt struct {}
+
+func PassSalt(salt []byte) NextHandler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			next.ServeHTTP(writer, req.WithContext(context.WithValue(req.Context(), Salt{}, salt)))
+		})
+	}
+}
 
 func NewAsyncHandler(key, dsn string, isDB bool) (AsyncHandler, error) {
 	var s storage.Storager
@@ -26,7 +40,8 @@ func NewAsyncHandler(key, dsn string, isDB bool) (AsyncHandler, error) {
 	return h, nil
 }
 
-func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandler) (chi.Router, error) {
+func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandler, e encryption.Encryptor,
+	salt []byte) (chi.Router, error) {
 	// Функция для создания нового роутера
 	if isRestored {
 		var err error
@@ -38,7 +53,8 @@ func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandl
 		}
 	}
 	r := chi.NewRouter()
-	r.Use(gzipHandle)
+	//r.Use(gzipHandle)
+	r.Use(DecryptingMiddleware(e), gzipHandle, PassSalt(salt))
 	r.Mount("/debug", middleware.Profiler())
 
 	r.Route("/update", func(r chi.Router) {

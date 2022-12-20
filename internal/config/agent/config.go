@@ -20,6 +20,8 @@ type ConfigAgent struct {
 	ReportInterval time.Duration `env:"REPORT_INTERVAL" envDefault:"10s"`
 	PollInterval   time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
 	Key            string        `env:"KEY" envDefault:""`
+	Salt string
+	CryptoKey string
 }
 
 type FlagStruct struct {
@@ -27,6 +29,8 @@ type FlagStruct struct {
 	ReportInterval time.Duration
 	PollInterval   time.Duration
 	Key            string
+	Salt string
+	CryptoKey string
 }
 
 func GetEnvAgent() (ConfigAgent, error) {
@@ -37,6 +41,8 @@ func GetEnvAgent() (ConfigAgent, error) {
 	flag.DurationVar(&fs.PollInterval, "p", defaultPollInterval, "Interval for polling the metric")
 	flag.StringVar(&fs.Address, "a", defaultAddress, "Address for the server")
 	flag.StringVar(&fs.Key, "k", defaultKey, "Key for encrypting")
+	flag.StringVar(&fs.Salt, "salt", "", "salt for crypto key")
+	flag.StringVar(&fs.CryptoKey, "cryptokey", "", "crypto key")
 	flag.Parse()
 
 	err := env.Parse(&cfg)

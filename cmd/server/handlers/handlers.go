@@ -1,13 +1,16 @@
 package handlers
 
 import (
+	"bytes"
 	"compress/gzip"
 	"database/sql"
 	"encoding/json"
+	"github.com/dayterr/go_agent_metrics/internal/encryption"
 	"html/template"
 	"io"
 	"log"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -58,6 +61,39 @@ func gzipHandle(next http.Handler) http.Handler {
 		next.ServeHTTP(gzipWriter{ResponseWriter: w, Writer: gz}, r)
 	})
 }
+
+func DecryptingMiddleware(e encryption.Encryptor) func(http.Handler) http.Handler {
+	var b bytes.Buffer
+
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			if !(reflect.DeepEqual(e, encryption.Encryptor{})) {
+				switch req.Method {
+				case http.MethodPost:
+					if _, err := b.ReadFrom(req.Body); err != nil {
+						writer.WriteHeader(http.StatusInternalServerError)
+						return
+					}
+
+					buf, err := e.DecryptMessage(b.Bytes())
+					if err != nil {
+						writer.WriteHeader(http.StatusInternalServerError)
+						return
+					}
+
+					req.Body = io.NopCloser(bytes.NewReader(buf))
+					req.ContentLength = int64(len(buf))
+
+				default:
+					next.ServeHTTP(writer, req)
+				}
+			}
+			next.ServeHTTP(writer, req)
+		})
+	}
+}
+
+
 
 func (ah AsyncHandler) MarshallMetrics() ([]byte, error) {
 	// Метод возвращает данные из хранилища в json-формате
