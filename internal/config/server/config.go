@@ -24,6 +24,8 @@ type ConfigServer struct {
 	Restore       bool          `env:"RESTORE" envDefault:"true"`
 	Key           string        `env:"KEY" envDefault:""`
 	DatabaseDSN   string        `env:"DATABASE_DSN" envDefault:""`
+	Salt string `env:"SALT" envDefault:""`
+	CryptoKey string `env:"CRYPTO_KEY" envDefault:""`
 }
 
 type FlagStruct struct {
@@ -33,6 +35,8 @@ type FlagStruct struct {
 	Restore       bool
 	Key           string
 	DatabaseDSN   string
+	Salt string
+	CryptoKey string
 }
 
 func GetEnvServer() (ConfigServer, error) {
@@ -46,6 +50,8 @@ func GetEnvServer() (ConfigServer, error) {
 	flag.StringVar(&fs.StoreFile, "f", defaultStoreFile, "file to store the metric")
 	flag.StringVar(&fs.Key, "k", defaultKey, "Key for encrypting")
 	flag.StringVar(&fs.DatabaseDSN, "d", "", "Database DSN")
+	flag.StringVar(&fs.Salt, "salt", "", "salt for crypto key")
+	flag.StringVar(&fs.CryptoKey, "cryptokey", "", "crypto key")
 	flag.Parse()
 
 	err := env.Parse(&cfg)
