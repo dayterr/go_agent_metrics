@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"time"
+	"encoding/json"
 
 	"github.com/caarlos0/env/v6"
 	"github.com/rs/zerolog"
