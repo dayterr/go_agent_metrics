@@ -7,64 +7,64 @@ on:
       - main
       - sprint9
 
-jobs:
-
-  devopstest:
-    runs-on: ubuntu-latest
-    container: golang:1.17
-
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: praktikum
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Download autotests binaries
-        uses: robinraju/release-downloader@v1.2
-        with:
-          repository: Yandex-Practicum/go-autotests-bin
-          latest: true
-          fileName: "*"
-          out-file-path: .tools
-
-      - name: Setup autotest binary
-        run: |
-          chmod -R +x $GITHUB_WORKSPACE/.tools
-          mv $GITHUB_WORKSPACE/.tools/devopstest /usr/local/bin/devopstest
-          mv $GITHUB_WORKSPACE/.tools/random /usr/local/bin/random
-
-      - name: Build agent binary
-        run: |
-          cd cmd/agent
-          go build -o agent
-
-# Соглашение:
-#   Во всех заданиях, нужно обрабатывать все пограничные случаи и негатив-кейсы.
-#   По ходу продвижения по инкрементам, тесты становятся строже.
-#   Темплейты могут обновляться, добавляя все более строгие проверки.
-
-# I. Задание к первому инкременту.
-# Разработать агент по сбору рантайм метрик и их последующей отправке на сервер по протоколу http.
-# Разработку необходимо вести с использованием шаблона https://github.com/yandex-praktikum/go-musthave-devops-tpl.git
-# Агент должен собирать метрики двух типов:
-#   * gauge, тип float64
-#   * counter, тип int64
-# В качестве источника метрик использовать пакет runtime. Собирать следующие метрики:
-#   * Имя метрики: "Alloc", тип: gauge
-#   * Имя метрики: "BuckHashSys", тип: gauge
+jobs:#   * Имя метрики: "BuckHashSys", тип: gauge
 #   * Имя метрики: "Frees", тип: gauge
 #   * Имя метрики: "GCCPUFraction", тип: gauge
-#   * Имя метрики: "GCSys", тип: gauge
+
+          devopstest:
+            runs-on: ubuntu-latest
+            container: golang:1.18
+
+            services:
+              postgres:
+                image: postgres
+                env:
+                  POSTGRES_PASSWORD: postgres
+                  POSTGRES_DB: praktikum
+                options: >-
+                  --health-cmd pg_isready
+                  --health-interval 5s
+                  --health-timeout 5s
+                  --health-retries 5
+
+            steps:
+              - name: Checkout code
+                uses: actions/checkout@v2
+
+              - name: Download autotests binaries
+                uses: robinraju/release-downloader@v1.2
+                with:
+                  repository: Yandex-Practicum/go-autotests-bin
+                  latest: true
+                  fileName: "*"
+                  out-file-path: .tools
+
+              - name: Setup autotest binary
+                run: |
+                  chmod -R +x $GITHUB_WORKSPACE/.tools
+                  mv $GITHUB_WORKSPACE/.tools/devopstest /usr/local/bin/devopstest
+                  mv $GITHUB_WORKSPACE/.tools/random /usr/local/bin/random
+
+              - name: Build agent binary
+                run: |
+                  cd cmd/agent
+                  go build -o agent
+
+          # Соглашение:
+          #   Во всех заданиях, нужно обрабатывать все пограничные случаи и негатив-кейсы.
+          #   По ходу продвижения по инкрементам, тесты становятся строже.
+          #   Темплейты могут обновляться, добавляя все более строгие проверки.
+
+          # I. Задание к первому инкременту.
+          # Разработать агент по сбору рантайм метрик и их последующей отправке на сервер по протоколу http.
+          # Разработку необходимо вести с использованием шаблона https://github.com/yandex-praktikum/go-musthave-devops-tpl.git
+          # Агент должен собирать метрики двух типов:
+          #   * gauge, тип float64
+          #   * counter, тип int64
+          # В качестве источника метрик использовать пакет runtime. Собирать следующие метрики:
+          #   * Имя метрики: "Alloc", тип: gauge
+
+      #   * Имя метрики: "GCSys", тип: gauge
 #   * Имя метрики: "HeapAlloc", тип: gauge
 #   * Имя метрики: "HeapIdle", тип: gauge
 #   * Имя метрики: "HeapInuse", тип: gauge
