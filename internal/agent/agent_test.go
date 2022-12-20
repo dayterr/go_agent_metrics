@@ -37,7 +37,7 @@ func TestPostGauge(t *testing.T) {
 			ts.Listener = l
 			ts.Start()
 			defer ts.Close()
-			v := PostGauge(tt.value, tt.metricName, address, "")
+			v := PostGauge(tt.value, tt.metricName, address, "", "")
 			assert.Nil(t, v)
 		})
 	}
