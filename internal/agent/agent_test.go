@@ -68,7 +68,7 @@ func TestPostCounter(t *testing.T) {
 			ts.Listener = l
 			ts.Start()
 			defer ts.Close()
-			v := PostCounter(tt.value, tt.metricName, address, "")
+			v := PostCounter(tt.value, tt.metricName, address, "", "")
 			assert.Nil(t, v)
 		})
 	}

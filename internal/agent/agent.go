@@ -87,10 +87,10 @@ func (a Agent) PostAll() {
 		log.Println("getting counters error", err)
 	}
 	for k, v := range gauges {
-		PostGauge(v, k, a.Address, a.Key)
+		PostGauge(v, k, a.Address, a.Key, a.CryptoKey)
 	}
 	for k, v := range counters {
-		PostCounter(v, k, a.Address, a.Key)
+		PostCounter(v, k, a.Address, a.Key, a.CryptoKey)
 	}
 }
 
