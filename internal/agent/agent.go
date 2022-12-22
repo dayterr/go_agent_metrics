@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"net/http"
 	"runtime"
+	"time"
 
 	"github.com/levigross/grequests"
 	"github.com/shirou/gopsutil/v3/mem"
@@ -194,4 +195,24 @@ func (a Agent) PostMany() error {
 	}
 
 	return nil
+}
+
+func (a Agent) Run(ctx context.Context) {
+	tickerCollectMetrics := time.NewTicker(a.PollInterval)
+	tickerReportMetrics := time.NewTicker(a.ReportInterval)
+	go func() {
+		for {
+			select {
+			case <-tickerCollectMetrics.C:
+				a.ReadMetrics()
+			case <-tickerReportMetrics.C:
+				err := a.PostMany()
+				if err != nil {
+					a.PostAll()
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
 }
