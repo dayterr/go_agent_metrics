@@ -5,7 +5,6 @@ import (
 	"compress/gzip"
 	"database/sql"
 	"encoding/json"
-	"github.com/dayterr/go_agent_metrics/internal/encryption"
 	"html/template"
 	"io"
 	"log"
@@ -18,6 +17,7 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/dayterr/go_agent_metrics/internal/agent"
+	"github.com/dayterr/go_agent_metrics/internal/encryption"
 	"github.com/dayterr/go_agent_metrics/internal/hash"
 	"github.com/dayterr/go_agent_metrics/internal/metric"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
@@ -92,8 +92,6 @@ func DecryptingMiddleware(e encryption.Encryptor) func(http.Handler) http.Handle
 		})
 	}
 }
-
-
 
 func (ah AsyncHandler) MarshallMetrics() ([]byte, error) {
 	// Метод возвращает данные из хранилища в json-формате

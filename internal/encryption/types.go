@@ -12,7 +12,7 @@ func NewEncryptor(key any) Encryptor {
 
 type RoundTripperWithEncryption struct {
 	next http.RoundTripper
-	enc Encryptor
+	enc  Encryptor
 }
 
 func NewRoundTripperWithEncryption(enc Encryptor) *RoundTripperWithEncryption {

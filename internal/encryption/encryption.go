@@ -9,9 +9,9 @@ import (
 	"encoding/pem"
 	"errors"
 	"io"
-	"reflect"
 	"net/http"
 	"os"
+	"reflect"
 
 	"github.com/rs/zerolog/log"
 )

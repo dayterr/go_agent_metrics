@@ -12,7 +12,7 @@ type Agent struct {
 	ReportInterval time.Duration
 	PollInterval   time.Duration
 	Key            string
-	CryptoKey string
+	CryptoKey      string
 }
 
 func NewAgent(address string, repInt time.Duration, pInt time.Duration, key, cryptoKey string) Agent {
@@ -23,6 +23,6 @@ func NewAgent(address string, repInt time.Duration, pInt time.Duration, key, cry
 		ReportInterval: repInt,
 		PollInterval:   pInt,
 		Key:            key,
-		CryptoKey: cryptoKey,
+		CryptoKey:      cryptoKey,
 	}
 }

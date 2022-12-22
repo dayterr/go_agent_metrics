@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"github.com/dayterr/go_agent_metrics/internal/encryption"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -9,6 +8,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/dayterr/go_agent_metrics/internal/encryption"
 )
 
 func TestPostMetric(t *testing.T) {

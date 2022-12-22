@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"github.com/dayterr/go_agent_metrics/internal/encryption"
 	"context"
 	"log"
 	"net/http"
@@ -9,12 +8,13 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"github.com/dayterr/go_agent_metrics/internal/encryption"
 	"github.com/dayterr/go_agent_metrics/internal/server"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 )
 
 type NextHandler func(next http.Handler) http.Handler
-type Salt struct {}
+type Salt struct{}
 
 func PassSalt(salt []byte) NextHandler {
 	return func(next http.Handler) http.Handler {
