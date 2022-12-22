@@ -28,5 +28,5 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cancel()
 
-	agentInstance.Run()
+	agentInstance.Run(ctx)
 }
