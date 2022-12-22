@@ -5,7 +5,10 @@ import (
 	"github.com/dayterr/go_agent_metrics/internal/encryption"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
+	"os/signal"
 	"time"
+	"context"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -53,14 +56,30 @@ func main() {
 			}
 		}(h)
 	}
+
 	restore := Cfg.Restore && Cfg.DatabaseDSN == ""
 	e := encryption.NewEncryptor(Cfg.CryptoKey)
 	r, err := handlers.CreateRouterWithAsyncHandler(Cfg.StoreFile, restore, h, e, []byte(Cfg.Salt))
 	if err != nil {
 		log.Fatal().Err(err).Msg("creating router error")
 	}
-	err = http.ListenAndServe(Cfg.Address, r)
-	if err != nil {
-		log.Fatal().Err(err).Msg("error in server main")
+
+	srv := http.Server{Addr: Cfg.Address, Handler: r}
+	idleConnsClosed := make(chan struct{})
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, os.Interrupt)
+
+	go func() {
+		<-sigint
+		if err := srv.Shutdown(context.Background()); err != nil {
+			log.Info().Err(err).Msg("HTTP server Shutdown")
+		}
+		close(idleConnsClosed)
+	}()
+
+	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+		log.Fatal().Err(err).Msg("HTTP server ListenAndServe error")
 	}
+	<-idleConnsClosed
+	log.Info().Msg("Server Shutdown gracefully")
 }
