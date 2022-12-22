@@ -1,14 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"github.com/dayterr/go_agent_metrics/internal/encryption"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"time"
-	"context"
+
+	"github.com/dayterr/go_agent_metrics/internal/encryption"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

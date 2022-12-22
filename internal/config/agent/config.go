@@ -1,12 +1,12 @@
 package agent
 
 import (
+	"encoding/json"
 	"flag"
 	"io/ioutil"
 	"log"
 	"os"
 	"time"
-	"encoding/json"
 
 	"github.com/caarlos0/env/v6"
 )
@@ -23,9 +23,9 @@ type ConfigAgent struct {
 	ReportInterval time.Duration `env:"REPORT_INTERVAL" envDefault:"10s"`
 	PollInterval   time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
 	Key            string        `env:"KEY" envDefault:""`
-	Salt string
-	CryptoKey string
-	File           string        `env:"CONFIG" envDefault:""`
+	Salt           string
+	CryptoKey      string
+	File           string `env:"CONFIG" envDefault:""`
 }
 
 type FlagStruct struct {
@@ -33,9 +33,9 @@ type FlagStruct struct {
 	ReportInterval time.Duration
 	PollInterval   time.Duration
 	Key            string
-	Salt string
-	CryptoKey string
-	File string
+	Salt           string
+	CryptoKey      string
+	File           string
 }
 
 type FileStruct struct {
@@ -43,8 +43,8 @@ type FileStruct struct {
 	ReportInterval time.Duration
 	PollInterval   time.Duration
 	Key            string
-	Salt string
-	CryptoKey string
+	Salt           string
+	CryptoKey      string
 }
 
 func GetEnvAgent() (ConfigAgent, error) {

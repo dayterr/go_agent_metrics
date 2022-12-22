@@ -1,11 +1,11 @@
 package server
 
 import (
+	"encoding/json"
 	"flag"
 	"io/ioutil"
 	"os"
 	"time"
-	"encoding/json"
 
 	"github.com/caarlos0/env/v6"
 	"github.com/rs/zerolog"
@@ -27,9 +27,9 @@ type ConfigServer struct {
 	Restore       bool          `env:"RESTORE" envDefault:"true"`
 	Key           string        `env:"KEY" envDefault:""`
 	DatabaseDSN   string        `env:"DATABASE_DSN" envDefault:""`
-	Salt string `env:"SALT" envDefault:""`
-	CryptoKey string `env:"CRYPTO_KEY" envDefault:""`
-	File           string        `env:"CONFIG" envDefault:""`
+	Salt          string        `env:"SALT" envDefault:""`
+	CryptoKey     string        `env:"CRYPTO_KEY" envDefault:""`
+	File          string        `env:"CONFIG" envDefault:""`
 }
 
 type FlagStruct struct {
@@ -39,9 +39,9 @@ type FlagStruct struct {
 	Restore       bool
 	Key           string
 	DatabaseDSN   string
-	Salt string
-	CryptoKey string
-	File string
+	Salt          string
+	CryptoKey     string
+	File          string
 }
 
 type FileStruct struct {
@@ -51,8 +51,8 @@ type FileStruct struct {
 	Restore       bool
 	Key           string
 	DatabaseDSN   string
-	Salt string
-	CryptoKey string
+	Salt          string
+	CryptoKey     string
 }
 
 func GetEnvServer() (ConfigServer, error) {

@@ -1,12 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
-	"context"
 
 	"github.com/dayterr/go_agent_metrics/internal/agent"
 	agent2 "github.com/dayterr/go_agent_metrics/internal/config/agent"
