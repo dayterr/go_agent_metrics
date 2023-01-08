@@ -171,7 +171,7 @@ func TestGetMetric(t *testing.T) {
 			h, err := NewAsyncHandler("", "", false)
 			assert.NoError(t, err)
 			e := encryption.NewEncryptor("")
-			r, err := CreateRouterWithAsyncHandler("", false, h, e, []byte("abc"))
+			r, err := CreateRouterWithAsyncHandler("", false, h, e, []byte("abc"), "")
 			assert.NoError(t, err)
 			ts := httptest.NewServer(r)
 			defer ts.Close()
