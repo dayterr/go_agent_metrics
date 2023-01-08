@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      - sprint9
+      - sprint10
 
 jobs:
 
