@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      - sprint9
+      - sprint10
 
 jobs:#   * Имя метрики: "BuckHashSys", тип: gauge
 #   * Имя метрики: "Frees", тип: gauge
