@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	"runtime"
 	"time"
@@ -42,8 +43,13 @@ func PostCounter(value storage.Counter, metricName string, address string, key, 
 		client.Transport = encryption.NewRoundTripperWithEncryption(enc)
 	}
 
+	addr, err := GetMyIP()
+	if err != nil {
+		return nil
+	}
+
 	_, err = grequests.Post(url, &grequests.RequestOptions{JSON: mJSON,
-		Headers: map[string]string{"ContentType": "application/json"}, HTTPClient: client})
+		Headers: map[string]string{"ContentType": "application/json", "X-Real-IP": addr}, HTTPClient: client})
 	if err != nil {
 		return err
 	}
@@ -69,8 +75,13 @@ func PostGauge(value storage.Gauge, metricName string, address string, key, cryp
 		client.Transport = encryption.NewRoundTripperWithEncryption(enc)
 	}
 
+	addr, err := GetMyIP()
+	if err != nil {
+		return nil
+	}
+
 	_, err = grequests.Post(url, &grequests.RequestOptions{JSON: mJSON,
-		Headers: map[string]string{"ContentType": "application/json"}, HTTPClient: client})
+		Headers: map[string]string{"ContentType": "application/json", "X-Real-IP": addr}, HTTPClient: client})
 	if err != nil {
 		return err
 	}
@@ -215,4 +226,22 @@ func (a Agent) Run(ctx context.Context) {
 			}
 		}
 	}()
+}
+
+func GetMyIP() (string, error) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "", err
+	}
+
+	for _, addr := range addrs {
+		ipnet, ok := addr.(*net.IPNet)
+		if ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String(), nil
+			}
+		}
+	}
+
+	return "", nil
 }

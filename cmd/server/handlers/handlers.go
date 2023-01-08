@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -66,29 +67,46 @@ func DecryptingMiddleware(e encryption.Encryptor) func(http.Handler) http.Handle
 	var b bytes.Buffer
 
 	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if !(reflect.DeepEqual(e, encryption.Encryptor{})) {
-				switch req.Method {
+				switch r.Method {
 				case http.MethodPost:
-					if _, err := b.ReadFrom(req.Body); err != nil {
-						writer.WriteHeader(http.StatusInternalServerError)
+					if _, err := b.ReadFrom(r.Body); err != nil {
+						w.WriteHeader(http.StatusInternalServerError)
 						return
 					}
 
 					buf, err := e.DecryptMessage(b.Bytes())
 					if err != nil {
-						writer.WriteHeader(http.StatusInternalServerError)
+						w.WriteHeader(http.StatusInternalServerError)
 						return
 					}
 
-					req.Body = io.NopCloser(bytes.NewReader(buf))
-					req.ContentLength = int64(len(buf))
+					r.Body = io.NopCloser(bytes.NewReader(buf))
+					r.ContentLength = int64(len(buf))
 
 				default:
-					next.ServeHTTP(writer, req)
+					next.ServeHTTP(w, r)
 				}
 			}
-			next.ServeHTTP(writer, req)
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func CheckIPMiddleware(ts *net.IPNet) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if ts == nil {
+				next.ServeHTTP(w, r)
+			}
+
+			if !ts.Contains(net.ParseIP(r.RemoteAddr)) {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			next.ServeHTTP(w, r)
 		})
 	}
 }
