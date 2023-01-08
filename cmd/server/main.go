@@ -60,11 +60,10 @@ func main() {
 
 	restore := Cfg.Restore && Cfg.DatabaseDSN == ""
 	e := encryption.NewEncryptor(Cfg.CryptoKey)
-	r, err := handlers.CreateRouterWithAsyncHandler(Cfg.StoreFile, restore, h, e, []byte(Cfg.Salt))
+	r, err := handlers.CreateRouterWithAsyncHandler(Cfg.StoreFile, restore, h, e, []byte(Cfg.Salt), Cfg.TrustedSubnet)
 	if err != nil {
 		log.Fatal().Err(err).Msg("creating router error")
 	}
-
 	srv := http.Server{Addr: Cfg.Address, Handler: r}
 	idleConnsClosed := make(chan struct{})
 	sigint := make(chan os.Signal, 1)
@@ -78,7 +77,8 @@ func main() {
 		close(idleConnsClosed)
 	}()
 
-	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+	err = srv.ListenAndServe()
+	if err != http.ErrServerClosed {
 		log.Fatal().Err(err).Msg("HTTP server ListenAndServe error")
 	}
 	<-idleConnsClosed

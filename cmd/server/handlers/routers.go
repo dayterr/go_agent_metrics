@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"log"
+	"net"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -41,7 +42,7 @@ func NewAsyncHandler(key, dsn string, isDB bool) (AsyncHandler, error) {
 }
 
 func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandler, e encryption.Encryptor,
-	salt []byte) (chi.Router, error) {
+	salt []byte, ts string) (chi.Router, error) {
 	// Функция для создания нового роутера
 	if isRestored {
 		var err error
@@ -52,9 +53,16 @@ func CreateRouterWithAsyncHandler(filename string, isRestored bool, h AsyncHandl
 			return nil, err
 		}
 	}
+
+	_, cidr, err := net.ParseCIDR(ts)
+	if err != nil {
+		return nil, err
+	}
+
 	r := chi.NewRouter()
 	//r.Use(gzipHandle)
 	r.Use(DecryptingMiddleware(e), gzipHandle, PassSalt(salt))
+	r.Use(DecryptingMiddleware(e), CheckIPMiddleware(cidr), PassSalt(salt))
 	r.Mount("/debug", middleware.Profiler())
 
 	r.Route("/update", func(r chi.Router) {

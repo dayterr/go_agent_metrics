@@ -30,6 +30,7 @@ type ConfigServer struct {
 	Salt          string        `env:"SALT" envDefault:""`
 	CryptoKey     string        `env:"CRYPTO_KEY" envDefault:""`
 	File          string        `env:"CONFIG" envDefault:""`
+	TrustedSubnet string `env:"TRUSTED_SUBNET" envDefault:""`
 }
 
 type FlagStruct struct {
@@ -42,6 +43,7 @@ type FlagStruct struct {
 	Salt          string
 	CryptoKey     string
 	File          string
+	TrustedSubnet string
 }
 
 type FileStruct struct {
@@ -53,6 +55,7 @@ type FileStruct struct {
 	DatabaseDSN   string
 	Salt          string
 	CryptoKey     string
+	TrustedSubnet string
 }
 
 func GetEnvServer() (ConfigServer, error) {
@@ -69,6 +72,7 @@ func GetEnvServer() (ConfigServer, error) {
 	flag.StringVar(&fs.Salt, "salt", "", "salt for crypto key")
 	flag.StringVar(&fs.CryptoKey, "cryptokey", "", "crypto key")
 	flag.StringVar(&fs.File, "c", "", "config file")
+	flag.StringVar(&fs.TrustedSubnet, "t", "", "cidr")
 	flag.Parse()
 
 	err := env.Parse(&cfg)
@@ -100,6 +104,9 @@ func GetEnvServer() (ConfigServer, error) {
 	if cfg.File == "" && fs.File != "" {
 		cfg.File = fs.File
 	}
+	if cfg.TrustedSubnet == "" && fs.TrustedSubnet != "" {
+		cfg.TrustedSubnet = fs.TrustedSubnet
+	}
 
 	var fileCfg FileStruct
 	if cfg.File != "" {
@@ -126,6 +133,9 @@ func GetEnvServer() (ConfigServer, error) {
 	}
 	if cfg.CryptoKey == "" && fileCfg.CryptoKey != "" {
 		cfg.CryptoKey = fileCfg.CryptoKey
+	}
+	if cfg.TrustedSubnet == "" && fileCfg.TrustedSubnet != "" {
+		cfg.TrustedSubnet = fileCfg.TrustedSubnet
 	}
 
 	log.Print("server config", cfg)
