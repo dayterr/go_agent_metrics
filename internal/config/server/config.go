@@ -18,6 +18,7 @@ var (
 	defaultStoreFile     = "/tmp/devops-metric-db.json"
 	defaultRestore       = true
 	defaultKey           = ""
+	defaultEnablegRPC = false
 )
 
 type ConfigServer struct {
@@ -31,6 +32,7 @@ type ConfigServer struct {
 	CryptoKey     string        `env:"CRYPTO_KEY" envDefault:""`
 	File          string        `env:"CONFIG" envDefault:""`
 	TrustedSubnet string `env:"TRUSTED_SUBNET" envDefault:""`
+	EnablegRPC bool `env:"ENABLE_GRPC" envDefault:"false"`
 }
 
 type FlagStruct struct {
@@ -44,6 +46,7 @@ type FlagStruct struct {
 	CryptoKey     string
 	File          string
 	TrustedSubnet string
+	EnablegRPC bool
 }
 
 type FileStruct struct {
@@ -56,6 +59,7 @@ type FileStruct struct {
 	Salt          string
 	CryptoKey     string
 	TrustedSubnet string
+	EnablegRPC bool
 }
 
 func GetEnvServer() (ConfigServer, error) {
@@ -73,6 +77,7 @@ func GetEnvServer() (ConfigServer, error) {
 	flag.StringVar(&fs.CryptoKey, "cryptokey", "", "crypto key")
 	flag.StringVar(&fs.File, "c", "", "config file")
 	flag.StringVar(&fs.TrustedSubnet, "t", "", "cidr")
+	flag.BoolVar(&fs.EnablegRPC, "g", defaultEnablegRPC, "A bool flag for gRPC")
 	flag.Parse()
 
 	err := env.Parse(&cfg)
@@ -107,6 +112,9 @@ func GetEnvServer() (ConfigServer, error) {
 	if cfg.TrustedSubnet == "" && fs.TrustedSubnet != "" {
 		cfg.TrustedSubnet = fs.TrustedSubnet
 	}
+	if cfg.EnablegRPC == defaultEnablegRPC && fs.EnablegRPC != defaultEnablegRPC{
+		cfg.EnablegRPC = fs.EnablegRPC
+	}
 
 	var fileCfg FileStruct
 	if cfg.File != "" {
@@ -136,6 +144,9 @@ func GetEnvServer() (ConfigServer, error) {
 	}
 	if cfg.TrustedSubnet == "" && fileCfg.TrustedSubnet != "" {
 		cfg.TrustedSubnet = fileCfg.TrustedSubnet
+	}
+	if cfg.EnablegRPC == defaultEnablegRPC && fileCfg.EnablegRPC != defaultEnablegRPC {
+		cfg.EnablegRPC = fileCfg.EnablegRPC
 	}
 
 	log.Print("server config", cfg)

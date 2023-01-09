@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	pb "github.com/dayterr/go_agent_metrics/internal/grpc/proto"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"os"
 	"os/signal"
@@ -28,5 +31,18 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer cancel()
 
-	agentInstance.Run(ctx)
+	if Cfg.EnablegRPC {
+		conn, err := grpc.Dial(Cfg.Address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer conn.Close()
+
+		agentInstance.GRPCClient = pb.NewMetricsServiceClient(conn)
+
+		agentInstance.RungRPC(ctx)
+	} else {
+		agentInstance.Run(ctx)
+	}
+
 }

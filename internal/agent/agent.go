@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	pb "github.com/dayterr/go_agent_metrics/internal/grpc/proto"
 	"log"
 	"math/rand"
 	"net"
 	"net/http"
 	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/levigross/grequests"
@@ -226,6 +228,80 @@ func (a Agent) Run(ctx context.Context) {
 			}
 		}
 	}()
+}
+
+func (a Agent) RungRPC(ctx context.Context) {
+	tickerCollectMetrics := time.NewTicker(a.PollInterval)
+	tickerReportMetrics := time.NewTicker(a.ReportInterval)
+	go func() {
+		for {
+			select {
+			case <-tickerCollectMetrics.C:
+				a.ReadMetrics()
+			case <-tickerReportMetrics.C:
+				err := a.PostMany()
+				if err != nil {
+					a.PostAllgRPC()
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+}
+
+func (a Agent) PostMetricgRPC(value string, metricName string, metricType string) error {
+	var metric pb.Metric
+	switch metricType {
+	case GaugeType:
+		valFloat, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return err
+		}
+		metric.Value = valFloat
+		metric.Type = pb.Metric_GAUGE
+		metric.Id = metricName
+
+	case CounterType:
+		valInt, err := strconv.Atoi(value)
+		if err != nil {
+			return err
+		}
+		metric.Delta = int64(valInt)
+		metric.Type = pb.Metric_GAUGE
+		metric.Id = metricName
+
+	default:
+		return errors.New("unknown metric type")
+	}
+
+	ctx := context.Background()
+	_, err := a.GRPCClient.PostMetric(ctx, &pb.PostMetricRequest{Metrics: &metric})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a Agent) PostAllgRPC() {
+	ctx := context.Background()
+	gauges, err := a.Storage.GetGauges(ctx)
+	if err != nil {
+		log.Println("getting gauges error", err)
+	}
+	counters, err := a.Storage.GetCounters(ctx)
+	if err != nil {
+		log.Println("getting counters error", err)
+	}
+	for k, v := range gauges {
+		valStr := fmt.Sprintf("%f", v)
+		a.PostMetricgRPC(valStr, k, GaugeType)
+	}
+	for k, v := range counters {
+		valStr := fmt.Sprintf("%f", v)
+		a.PostMetricgRPC(valStr, k, CounterType)
+	}
 }
 
 func GetMyIP() (string, error) {
