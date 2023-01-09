@@ -16,6 +16,7 @@ const (
 	defaultReportInterval = 10 * time.Second
 	defaultPollInterval   = 2 * time.Second
 	defaultKey            = ""
+	defaultEnablegRPC = false
 )
 
 type ConfigAgent struct {
@@ -26,6 +27,7 @@ type ConfigAgent struct {
 	Salt           string
 	CryptoKey      string
 	File           string `env:"CONFIG" envDefault:""`
+	EnablegRPC bool `env:"ENABLE_GRPC" envDefault:"false"`
 }
 
 type FlagStruct struct {
@@ -36,6 +38,7 @@ type FlagStruct struct {
 	Salt           string
 	CryptoKey      string
 	File           string
+	EnablegRPC bool
 }
 
 type FileStruct struct {
@@ -45,6 +48,7 @@ type FileStruct struct {
 	Key            string
 	Salt           string
 	CryptoKey      string
+	EnablegRPC bool
 }
 
 func GetEnvAgent() (ConfigAgent, error) {
@@ -58,6 +62,7 @@ func GetEnvAgent() (ConfigAgent, error) {
 	flag.StringVar(&fs.Salt, "salt", "", "salt for crypto key")
 	flag.StringVar(&fs.CryptoKey, "cryptokey", "", "crypto key")
 	flag.StringVar(&fs.File, "c", "", "config file")
+	flag.BoolVar(&fs.EnablegRPC, "g", defaultEnablegRPC, "A bool flag for gRPC")
 	flag.Parse()
 
 	err := env.Parse(&cfg)
@@ -85,6 +90,9 @@ func GetEnvAgent() (ConfigAgent, error) {
 	if cfg.File == "" && fs.File != "" {
 		cfg.File = fs.File
 	}
+	if cfg.EnablegRPC == defaultEnablegRPC && fs.EnablegRPC != defaultEnablegRPC{
+		cfg.EnablegRPC = fs.EnablegRPC
+	}
 
 	var fileCfg FileStruct
 	if cfg.File != "" {
@@ -111,6 +119,9 @@ func GetEnvAgent() (ConfigAgent, error) {
 	}
 	if cfg.CryptoKey == "" && fileCfg.CryptoKey != "" {
 		cfg.CryptoKey = fileCfg.CryptoKey
+	}
+	if cfg.EnablegRPC == defaultEnablegRPC && fileCfg.EnablegRPC != defaultEnablegRPC {
+		cfg.EnablegRPC = fileCfg.EnablegRPC
 	}
 
 	log.Println("agent config", cfg)

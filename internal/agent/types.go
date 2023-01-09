@@ -3,6 +3,7 @@ package agent
 import (
 	"time"
 
+	pb "github.com/dayterr/go_agent_metrics/internal/grpc/proto"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 )
 
@@ -13,6 +14,7 @@ type Agent struct {
 	PollInterval   time.Duration
 	Key            string
 	CryptoKey      string
+	GRPCClient pb.MetricsServiceClient
 }
 
 func NewAgent(address string, repInt time.Duration, pInt time.Duration, key, cryptoKey string) Agent {
