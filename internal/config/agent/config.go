@@ -90,7 +90,7 @@ func GetEnvAgent() (ConfigAgent, error) {
 	if cfg.File == "" && fs.File != "" {
 		cfg.File = fs.File
 	}
-	if cfg.EnablegRPC == defaultEnablegRPC && fs.EnablegRPC != defaultEnablegRPC{
+	if !cfg.EnablegRPC && fs.EnablegRPC{
 		cfg.EnablegRPC = fs.EnablegRPC
 	}
 
@@ -120,7 +120,7 @@ func GetEnvAgent() (ConfigAgent, error) {
 	if cfg.CryptoKey == "" && fileCfg.CryptoKey != "" {
 		cfg.CryptoKey = fileCfg.CryptoKey
 	}
-	if cfg.EnablegRPC == defaultEnablegRPC && fileCfg.EnablegRPC != defaultEnablegRPC {
+	if !cfg.EnablegRPC && fileCfg.EnablegRPC {
 		cfg.EnablegRPC = fileCfg.EnablegRPC
 	}
 

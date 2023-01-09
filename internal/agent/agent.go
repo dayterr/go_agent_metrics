@@ -299,7 +299,7 @@ func (a Agent) PostAllgRPC() {
 		a.PostMetricgRPC(valStr, k, GaugeType)
 	}
 	for k, v := range counters {
-		valStr := fmt.Sprintf("%f", v)
+		valStr := fmt.Sprintf("%d", v)
 		a.PostMetricgRPC(valStr, k, CounterType)
 	}
 }

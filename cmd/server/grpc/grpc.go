@@ -3,16 +3,8 @@ package grpc
 import (
 	"context"
 	"errors"
-	"github.com/dayterr/go_agent_metrics/internal/storage"
-	"net/http"
-	"strconv"
-
-	"github.com/rs/zerolog/log"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 
 	"github.com/dayterr/go_agent_metrics/internal/agent"
-	"github.com/dayterr/go_agent_metrics/internal/metric"
 	pb "github.com/dayterr/go_agent_metrics/internal/grpc/proto"
 )
 
