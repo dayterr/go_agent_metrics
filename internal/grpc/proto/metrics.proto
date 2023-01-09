@@ -37,15 +37,8 @@ message GetMetricResponse{
   string error = 2;
 }
 
-message GetAllRequest{
-}
-
-message GetAllResponse{
-  repeated Metric metrics = 1;
-}
 
 service MetricsService {
   rpc PostMetric(PostMetricRequest) returns (PostMetricResponse);
   rpc GetMetric(GetMetricRequest) returns (GetMetricResponse);
-  rpc GetAll(GetAllRequest) returns (GetAllResponse);
 }

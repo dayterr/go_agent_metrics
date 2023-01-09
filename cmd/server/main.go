@@ -52,7 +52,7 @@ func main() {
 			}
 		}
 
-		listen, err := net.Listen("tcp", Cfg.Address)
+		_, err := net.Listen("tcp", Cfg.Address)
 		if err != nil {
 			log.Fatal().Err(err).Msg("starting listening error")
 		}

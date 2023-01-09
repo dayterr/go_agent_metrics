@@ -8,7 +8,7 @@ import (
 	pb "github.com/dayterr/go_agent_metrics/internal/grpc/proto"
 )
 
-func (gs *GRPCServer) PostMetric(ctx context.Context, req *pb.PostMetricRequest) (*pb.PostMetricResponse, error) {
+func (gs GRPCServer) PostMetric(ctx context.Context, req *pb.PostMetricRequest) (*pb.PostMetricResponse, error) {
 	var resp pb.PostMetricResponse
 
 	switch req.Metrics.Type.String() {
@@ -24,7 +24,7 @@ func (gs *GRPCServer) PostMetric(ctx context.Context, req *pb.PostMetricRequest)
 	return &resp, nil
 }
 
-func (gs *GRPCServer) GetMetric(ctx context.Context, req *pb.GetMetricRequest) (*pb.GetMetricResponse, error) {
+func (gs GRPCServer) GetMetric(ctx context.Context, req *pb.GetMetricRequest) (*pb.GetMetricResponse, error) {
 	var resp pb.GetMetricResponse
 
 	switch req.Type {

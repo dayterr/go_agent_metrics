@@ -24,7 +24,6 @@ const _ = grpc.SupportPackageIsVersion7
 type MetricsServiceClient interface {
 	PostMetric(ctx context.Context, in *PostMetricRequest, opts ...grpc.CallOption) (*PostMetricResponse, error)
 	GetMetric(ctx context.Context, in *GetMetricRequest, opts ...grpc.CallOption) (*GetMetricResponse, error)
-	GetAll(ctx context.Context, in *GetAllRequest, opts ...grpc.CallOption) (*GetAllResponse, error)
 }
 
 type metricsServiceClient struct {
@@ -53,22 +52,12 @@ func (c *metricsServiceClient) GetMetric(ctx context.Context, in *GetMetricReque
 	return out, nil
 }
 
-func (c *metricsServiceClient) GetAll(ctx context.Context, in *GetAllRequest, opts ...grpc.CallOption) (*GetAllResponse, error) {
-	out := new(GetAllResponse)
-	err := c.cc.Invoke(ctx, "/grpc.MetricsService/GetAll", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // MetricsServiceServer is the server API for MetricsService service.
 // All implementations must embed UnimplementedMetricsServiceServer
 // for forward compatibility
 type MetricsServiceServer interface {
 	PostMetric(context.Context, *PostMetricRequest) (*PostMetricResponse, error)
 	GetMetric(context.Context, *GetMetricRequest) (*GetMetricResponse, error)
-	GetAll(context.Context, *GetAllRequest) (*GetAllResponse, error)
 	mustEmbedUnimplementedMetricsServiceServer()
 }
 
@@ -81,9 +70,6 @@ func (UnimplementedMetricsServiceServer) PostMetric(context.Context, *PostMetric
 }
 func (UnimplementedMetricsServiceServer) GetMetric(context.Context, *GetMetricRequest) (*GetMetricResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMetric not implemented")
-}
-func (UnimplementedMetricsServiceServer) GetAll(context.Context, *GetAllRequest) (*GetAllResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAll not implemented")
 }
 func (UnimplementedMetricsServiceServer) mustEmbedUnimplementedMetricsServiceServer() {}
 
@@ -134,24 +120,6 @@ func _MetricsService_GetMetric_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MetricsService_GetAll_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetAllRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MetricsServiceServer).GetAll(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc.MetricsService/GetAll",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MetricsServiceServer).GetAll(ctx, req.(*GetAllRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // MetricsService_ServiceDesc is the grpc.ServiceDesc for MetricsService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -166,10 +134,6 @@ var MetricsService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMetric",
 			Handler:    _MetricsService_GetMetric_Handler,
-		},
-		{
-			MethodName: "GetAll",
-			Handler:    _MetricsService_GetAll_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
