@@ -13,7 +13,7 @@ import (
 func Example() {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	ctx := context.Background()
-	handler, err := NewAsyncHandler("", "", false)
+	handler, err := NewAsyncHandler("", "")
 	if err != nil {
 		log.Fatal().Err(err)
 	}
