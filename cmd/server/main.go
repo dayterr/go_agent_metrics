@@ -39,38 +39,21 @@ func main() {
 
 	ticker := time.NewTicker(Cfg.StoreInterval)
 	if Cfg.EnablegRPC {
-		var mServer mygrpc.GRPCServer
-		if Cfg.DatabaseDSN == "" {
-			mServer, err = mygrpc.NewGRPCServer(Cfg.DatabaseDSN, false)
-			if err != nil {
-				log.Fatal().Err(err).Msg("creating server error")
-			}
-		} else {
-			mServer, err = mygrpc.NewGRPCServer(Cfg.DatabaseDSN, true)
-			if err != nil {
-				log.Fatal().Err(err).Msg("creating server error")
-			}
+		mServer, err := mygrpc.NewGRPCServer(Cfg.DatabaseDSN, Cfg.Key, Cfg.TrustedSubnet)
+		if err != nil {
+			log.Fatal().Err(err).Msg("creating server error")
 		}
-
-		_, err := net.Listen("tcp", Cfg.Address)
+		_, err = net.Listen("tcp", Cfg.Address)
 		if err != nil {
 			log.Fatal().Err(err).Msg("starting listening error")
 		}
 
-		s := grpc.NewServer()
+		s := grpc.NewServer(grpc.ChainUnaryInterceptor(mServer.IPInterceptor))
 		pb.RegisterMetricsServiceServer(s, mServer)
 	} else {
-		var h handlers.AsyncHandler
-		if Cfg.DatabaseDSN == "" {
-			h, err = handlers.NewAsyncHandler(Cfg.Key, Cfg.DatabaseDSN, false)
-			if err != nil {
-				log.Fatal().Err(err).Msg("creating handler error")
-			}
-		} else {
-			h, err = handlers.NewAsyncHandler(Cfg.Key, Cfg.DatabaseDSN, true)
-			if err != nil {
-				log.Fatal().Err(err).Msg("creating handler error")
-			}
+		h, err := handlers.NewAsyncHandler(Cfg.Key, Cfg.DatabaseDSN)
+		if err != nil {
+			log.Fatal().Err(err).Msg("creating handler error")
 		}
 		if Cfg.DatabaseDSN == "" {
 			go func(h handlers.AsyncHandler) {

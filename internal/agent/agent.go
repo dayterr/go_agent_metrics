@@ -19,7 +19,7 @@ import (
 
 	"github.com/dayterr/go_agent_metrics/internal/encryption"
 	"github.com/dayterr/go_agent_metrics/internal/hash"
-	"github.com/dayterr/go_agent_metrics/internal/metric"
+	metric2 "github.com/dayterr/go_agent_metrics/internal/metric"
 	"github.com/dayterr/go_agent_metrics/internal/storage"
 )
 
@@ -29,7 +29,7 @@ const CounterType = "counter"
 func PostCounter(value storage.Counter, metricName string, address string, key, cryptoKey string) error {
 	url := fmt.Sprintf("http://%v/update/", address)
 	delta := value.ToInt64()
-	metric := metric.Metrics{ID: metricName, MType: CounterType, Delta: &delta}
+	metric := metric2.Metrics{ID: metricName, MType: CounterType, Delta: &delta}
 	if key != "" {
 		metric.Hash = hash.EncryptMetric(metric, key)
 	}
@@ -61,7 +61,7 @@ func PostCounter(value storage.Counter, metricName string, address string, key, 
 func PostGauge(value storage.Gauge, metricName string, address string, key, cryptoKey string) error {
 	url := fmt.Sprintf("http://%v/update/", address)
 	v := value.ToFloat()
-	metric := metric.Metrics{ID: metricName, MType: GaugeType, Value: &v}
+	metric := metric2.Metrics{ID: metricName, MType: GaugeType, Value: &v}
 	if key != "" {
 		metric.Hash = hash.EncryptMetric(metric, key)
 	}
@@ -148,7 +148,7 @@ func (a Agent) ReadMetrics() {
 }
 
 func (a Agent) PostMany() error {
-	var listMetrics []metric.Metrics
+	var listMetrics []metric2.Metrics
 
 	ctx := context.Background()
 	gs, err := a.Storage.GetGauges(ctx)
@@ -168,7 +168,7 @@ func (a Agent) PostMany() error {
 		return err
 	}
 	for key, value := range gs {
-		var m metric.Metrics
+		var m metric2.Metrics
 		m.ID = key
 		v := value.ToFloat()
 		m.Value = &v
@@ -183,7 +183,7 @@ func (a Agent) PostMany() error {
 		return err
 	}
 	for key, value := range cs {
-		var m metric.Metrics
+		var m metric2.Metrics
 		m.ID = key
 		d := value.ToInt64()
 		m.Delta = &d
@@ -250,7 +250,7 @@ func (a Agent) RungRPC(ctx context.Context) {
 	}()
 }
 
-func (a Agent) PostMetricgRPC(value string, metricName string, metricType string) error {
+func (a Agent) PostMetricgRPC(value, metricName, metricType, key string) error {
 	var metric pb.Metric
 	switch metricType {
 	case GaugeType:
@@ -261,6 +261,10 @@ func (a Agent) PostMetricgRPC(value string, metricName string, metricType string
 		metric.Value = valFloat
 		metric.Type = pb.Metric_GAUGE
 		metric.Id = metricName
+		if key != "" {
+			metric.Hash = hash.EncryptMetric(metric2.Metrics{ID: metricName,
+				MType: metricType, Value: &valFloat}, key)
+		}
 
 	case CounterType:
 		valInt, err := strconv.Atoi(value)
@@ -270,6 +274,10 @@ func (a Agent) PostMetricgRPC(value string, metricName string, metricType string
 		metric.Delta = int64(valInt)
 		metric.Type = pb.Metric_GAUGE
 		metric.Id = metricName
+		if key != "" {
+			metric.Hash = hash.EncryptMetric(metric2.Metrics{ID: metricName,
+				MType: metricType, Delta: &metric.Delta}, key)
+		}
 
 	default:
 		return errors.New("unknown metric type")
@@ -296,11 +304,11 @@ func (a Agent) PostAllgRPC() {
 	}
 	for k, v := range gauges {
 		valStr := fmt.Sprintf("%f", v)
-		a.PostMetricgRPC(valStr, k, GaugeType)
+		a.PostMetricgRPC(valStr, k, GaugeType, a.Key)
 	}
 	for k, v := range counters {
 		valStr := fmt.Sprintf("%d", v)
-		a.PostMetricgRPC(valStr, k, CounterType)
+		a.PostMetricgRPC(valStr, k, CounterType, a.Key)
 	}
 }
 
