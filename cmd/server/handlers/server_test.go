@@ -75,7 +75,7 @@ func TestPostMetric(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h, err := NewAsyncHandler("", "", false)
+			h, err := NewAsyncHandler("", "")
 			assert.NoError(t, err)
 			e := encryption.NewEncryptor("")
 			r, err := CreateRouterWithAsyncHandler("", false, h, e, []byte("abc"), "")
@@ -168,7 +168,7 @@ func TestGetMetric(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h, err := NewAsyncHandler("", "", false)
+			h, err := NewAsyncHandler("", "")
 			assert.NoError(t, err)
 			e := encryption.NewEncryptor("")
 			r, err := CreateRouterWithAsyncHandler("", false, h, e, []byte("abc"), "")
