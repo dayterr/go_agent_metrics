@@ -25,10 +25,10 @@ func PassSalt(salt []byte) NextHandler {
 	}
 }
 
-func NewAsyncHandler(key, dsn string, isDB bool) (AsyncHandler, error) {
+func NewAsyncHandler(key, dsn string) (AsyncHandler, error) {
 	var s storage.Storager
 	var err error
-	if isDB {
+	if dsn != "" {
 		s, err = storage.NewDB(dsn)
 		if err != nil {
 			log.Println(err)
