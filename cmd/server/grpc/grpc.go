@@ -2,16 +2,11 @@ package grpc
 
 import (
 	"context"
-	"crypto/hmac"
-	"encoding/hex"
 	"errors"
 	"github.com/dayterr/go_agent_metrics/internal/hash"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/peer"
-	"google.golang.org/grpc/status"
 	"net"
-	"net/http"
 	"strings"
 
 	"github.com/dayterr/go_agent_metrics/internal/agent"
@@ -72,10 +67,8 @@ func (gs GRPCServer) GetMetric(ctx context.Context, req *pb.GetMetricRequest) (*
 	var resp pb.GetMetricResponse
 
 	var m metric2.Metrics
-	m.ID = req.Metrics.Id
-	m.MType = req.Metrics.Type.String()
-	m.Delta = &req.Metrics.Delta
-	m.Value = &req.Metrics.Value
+	m.ID = req.Name
+	m.MType = req.Type
 
 	switch req.Type {
 	case agent.GaugeType:
@@ -85,6 +78,7 @@ func (gs GRPCServer) GetMetric(ctx context.Context, req *pb.GetMetricRequest) (*
 				return &resp, err
 			}
 			resp.Metric.Value = v
+			m.Value = &v
 			if gs.key != "" {
 				resp.Metric.Hash = hash.EncryptMetric(m, gs.key)
 			}
@@ -97,6 +91,7 @@ func (gs GRPCServer) GetMetric(ctx context.Context, req *pb.GetMetricRequest) (*
 				return &resp, err
 			}
 			resp.Metric.Delta = v
+			m.Delta = &v
 			if gs.key != "" {
 				resp.Metric.Hash = hash.EncryptMetric(m, gs.key)
 			}
